@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "placeholder.arena.geometry",
+      "paths": [
+        "src/Overload.Game/Scripts/WorldView.cs",
+        "src/Overload.Game/Scripts/ActorBody.cs",
+        "src/Overload.Game/Scripts/CombatEffects.cs"
+      ],
+      "type": "original code-drawn geometric placeholders",
+      "author": "Codex, created for this project on 2026-10-05",
+      "source": "Repository source code; no downloaded artwork, textures, or audio",
+      "status": "Temporary prototype art; replace during M4 art benchmark"
+    },
+    {
+      "id": "godot.builtin_font",
+      "source": "Godot ThemeDB fallback font, bundled with the pinned engine",
+      "license": "See Godot engine distribution third-party notices",
+      "status": "Prototype UI font"
+    },
+    {
+      "id": "original.expansion.v1",
+      "paths": [
+        "src/Overload.Game/Assets/cinderrunner.svg",
+        "src/Overload.Game/Assets/slagslinger.svg",
+        "src/Overload.Game/Assets/kilnguard.svg",
+        "src/Overload.Game/Assets/ashskater.svg",
+        "src/Overload.Game/Assets/coalchoir.svg",
+        "src/Overload.Game/Assets/furnacesentinel.svg",
+        "src/Overload.Game/Assets/reedstalker.svg",
+        "src/Overload.Game/Assets/glassspitter.svg",
+        "src/Overload.Game/Assets/mirrorguard.svg",
+        "src/Overload.Game/Assets/marshskater.svg",
+        "src/Overload.Game/Assets/prismchoir.svg",
+        "src/Overload.Game/Assets/shardsentinel.svg",
+        "src/Overload.Game/Assets/pagehunter.svg",
+        "src/Overload.Game/Assets/inkslinger.svg",
+        "src/Overload.Game/Assets/archiveguard.svg",
+        "src/Overload.Game/Assets/marginskater.svg",
+        "src/Overload.Game/Assets/nullchoir.svg",
+        "src/Overload.Game/Assets/indexsentinel.svg",
+        "src/Overload.Game/Assets/scarrunner.svg",
+        "src/Overload.Game/Assets/crownspitter.svg",
+        "src/Overload.Game/Assets/riftguard.svg",
+        "src/Overload.Game/Assets/crownskater.svg",
+        "src/Overload.Game/Assets/ruinchoir.svg",
+        "src/Overload.Game/Assets/royalsentinel.svg",
+        "src/Overload.Game/Assets/regional-bellkeeper.svg",
+        "src/Overload.Game/Assets/regional-forgeheart.svg",
+        "src/Overload.Game/Assets/regional-mirrorregent.svg",
+        "src/Overload.Game/Assets/regional-reedwidow.svg",
+        "src/Overload.Game/Assets/regional-indexer.svg",
+        "src/Overload.Game/Assets/regional-nullabbot.svg",
+        "src/Overload.Game/Assets/regional-scarmarshal.svg",
+        "src/Overload.Game/Assets/regional-firstpattern.svg",
+        "src/Overload.Game/Assets/threadseer.svg",
+        "src/Overload.Game/Assets/revenant.svg"
+      ],
+      "type": "original finite SVG silhouettes",
+      "author": "Codex for Overload, 2026-10-06",
+      "source": "Authored geometry and palettes in this repository; no external art",
+      "status": "Gameplay-readable prototype silhouettes; final animation art remains a release gate"
+    }
+  ]
+}

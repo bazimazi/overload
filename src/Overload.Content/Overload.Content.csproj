@@ -1,0 +1,3 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup><ProjectReference Include="../Overload.Domain/Overload.Domain.csproj" /></ItemGroup>
+</Project>

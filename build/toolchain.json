@@ -1,0 +1,20 @@
+{
+  "godot": "4.7.2.stable.mono.official.ed1daf0bf",
+  "renderer": "gl_compatibility",
+  "sdk": "10.0.401",
+  "targetFramework": "net10.0",
+  "templates": "4.7.2.stable.mono",
+  "runtime": "win-x64",
+  "downloads": [
+    {
+      "file": "Godot_v4.7.2-stable_mono_win64.zip",
+      "bytes": 116582061,
+      "sha512": "79229FD112B0C9CBEAB82363A4EF7BE18EA70F1CAF86BF912789335B136FBE7E01DB0053A33461438C5DA1C680C17BBB10040BD09BEDC51221CD4423D0367757"
+    },
+    {
+      "file": "Godot_v4.7.2-stable_mono_export_templates.tpz",
+      "bytes": 1202598411,
+      "sha512": "BB5C41D72370ED743660361F6228006F808AB04CA33ABDC545D740B044F3FE057F32AE8CB7873A1BC86DDCD82AE683B9F6DFDFE4179852F2C0F1ACDE2FF6BD5A"
+    }
+  ]
+}

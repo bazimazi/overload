@@ -1,0 +1,11 @@
+<Project Sdk="Godot.NET.Sdk/4.7.2">
+  <PropertyGroup>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <TargetFramework>net10.0</TargetFramework>
+    <NuGetLockFilePath>packages.$(Configuration).lock.json</NuGetLockFilePath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Overload.Domain/Overload.Domain.csproj" />
+    <ProjectReference Include="../Overload.Content/Overload.Content.csproj" />
+  </ItemGroup>
+</Project>

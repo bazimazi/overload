@@ -1,0 +1,352 @@
+{
+  "schemaVersion": 1,
+  "id": "balance.arena.v1",
+  "memories": {
+    "momentumDistancePixels": 96,
+    "momentumWindowTicks": 120,
+    "lifetimeTicks": 300,
+    "generationCooldownTicks": 120
+  },
+  "overload": {
+    "maximumStrain": 100,
+    "decayPerSecond": 12,
+    "decayDelayTicks": 60,
+    "exitClearTicks": 300,
+    "bindingSlots": 3,
+    "patterns": [
+      {
+        "id": "pattern.assault.pursuit",
+        "family": "Assault",
+        "requiredMemories": [
+          "Momentum"
+        ],
+        "requiredCapabilities": "DirectDamage, AimOrigin, GroundAdvance",
+        "strainCost": 25,
+        "implementationId": "assault.pursuit.v1"
+      },
+      {
+        "id": "pattern.assault.afterstrike",
+        "family": "Assault",
+        "requiredMemories": [
+          "Echo"
+        ],
+        "requiredCapabilities": "DirectDamage, AimOrigin",
+        "strainCost": 30,
+        "implementationId": "assault.afterstrike.v1"
+      },
+      {
+        "id": "pattern.traverse.crossing",
+        "family": "Traverse",
+        "requiredMemories": [
+          "Momentum"
+        ],
+        "requiredCapabilities": "PathTraversal",
+        "strainCost": 25,
+        "implementationId": "traverse.crossing.v1"
+      },
+      {
+        "id": "pattern.assault.convergence",
+        "family": "Assault",
+        "requiredMemories": [
+          "Momentum",
+          "Echo"
+        ],
+        "requiredCapabilities": "DirectDamage, AimOrigin",
+        "strainCost": 45,
+        "implementationId": "assault.convergence.v1"
+      },
+      {
+        "id": "pattern.traverse.shelter",
+        "family": "Traverse",
+        "requiredMemories": [
+          "Echo"
+        ],
+        "requiredCapabilities": "None",
+        "strainCost": 30,
+        "implementationId": "traverse.shelter.v1"
+      },
+      {
+        "id": "pattern.recover.reprieve",
+        "family": "Recover",
+        "requiredMemories": [
+          "Echo"
+        ],
+        "requiredCapabilities": "None",
+        "strainCost": 25,
+        "implementationId": "recover.reprieve.v1"
+      },
+      {
+        "id": "pattern.assault.focused",
+        "family": "Assault",
+        "requiredMemories": [
+          "Stillness"
+        ],
+        "requiredCapabilities": "DirectDamage, AimOrigin",
+        "strainCost": 25,
+        "implementationId": "assault.focused.v1",
+        "extraFocusCost": 0
+      },
+      {
+        "id": "pattern.assault.shatter",
+        "family": "Assault",
+        "requiredMemories": [
+          "Rupture"
+        ],
+        "requiredCapabilities": "DirectDamage, AimOrigin",
+        "strainCost": 25,
+        "implementationId": "assault.shatter.v1",
+        "extraFocusCost": 0
+      },
+      {
+        "id": "pattern.assault.cascade",
+        "family": "Assault",
+        "requiredMemories": [
+          "Stillness",
+          "Rupture"
+        ],
+        "requiredCapabilities": "DirectDamage, AimOrigin",
+        "strainCost": 50,
+        "implementationId": "assault.cascade.v1",
+        "extraFocusCost": 0
+      }
+    ],
+    "bindings": [
+      {
+        "patternId": "pattern.assault.pursuit",
+        "priority": 0
+      },
+      {
+        "patternId": "pattern.assault.afterstrike",
+        "priority": 1
+      },
+      {
+        "patternId": "pattern.traverse.crossing",
+        "priority": 2
+      }
+    ]
+  },
+  "hero": {
+    "life": 200,
+    "focus": 100,
+    "focusPerSecond": 8,
+    "armor": 40,
+    "resistance": 20,
+    "speed": 128,
+    "flaskCharges": 3,
+    "flaskPercent": 35,
+    "flaskTicks": 60,
+    "evadeTicks": 18,
+    "evadeWindow": 7,
+    "evadeCooldown": 72,
+    "evadeDistance": 96,
+    "criticalPercent": 5,
+    "criticalMultiplierPercent": 150
+  },
+  "skills": [
+    {
+      "id": "Cleave",
+      "contentId": "skill.warden.cleave",
+      "family": "Assault",
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance",
+      "windup": 7,
+      "active": 5,
+      "recovery": 12,
+      "cooldown": 0,
+      "focusCost": 0,
+      "damage": 50,
+      "reach": 48,
+      "arcDegrees": 100,
+      "stagger": 5,
+      "push": 0
+    },
+    {
+      "id": "ShieldPulse",
+      "contentId": "skill.warden.shield_pulse",
+      "family": "Assault",
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance",
+      "windup": 12,
+      "active": 6,
+      "recovery": 15,
+      "cooldown": 360,
+      "focusCost": 25,
+      "damage": 30,
+      "reach": 64,
+      "arcDegrees": 80,
+      "stagger": 30,
+      "push": 16
+    },
+    {
+      "id": "ChainLance",
+      "contentId": "skill.warden.chain_lance",
+      "family": "Assault",
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance",
+      "windup": 15,
+      "active": 1,
+      "recovery": 15,
+      "cooldown": 120,
+      "focusCost": 24,
+      "damage": 100,
+      "reach": 192,
+      "arcDegrees": 0,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 480,
+      "projectileRadius": 8,
+      "maxVictims": 3
+    },
+    {
+      "id": "Traverse",
+      "contentId": "action.traverse",
+      "family": "Traverse",
+      "capabilities": "PathTraversal",
+      "windup": 0,
+      "active": 18,
+      "recovery": 0,
+      "cooldown": 72,
+      "focusCost": 0,
+      "damage": 0,
+      "reach": 96,
+      "arcDegrees": 0,
+      "stagger": 0,
+      "push": 0
+    },
+    {
+      "id": "Flask",
+      "contentId": "action.recover",
+      "family": "Recover",
+      "windup": 0,
+      "active": 1,
+      "recovery": 11,
+      "cooldown": 60,
+      "focusCost": 0,
+      "damage": 0,
+      "reach": 0,
+      "arcDegrees": 0,
+      "stagger": 0,
+      "push": 0
+    },
+    {
+      "id": "Faultline",
+      "contentId": "skill.warden.faultline",
+      "family": "Assault",
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance",
+      "windup": 24,
+      "active": 4,
+      "recovery": 16,
+      "cooldown": 240,
+      "focusCost": 30,
+      "damage": 80,
+      "reach": 144,
+      "arcDegrees": 0,
+      "stagger": 25,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64
+    },
+    {
+      "id": "IronSweep",
+      "contentId": "skill.warden.ironsweep",
+      "family": "Assault",
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance",
+      "windup": 18,
+      "active": 4,
+      "recovery": 16,
+      "cooldown": 180,
+      "focusCost": 20,
+      "damage": 65,
+      "reach": 68,
+      "arcDegrees": 170,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64
+    },
+    {
+      "id": "GuardBolt",
+      "contentId": "skill.warden.guardbolt",
+      "family": "Assault",
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance",
+      "windup": 8,
+      "active": 1,
+      "recovery": 16,
+      "cooldown": 75,
+      "focusCost": 16,
+      "damage": 45,
+      "reach": 240,
+      "arcDegrees": 0,
+      "stagger": 10,
+      "push": 0,
+      "projectileSpeed": 360,
+      "projectileRadius": 5,
+      "maxVictims": 1
+    }
+  ],
+  "enemies": [
+    {
+      "role": "Pursuer",
+      "contentId": "enemy.pursuer",
+      "life": 120,
+      "damage": 12,
+      "speed": 68,
+      "reach": 32,
+      "arcDegrees": 85,
+      "windup": 30,
+      "recovery": 48,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 0,
+      "projectileRadius": 0
+    },
+    {
+      "role": "Caster",
+      "contentId": "enemy.caster",
+      "life": 120,
+      "damage": 16,
+      "speed": 44,
+      "reach": 230,
+      "arcDegrees": 10,
+      "windup": 48,
+      "recovery": 84,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 115,
+      "projectileRadius": 5
+    },
+    {
+      "role": "Brute",
+      "contentId": "enemy.brute",
+      "life": 160,
+      "damage": 20,
+      "speed": 42,
+      "reach": 55,
+      "arcDegrees": 130,
+      "windup": 54,
+      "recovery": 70,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 90,
+      "projectileSpeed": 0,
+      "projectileRadius": 0
+    },
+    {
+      "role": "Bellkeeper",
+      "contentId": "enemy.bellkeeper",
+      "life": 6000,
+      "damage": 65,
+      "speed": 36,
+      "reach": 115,
+      "arcDegrees": 160,
+      "windup": 60,
+      "recovery": 100,
+      "staggerThreshold": 200,
+      "stunTicks": 120,
+      "staggerImmunityTicks": 240,
+      "projectileSpeed": 130,
+      "projectileRadius": 6
+    }
+  ]
+}

@@ -1,0 +1,2126 @@
+{
+  "schemaVersion": 1,
+  "version": "release.expansion.v1",
+  "definitions": [
+    {
+      "id": "frame.warden",
+      "category": "Frame",
+      "name": "Warden",
+      "descriptionKey": "frame.warden.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": "warden.idle"
+    },
+    {
+      "id": "skill.warden.cleave",
+      "category": "Skill",
+      "name": "Cleave",
+      "descriptionKey": "skill.warden.cleave.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": [],
+      "animation": "warden.attack"
+    },
+    {
+      "id": "skill.warden.shield_pulse",
+      "category": "Skill",
+      "name": "ShieldPulse",
+      "descriptionKey": "skill.warden.shield_pulse.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": [],
+      "animation": "warden.attack"
+    },
+    {
+      "id": "skill.warden.chain_lance",
+      "category": "Skill",
+      "name": "ChainLance",
+      "descriptionKey": "skill.warden.chain_lance.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": [],
+      "animation": "warden.attack"
+    },
+    {
+      "id": "action.traverse",
+      "category": "Skill",
+      "name": "Traverse",
+      "descriptionKey": "action.traverse.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": [],
+      "animation": "warden.attack"
+    },
+    {
+      "id": "action.recover",
+      "category": "Skill",
+      "name": "Flask",
+      "descriptionKey": "action.recover.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": [],
+      "animation": "warden.attack"
+    },
+    {
+      "id": "skill.warden.faultline",
+      "category": "Skill",
+      "name": "Faultline",
+      "descriptionKey": "skill.warden.faultline.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": [],
+      "animation": "warden.attack"
+    },
+    {
+      "id": "skill.warden.ironsweep",
+      "category": "Skill",
+      "name": "IronSweep",
+      "descriptionKey": "skill.warden.ironsweep.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": [],
+      "animation": "warden.attack"
+    },
+    {
+      "id": "skill.warden.guardbolt",
+      "category": "Skill",
+      "name": "GuardBolt",
+      "descriptionKey": "skill.warden.guardbolt.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": [],
+      "animation": "warden.attack"
+    },
+    {
+      "id": "pattern.assault.pursuit",
+      "category": "Pattern",
+      "name": "assault.pursuit.v1",
+      "descriptionKey": "pattern.assault.pursuit.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "pattern.assault.afterstrike",
+      "category": "Pattern",
+      "name": "assault.afterstrike.v1",
+      "descriptionKey": "pattern.assault.afterstrike.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "pattern.traverse.crossing",
+      "category": "Pattern",
+      "name": "traverse.crossing.v1",
+      "descriptionKey": "pattern.traverse.crossing.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "pattern.assault.convergence",
+      "category": "Pattern",
+      "name": "assault.convergence.v1",
+      "descriptionKey": "pattern.assault.convergence.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "pattern.traverse.shelter",
+      "category": "Pattern",
+      "name": "traverse.shelter.v1",
+      "descriptionKey": "pattern.traverse.shelter.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "pattern.recover.reprieve",
+      "category": "Pattern",
+      "name": "recover.reprieve.v1",
+      "descriptionKey": "pattern.recover.reprieve.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "pattern.assault.focused",
+      "category": "Pattern",
+      "name": "Focused strike",
+      "descriptionKey": "pattern.assault.focused.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "pattern.assault.shatter",
+      "category": "Pattern",
+      "name": "Shatter",
+      "descriptionKey": "pattern.assault.shatter.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "pattern.assault.cascade",
+      "category": "Pattern",
+      "name": "Cascade",
+      "descriptionKey": "pattern.assault.cascade.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "enemy.pursuer",
+      "category": "Enemy",
+      "name": "Pursuer",
+      "descriptionKey": "enemy.pursuer.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": "enemy.idle"
+    },
+    {
+      "id": "enemy.caster",
+      "category": "Enemy",
+      "name": "Caster",
+      "descriptionKey": "enemy.caster.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": "enemy.idle"
+    },
+    {
+      "id": "enemy.brute",
+      "category": "Enemy",
+      "name": "Brute",
+      "descriptionKey": "enemy.brute.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": "enemy.idle"
+    },
+    {
+      "id": "enemy.bellkeeper",
+      "category": "Enemy",
+      "name": "Bellkeeper",
+      "descriptionKey": "enemy.bellkeeper.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": "enemy.idle"
+    },
+    {
+      "id": "technique.cleave.wide",
+      "category": "Technique",
+      "name": "Wide cleave",
+      "descriptionKey": "technique.cleave.wide.description",
+      "references": [
+        "skill.warden.cleave"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "talent.steady",
+      "category": "TalentNode",
+      "name": "Steady",
+      "descriptionKey": "talent.steady.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "inscription.quiet-rest",
+      "category": "Inscription",
+      "name": "Quiet rest",
+      "descriptionKey": "inscription.quiet-rest.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "oath.elsewhere",
+      "category": "Override",
+      "name": "Elsewhere",
+      "descriptionKey": "oath.elsewhere.description",
+      "references": [
+        "trial.contradiction"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "attack.bell.sweep",
+      "category": "Attack",
+      "name": "Bell sweep",
+      "descriptionKey": "attack.bell.sweep.description",
+      "references": [
+        "enemy.bellkeeper"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "encounter.court",
+      "category": "Encounter",
+      "name": "Court pack",
+      "descriptionKey": "encounter.court.description",
+      "references": [
+        "enemy.pursuer"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "room.court",
+      "category": "Room",
+      "name": "Court kit",
+      "descriptionKey": "room.court.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "item.weapon.court",
+      "category": "ItemBase",
+      "name": "Court weapon",
+      "descriptionKey": "item.weapon.court.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "affix.attack",
+      "category": "Affix",
+      "name": "Attack",
+      "descriptionKey": "affix.attack.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "loot.regional",
+      "category": "LootTable",
+      "name": "Regional targeted gear",
+      "descriptionKey": "loot.regional.description",
+      "references": [
+        "item.weapon.court"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "quest.campaign",
+      "category": "Quest",
+      "name": "Restore the court",
+      "descriptionKey": "quest.campaign.description",
+      "references": [
+        "encounter.court"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "reward.expedition",
+      "category": "Reward",
+      "name": "Immutable tier budget",
+      "descriptionKey": "reward.expedition.description",
+      "references": [
+        "curve.endless"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "curve.endless",
+      "category": "ProgressionCurve",
+      "name": "Uncapped exact progression",
+      "descriptionKey": "curve.endless.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "trial.contradiction",
+      "category": "Trial",
+      "name": "Trial of Contradiction",
+      "descriptionKey": "trial.contradiction.description",
+      "references": [
+        "encounter.court"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "chain.three-leg",
+      "category": "Chain",
+      "name": "Three regional legs",
+      "descriptionKey": "chain.three-leg.description",
+      "references": [
+        "reward.expedition"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "echo.anchor",
+      "category": "SovereignEcho",
+      "name": "The Remembering Sovereign",
+      "descriptionKey": "echo.anchor.description",
+      "references": [
+        "enemy.bellkeeper"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "region.ash",
+      "category": "Region",
+      "name": "Ash",
+      "descriptionKey": "region.ash.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "quest.mastery.ash",
+      "category": "Quest",
+      "name": "Ash mastery",
+      "descriptionKey": "quest.mastery.ash.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": [
+        "quest.campaign"
+      ],
+      "animation": null
+    },
+    {
+      "id": "route.ash",
+      "category": "ChapterRoute",
+      "name": "Ash route",
+      "descriptionKey": "route.ash.description",
+      "references": [
+        "region.ash",
+        "loot.regional"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "region.glass",
+      "category": "Region",
+      "name": "Glass",
+      "descriptionKey": "region.glass.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "quest.mastery.glass",
+      "category": "Quest",
+      "name": "Glass mastery",
+      "descriptionKey": "quest.mastery.glass.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": [
+        "quest.campaign"
+      ],
+      "animation": null
+    },
+    {
+      "id": "route.glass",
+      "category": "ChapterRoute",
+      "name": "Glass route",
+      "descriptionKey": "route.glass.description",
+      "references": [
+        "region.glass",
+        "loot.regional"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "region.hollow",
+      "category": "Region",
+      "name": "Hollow",
+      "descriptionKey": "region.hollow.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "quest.mastery.hollow",
+      "category": "Quest",
+      "name": "Hollow mastery",
+      "descriptionKey": "quest.mastery.hollow.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": [
+        "quest.campaign"
+      ],
+      "animation": null
+    },
+    {
+      "id": "route.hollow",
+      "category": "ChapterRoute",
+      "name": "Hollow route",
+      "descriptionKey": "route.hollow.description",
+      "references": [
+        "region.hollow",
+        "loot.regional"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "region.crown",
+      "category": "Region",
+      "name": "Crown",
+      "descriptionKey": "region.crown.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "quest.mastery.crown",
+      "category": "Quest",
+      "name": "Crown mastery",
+      "descriptionKey": "quest.mastery.crown.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": [
+        "quest.campaign"
+      ],
+      "animation": null
+    },
+    {
+      "id": "route.crown",
+      "category": "ChapterRoute",
+      "name": "Crown route",
+      "descriptionKey": "route.crown.description",
+      "references": [
+        "region.crown",
+        "loot.regional"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "activity.hunt",
+      "category": "Activity",
+      "name": "Hunt",
+      "descriptionKey": "activity.hunt.description",
+      "references": [
+        "reward.expedition",
+        "room.court"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "activity.breach",
+      "category": "Activity",
+      "name": "Breach",
+      "descriptionKey": "activity.breach.description",
+      "references": [
+        "reward.expedition",
+        "room.court"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "activity.vault",
+      "category": "Activity",
+      "name": "Vault",
+      "descriptionKey": "activity.vault.description",
+      "references": [
+        "reward.expedition",
+        "room.court"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "law.reverberation",
+      "category": "WorldRule",
+      "name": "Reverberation",
+      "descriptionKey": "law.reverberation.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "law.glass",
+      "category": "WorldRule",
+      "name": "Glass",
+      "descriptionKey": "law.glass.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "law.vents",
+      "category": "WorldRule",
+      "name": "Vents",
+      "descriptionKey": "law.vents.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "law.tides",
+      "category": "WorldRule",
+      "name": "Tides",
+      "descriptionKey": "law.tides.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "law.watch",
+      "category": "WorldRule",
+      "name": "Watch",
+      "descriptionKey": "law.watch.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "law.crown",
+      "category": "WorldRule",
+      "name": "Crown",
+      "descriptionKey": "law.crown.description",
+      "references": [],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "mutation.anchor",
+      "category": "BossMutation",
+      "name": "Anchor",
+      "descriptionKey": "mutation.anchor.description",
+      "references": [
+        "enemy.bellkeeper"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "mutation.split",
+      "category": "BossMutation",
+      "name": "Split",
+      "descriptionKey": "mutation.split.description",
+      "references": [
+        "enemy.bellkeeper"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "mutation.patience",
+      "category": "BossMutation",
+      "name": "Patience",
+      "descriptionKey": "mutation.patience.description",
+      "references": [
+        "enemy.bellkeeper"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "mutation.procession",
+      "category": "BossMutation",
+      "name": "Procession",
+      "descriptionKey": "mutation.procession.description",
+      "references": [
+        "enemy.bellkeeper"
+      ],
+      "prerequisites": [],
+      "animation": null
+    },
+    {
+      "id": "frame.threadseer",
+      "category": "Frame",
+      "name": "Threadseer",
+      "descriptionKey": "frame.threadseer.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "frame.revenant",
+      "category": "Frame",
+      "name": "Revenant",
+      "descriptionKey": "frame.revenant.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.sunderingblow",
+      "category": "Skill",
+      "name": "SunderingBlow",
+      "descriptionKey": "skill.expansion.sunderingblow.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.bulwark",
+      "category": "Skill",
+      "name": "Bulwark",
+      "descriptionKey": "skill.expansion.bulwark.description",
+      "references": [
+        "frame.warden"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.needle",
+      "category": "Skill",
+      "name": "Needle",
+      "descriptionKey": "skill.expansion.needle.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.emberwell",
+      "category": "Skill",
+      "name": "EmberWell",
+      "descriptionKey": "skill.expansion.emberwell.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.tether",
+      "category": "Skill",
+      "name": "Tether",
+      "descriptionKey": "skill.expansion.tether.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.stormloom",
+      "category": "Skill",
+      "name": "StormLoom",
+      "descriptionKey": "skill.expansion.stormloom.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.frostfan",
+      "category": "Skill",
+      "name": "FrostFan",
+      "descriptionKey": "skill.expansion.frostfan.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.threadcut",
+      "category": "Skill",
+      "name": "ThreadCut",
+      "descriptionKey": "skill.expansion.threadcut.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.cinderorb",
+      "category": "Skill",
+      "name": "CinderOrb",
+      "descriptionKey": "skill.expansion.cinderorb.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.recallthread",
+      "category": "Skill",
+      "name": "RecallThread",
+      "descriptionKey": "skill.expansion.recallthread.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.shardshot",
+      "category": "Skill",
+      "name": "ShardShot",
+      "descriptionKey": "skill.expansion.shardshot.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.reap",
+      "category": "Skill",
+      "name": "Reap",
+      "descriptionKey": "skill.expansion.reap.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.echoorder",
+      "category": "Skill",
+      "name": "EchoOrder",
+      "descriptionKey": "skill.expansion.echoorder.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.veil",
+      "category": "Skill",
+      "name": "Veil",
+      "descriptionKey": "skill.expansion.veil.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.bonevolley",
+      "category": "Skill",
+      "name": "BoneVolley",
+      "descriptionKey": "skill.expansion.bonevolley.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.graveline",
+      "category": "Skill",
+      "name": "GraveLine",
+      "descriptionKey": "skill.expansion.graveline.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.soullance",
+      "category": "Skill",
+      "name": "SoulLance",
+      "descriptionKey": "skill.expansion.soullance.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "skill.expansion.duskring",
+      "category": "Skill",
+      "name": "DuskRing",
+      "descriptionKey": "skill.expansion.duskring.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.cinderrunner",
+      "category": "Enemy",
+      "name": "CinderRunner",
+      "descriptionKey": "enemy.region.cinderrunner.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.slagslinger",
+      "category": "Enemy",
+      "name": "SlagSlinger",
+      "descriptionKey": "enemy.region.slagslinger.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.kilnguard",
+      "category": "Enemy",
+      "name": "KilnGuard",
+      "descriptionKey": "enemy.region.kilnguard.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.ashskater",
+      "category": "Enemy",
+      "name": "AshSkater",
+      "descriptionKey": "enemy.region.ashskater.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.coalchoir",
+      "category": "Enemy",
+      "name": "CoalChoir",
+      "descriptionKey": "enemy.region.coalchoir.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.furnacesentinel",
+      "category": "Enemy",
+      "name": "FurnaceSentinel",
+      "descriptionKey": "enemy.region.furnacesentinel.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.reedstalker",
+      "category": "Enemy",
+      "name": "ReedStalker",
+      "descriptionKey": "enemy.region.reedstalker.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.glassspitter",
+      "category": "Enemy",
+      "name": "GlassSpitter",
+      "descriptionKey": "enemy.region.glassspitter.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.mirrorguard",
+      "category": "Enemy",
+      "name": "MirrorGuard",
+      "descriptionKey": "enemy.region.mirrorguard.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.marshskater",
+      "category": "Enemy",
+      "name": "MarshSkater",
+      "descriptionKey": "enemy.region.marshskater.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.prismchoir",
+      "category": "Enemy",
+      "name": "PrismChoir",
+      "descriptionKey": "enemy.region.prismchoir.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.shardsentinel",
+      "category": "Enemy",
+      "name": "ShardSentinel",
+      "descriptionKey": "enemy.region.shardsentinel.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.pagehunter",
+      "category": "Enemy",
+      "name": "PageHunter",
+      "descriptionKey": "enemy.region.pagehunter.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.inkslinger",
+      "category": "Enemy",
+      "name": "InkSlinger",
+      "descriptionKey": "enemy.region.inkslinger.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.archiveguard",
+      "category": "Enemy",
+      "name": "ArchiveGuard",
+      "descriptionKey": "enemy.region.archiveguard.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.marginskater",
+      "category": "Enemy",
+      "name": "MarginSkater",
+      "descriptionKey": "enemy.region.marginskater.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.nullchoir",
+      "category": "Enemy",
+      "name": "NullChoir",
+      "descriptionKey": "enemy.region.nullchoir.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.indexsentinel",
+      "category": "Enemy",
+      "name": "IndexSentinel",
+      "descriptionKey": "enemy.region.indexsentinel.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.scarrunner",
+      "category": "Enemy",
+      "name": "ScarRunner",
+      "descriptionKey": "enemy.region.scarrunner.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.crownspitter",
+      "category": "Enemy",
+      "name": "CrownSpitter",
+      "descriptionKey": "enemy.region.crownspitter.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.riftguard",
+      "category": "Enemy",
+      "name": "RiftGuard",
+      "descriptionKey": "enemy.region.riftguard.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.crownskater",
+      "category": "Enemy",
+      "name": "CrownSkater",
+      "descriptionKey": "enemy.region.crownskater.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.ruinchoir",
+      "category": "Enemy",
+      "name": "RuinChoir",
+      "descriptionKey": "enemy.region.ruinchoir.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "enemy.region.royalsentinel",
+      "category": "Enemy",
+      "name": "RoyalSentinel",
+      "descriptionKey": "enemy.region.royalsentinel.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "boss.region.bellkeeper",
+      "category": "Enemy",
+      "name": "Bellkeeper",
+      "descriptionKey": "boss.region.bellkeeper.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "boss.region.forgeheart",
+      "category": "Enemy",
+      "name": "Forgeheart",
+      "descriptionKey": "boss.region.forgeheart.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "boss.region.mirrorregent",
+      "category": "Enemy",
+      "name": "MirrorRegent",
+      "descriptionKey": "boss.region.mirrorregent.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "boss.region.reedwidow",
+      "category": "Enemy",
+      "name": "ReedWidow",
+      "descriptionKey": "boss.region.reedwidow.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "boss.region.indexer",
+      "category": "Enemy",
+      "name": "Indexer",
+      "descriptionKey": "boss.region.indexer.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "boss.region.nullabbot",
+      "category": "Enemy",
+      "name": "NullAbbot",
+      "descriptionKey": "boss.region.nullabbot.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "boss.region.scarmarshal",
+      "category": "Enemy",
+      "name": "ScarMarshal",
+      "descriptionKey": "boss.region.scarmarshal.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "boss.region.firstpattern",
+      "category": "Enemy",
+      "name": "FirstPattern",
+      "descriptionKey": "boss.region.firstpattern.description",
+      "references": [],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.0",
+      "category": "Room",
+      "name": "Furnace Gate",
+      "descriptionKey": "room.regional.0.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.1",
+      "category": "Room",
+      "name": "Furnace Crossing",
+      "descriptionKey": "room.regional.1.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.2",
+      "category": "Room",
+      "name": "Furnace Gallery",
+      "descriptionKey": "room.regional.2.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.3",
+      "category": "Room",
+      "name": "Furnace Works",
+      "descriptionKey": "room.regional.3.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.4",
+      "category": "Room",
+      "name": "Furnace Hall",
+      "descriptionKey": "room.regional.4.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.5",
+      "category": "Room",
+      "name": "Furnace Passage",
+      "descriptionKey": "room.regional.5.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.6",
+      "category": "Room",
+      "name": "Furnace Court",
+      "descriptionKey": "room.regional.6.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.7",
+      "category": "Room",
+      "name": "Furnace Bridge",
+      "descriptionKey": "room.regional.7.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.8",
+      "category": "Room",
+      "name": "Furnace Chamber",
+      "descriptionKey": "room.regional.8.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.9",
+      "category": "Room",
+      "name": "Furnace Sanctum",
+      "descriptionKey": "room.regional.9.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.10",
+      "category": "Room",
+      "name": "Furnace Enforcer",
+      "descriptionKey": "room.regional.10.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.11",
+      "category": "Room",
+      "name": "Furnace Throne",
+      "descriptionKey": "room.regional.11.description",
+      "references": [
+        "region.ash"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.12",
+      "category": "Room",
+      "name": "Reeds Gate",
+      "descriptionKey": "room.regional.12.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.13",
+      "category": "Room",
+      "name": "Reeds Crossing",
+      "descriptionKey": "room.regional.13.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.14",
+      "category": "Room",
+      "name": "Reeds Gallery",
+      "descriptionKey": "room.regional.14.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.15",
+      "category": "Room",
+      "name": "Reeds Works",
+      "descriptionKey": "room.regional.15.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.16",
+      "category": "Room",
+      "name": "Reeds Hall",
+      "descriptionKey": "room.regional.16.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.17",
+      "category": "Room",
+      "name": "Reeds Passage",
+      "descriptionKey": "room.regional.17.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.18",
+      "category": "Room",
+      "name": "Reeds Court",
+      "descriptionKey": "room.regional.18.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.19",
+      "category": "Room",
+      "name": "Reeds Bridge",
+      "descriptionKey": "room.regional.19.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.20",
+      "category": "Room",
+      "name": "Reeds Chamber",
+      "descriptionKey": "room.regional.20.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.21",
+      "category": "Room",
+      "name": "Reeds Sanctum",
+      "descriptionKey": "room.regional.21.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.22",
+      "category": "Room",
+      "name": "Reeds Enforcer",
+      "descriptionKey": "room.regional.22.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.23",
+      "category": "Room",
+      "name": "Reeds Throne",
+      "descriptionKey": "room.regional.23.description",
+      "references": [
+        "region.glass"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.24",
+      "category": "Room",
+      "name": "Stacks Gate",
+      "descriptionKey": "room.regional.24.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.25",
+      "category": "Room",
+      "name": "Stacks Crossing",
+      "descriptionKey": "room.regional.25.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.26",
+      "category": "Room",
+      "name": "Stacks Gallery",
+      "descriptionKey": "room.regional.26.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.27",
+      "category": "Room",
+      "name": "Stacks Works",
+      "descriptionKey": "room.regional.27.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.28",
+      "category": "Room",
+      "name": "Stacks Hall",
+      "descriptionKey": "room.regional.28.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.29",
+      "category": "Room",
+      "name": "Stacks Passage",
+      "descriptionKey": "room.regional.29.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.30",
+      "category": "Room",
+      "name": "Stacks Court",
+      "descriptionKey": "room.regional.30.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.31",
+      "category": "Room",
+      "name": "Stacks Bridge",
+      "descriptionKey": "room.regional.31.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.32",
+      "category": "Room",
+      "name": "Stacks Chamber",
+      "descriptionKey": "room.regional.32.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.33",
+      "category": "Room",
+      "name": "Stacks Sanctum",
+      "descriptionKey": "room.regional.33.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.34",
+      "category": "Room",
+      "name": "Stacks Enforcer",
+      "descriptionKey": "room.regional.34.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.35",
+      "category": "Room",
+      "name": "Stacks Throne",
+      "descriptionKey": "room.regional.35.description",
+      "references": [
+        "region.hollow"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.36",
+      "category": "Room",
+      "name": "Rift Gate",
+      "descriptionKey": "room.regional.36.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.37",
+      "category": "Room",
+      "name": "Rift Crossing",
+      "descriptionKey": "room.regional.37.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.38",
+      "category": "Room",
+      "name": "Rift Gallery",
+      "descriptionKey": "room.regional.38.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.39",
+      "category": "Room",
+      "name": "Rift Works",
+      "descriptionKey": "room.regional.39.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.40",
+      "category": "Room",
+      "name": "Rift Hall",
+      "descriptionKey": "room.regional.40.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.41",
+      "category": "Room",
+      "name": "Rift Passage",
+      "descriptionKey": "room.regional.41.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.42",
+      "category": "Room",
+      "name": "Rift Court",
+      "descriptionKey": "room.regional.42.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.43",
+      "category": "Room",
+      "name": "Rift Bridge",
+      "descriptionKey": "room.regional.43.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.44",
+      "category": "Room",
+      "name": "Rift Chamber",
+      "descriptionKey": "room.regional.44.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.45",
+      "category": "Room",
+      "name": "Rift Sanctum",
+      "descriptionKey": "room.regional.45.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.46",
+      "category": "Room",
+      "name": "Rift Enforcer",
+      "descriptionKey": "room.regional.46.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "room.regional.47",
+      "category": "Room",
+      "name": "Rift Throne",
+      "descriptionKey": "room.regional.47.description",
+      "references": [
+        "region.crown"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "talent.threadseer-force.1",
+      "category": "TalentNode",
+      "name": "Threadseer force 1",
+      "descriptionKey": "talent.threadseer-force.1.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "talent.threadseer-force.2",
+      "category": "TalentNode",
+      "name": "Threadseer force 2",
+      "descriptionKey": "talent.threadseer-force.2.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": [
+        "talent.threadseer-force.1"
+      ]
+    },
+    {
+      "id": "talent.threadseer-force.3",
+      "category": "TalentNode",
+      "name": "Threadseer force 3",
+      "descriptionKey": "talent.threadseer-force.3.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": [
+        "talent.threadseer-force.2"
+      ]
+    },
+    {
+      "id": "talent.threadseer-force.4",
+      "category": "TalentNode",
+      "name": "Threadseer force 4",
+      "descriptionKey": "talent.threadseer-force.4.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": [
+        "talent.threadseer-force.3"
+      ]
+    },
+    {
+      "id": "talent.threadseer-ward.1",
+      "category": "TalentNode",
+      "name": "Threadseer ward 1",
+      "descriptionKey": "talent.threadseer-ward.1.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "talent.threadseer-ward.2",
+      "category": "TalentNode",
+      "name": "Threadseer ward 2",
+      "descriptionKey": "talent.threadseer-ward.2.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": [
+        "talent.threadseer-ward.1"
+      ]
+    },
+    {
+      "id": "talent.threadseer-ward.3",
+      "category": "TalentNode",
+      "name": "Threadseer ward 3",
+      "descriptionKey": "talent.threadseer-ward.3.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": [
+        "talent.threadseer-ward.2"
+      ]
+    },
+    {
+      "id": "talent.threadseer-ward.4",
+      "category": "TalentNode",
+      "name": "Threadseer ward 4",
+      "descriptionKey": "talent.threadseer-ward.4.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": [
+        "talent.threadseer-ward.3"
+      ]
+    },
+    {
+      "id": "talent.threadseer-flow.1",
+      "category": "TalentNode",
+      "name": "Threadseer flow 1",
+      "descriptionKey": "talent.threadseer-flow.1.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "talent.threadseer-flow.2",
+      "category": "TalentNode",
+      "name": "Threadseer flow 2",
+      "descriptionKey": "talent.threadseer-flow.2.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": [
+        "talent.threadseer-flow.1"
+      ]
+    },
+    {
+      "id": "talent.threadseer-flow.3",
+      "category": "TalentNode",
+      "name": "Threadseer flow 3",
+      "descriptionKey": "talent.threadseer-flow.3.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": [
+        "talent.threadseer-flow.2"
+      ]
+    },
+    {
+      "id": "talent.threadseer-flow.4",
+      "category": "TalentNode",
+      "name": "Threadseer flow 4",
+      "descriptionKey": "talent.threadseer-flow.4.description",
+      "references": [
+        "frame.threadseer"
+      ],
+      "prerequisites": [
+        "talent.threadseer-flow.3"
+      ]
+    },
+    {
+      "id": "talent.revenant-force.1",
+      "category": "TalentNode",
+      "name": "Revenant force 1",
+      "descriptionKey": "talent.revenant-force.1.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "talent.revenant-force.2",
+      "category": "TalentNode",
+      "name": "Revenant force 2",
+      "descriptionKey": "talent.revenant-force.2.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": [
+        "talent.revenant-force.1"
+      ]
+    },
+    {
+      "id": "talent.revenant-force.3",
+      "category": "TalentNode",
+      "name": "Revenant force 3",
+      "descriptionKey": "talent.revenant-force.3.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": [
+        "talent.revenant-force.2"
+      ]
+    },
+    {
+      "id": "talent.revenant-force.4",
+      "category": "TalentNode",
+      "name": "Revenant force 4",
+      "descriptionKey": "talent.revenant-force.4.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": [
+        "talent.revenant-force.3"
+      ]
+    },
+    {
+      "id": "talent.revenant-ward.1",
+      "category": "TalentNode",
+      "name": "Revenant ward 1",
+      "descriptionKey": "talent.revenant-ward.1.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "talent.revenant-ward.2",
+      "category": "TalentNode",
+      "name": "Revenant ward 2",
+      "descriptionKey": "talent.revenant-ward.2.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": [
+        "talent.revenant-ward.1"
+      ]
+    },
+    {
+      "id": "talent.revenant-ward.3",
+      "category": "TalentNode",
+      "name": "Revenant ward 3",
+      "descriptionKey": "talent.revenant-ward.3.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": [
+        "talent.revenant-ward.2"
+      ]
+    },
+    {
+      "id": "talent.revenant-ward.4",
+      "category": "TalentNode",
+      "name": "Revenant ward 4",
+      "descriptionKey": "talent.revenant-ward.4.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": [
+        "talent.revenant-ward.3"
+      ]
+    },
+    {
+      "id": "talent.revenant-flow.1",
+      "category": "TalentNode",
+      "name": "Revenant flow 1",
+      "descriptionKey": "talent.revenant-flow.1.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "talent.revenant-flow.2",
+      "category": "TalentNode",
+      "name": "Revenant flow 2",
+      "descriptionKey": "talent.revenant-flow.2.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": [
+        "talent.revenant-flow.1"
+      ]
+    },
+    {
+      "id": "talent.revenant-flow.3",
+      "category": "TalentNode",
+      "name": "Revenant flow 3",
+      "descriptionKey": "talent.revenant-flow.3.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": [
+        "talent.revenant-flow.2"
+      ]
+    },
+    {
+      "id": "talent.revenant-flow.4",
+      "category": "TalentNode",
+      "name": "Revenant flow 4",
+      "descriptionKey": "talent.revenant-flow.4.description",
+      "references": [
+        "frame.revenant"
+      ],
+      "prerequisites": [
+        "talent.revenant-flow.3"
+      ]
+    },
+    {
+      "id": "oath.red-covenant",
+      "category": "Override",
+      "name": "Red Covenant",
+      "descriptionKey": "oath.red-covenant.description",
+      "references": [
+        "quest.covenant-mastery"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "quest.covenant-mastery",
+      "category": "Quest",
+      "name": "Reservoir mastery",
+      "descriptionKey": "quest.covenant-mastery.description",
+      "references": [],
+      "prerequisites": []
+    }
+  ],
+  "text": {
+    "frame.warden.description": "Warden",
+    "skill.warden.cleave.description": "Cleave",
+    "skill.warden.shield_pulse.description": "ShieldPulse",
+    "skill.warden.chain_lance.description": "ChainLance",
+    "action.traverse.description": "Traverse",
+    "action.recover.description": "Flask",
+    "skill.warden.faultline.description": "Faultline",
+    "skill.warden.ironsweep.description": "IronSweep",
+    "skill.warden.guardbolt.description": "GuardBolt",
+    "pattern.assault.pursuit.description": "assault.pursuit.v1",
+    "pattern.assault.afterstrike.description": "assault.afterstrike.v1",
+    "pattern.traverse.crossing.description": "traverse.crossing.v1",
+    "pattern.assault.convergence.description": "assault.convergence.v1",
+    "pattern.traverse.shelter.description": "traverse.shelter.v1",
+    "pattern.recover.reprieve.description": "recover.reprieve.v1",
+    "pattern.assault.focused.description": "Focused strike",
+    "pattern.assault.shatter.description": "Shatter",
+    "pattern.assault.cascade.description": "Cascade",
+    "enemy.pursuer.description": "Pursuer",
+    "enemy.caster.description": "Caster",
+    "enemy.brute.description": "Brute",
+    "enemy.bellkeeper.description": "Bellkeeper",
+    "technique.cleave.wide.description": "Wide cleave",
+    "talent.steady.description": "Steady",
+    "inscription.quiet-rest.description": "Quiet rest",
+    "oath.elsewhere.description": "Elsewhere",
+    "attack.bell.sweep.description": "Bell sweep",
+    "encounter.court.description": "Court pack",
+    "room.court.description": "Court kit",
+    "item.weapon.court.description": "Court weapon",
+    "affix.attack.description": "Attack",
+    "loot.regional.description": "Regional targeted gear",
+    "quest.campaign.description": "Restore the court",
+    "reward.expedition.description": "Immutable tier budget",
+    "curve.endless.description": "Uncapped exact progression",
+    "trial.contradiction.description": "Trial of Contradiction",
+    "chain.three-leg.description": "Three regional legs",
+    "echo.anchor.description": "The Remembering Sovereign",
+    "region.ash.description": "Ash",
+    "quest.mastery.ash.description": "Ash mastery",
+    "route.ash.description": "Ash route",
+    "region.glass.description": "Glass",
+    "quest.mastery.glass.description": "Glass mastery",
+    "route.glass.description": "Glass route",
+    "region.hollow.description": "Hollow",
+    "quest.mastery.hollow.description": "Hollow mastery",
+    "route.hollow.description": "Hollow route",
+    "region.crown.description": "Crown",
+    "quest.mastery.crown.description": "Crown mastery",
+    "route.crown.description": "Crown route",
+    "activity.hunt.description": "Hunt",
+    "activity.breach.description": "Breach",
+    "activity.vault.description": "Vault",
+    "law.reverberation.description": "Reverberation",
+    "law.glass.description": "Glass",
+    "law.vents.description": "Vents",
+    "law.tides.description": "Tides",
+    "law.watch.description": "Watch",
+    "law.crown.description": "Crown",
+    "mutation.anchor.description": "Anchor",
+    "mutation.split.description": "Split",
+    "mutation.patience.description": "Patience",
+    "mutation.procession.description": "Procession",
+    "frame.threadseer.description": "Spatial spellcasting and delayed area control.",
+    "frame.revenant.description": "Mobile ranged pressure and one commanded echo.",
+    "skill.expansion.sunderingblow.description": "SunderingBlow; authored action in expansion.v1.",
+    "skill.expansion.bulwark.description": "Bulwark; authored action in expansion.v1.",
+    "skill.expansion.needle.description": "Needle; authored action in expansion.v1.",
+    "skill.expansion.emberwell.description": "EmberWell; authored action in expansion.v1.",
+    "skill.expansion.tether.description": "Tether; authored action in expansion.v1.",
+    "skill.expansion.stormloom.description": "StormLoom; authored action in expansion.v1.",
+    "skill.expansion.frostfan.description": "FrostFan; authored action in expansion.v1.",
+    "skill.expansion.threadcut.description": "ThreadCut; authored action in expansion.v1.",
+    "skill.expansion.cinderorb.description": "CinderOrb; authored action in expansion.v1.",
+    "skill.expansion.recallthread.description": "RecallThread; authored action in expansion.v1.",
+    "skill.expansion.shardshot.description": "ShardShot; authored action in expansion.v1.",
+    "skill.expansion.reap.description": "Reap; authored action in expansion.v1.",
+    "skill.expansion.echoorder.description": "EchoOrder; authored action in expansion.v1.",
+    "skill.expansion.veil.description": "Veil; authored action in expansion.v1.",
+    "skill.expansion.bonevolley.description": "BoneVolley; authored action in expansion.v1.",
+    "skill.expansion.graveline.description": "GraveLine; authored action in expansion.v1.",
+    "skill.expansion.soullance.description": "SoulLance; authored action in expansion.v1.",
+    "skill.expansion.duskring.description": "DuskRing; authored action in expansion.v1.",
+    "enemy.region.cinderrunner.description": "CinderRunner; fixed tell and bounded attacks.",
+    "enemy.region.slagslinger.description": "SlagSlinger; fixed tell and bounded attacks.",
+    "enemy.region.kilnguard.description": "KilnGuard; fixed tell and bounded attacks.",
+    "enemy.region.ashskater.description": "AshSkater; fixed tell and bounded attacks.",
+    "enemy.region.coalchoir.description": "CoalChoir; fixed tell and bounded attacks.",
+    "enemy.region.furnacesentinel.description": "FurnaceSentinel; fixed tell and bounded attacks.",
+    "enemy.region.reedstalker.description": "ReedStalker; fixed tell and bounded attacks.",
+    "enemy.region.glassspitter.description": "GlassSpitter; fixed tell and bounded attacks.",
+    "enemy.region.mirrorguard.description": "MirrorGuard; fixed tell and bounded attacks.",
+    "enemy.region.marshskater.description": "MarshSkater; fixed tell and bounded attacks.",
+    "enemy.region.prismchoir.description": "PrismChoir; fixed tell and bounded attacks.",
+    "enemy.region.shardsentinel.description": "ShardSentinel; fixed tell and bounded attacks.",
+    "enemy.region.pagehunter.description": "PageHunter; fixed tell and bounded attacks.",
+    "enemy.region.inkslinger.description": "InkSlinger; fixed tell and bounded attacks.",
+    "enemy.region.archiveguard.description": "ArchiveGuard; fixed tell and bounded attacks.",
+    "enemy.region.marginskater.description": "MarginSkater; fixed tell and bounded attacks.",
+    "enemy.region.nullchoir.description": "NullChoir; fixed tell and bounded attacks.",
+    "enemy.region.indexsentinel.description": "IndexSentinel; fixed tell and bounded attacks.",
+    "enemy.region.scarrunner.description": "ScarRunner; fixed tell and bounded attacks.",
+    "enemy.region.crownspitter.description": "CrownSpitter; fixed tell and bounded attacks.",
+    "enemy.region.riftguard.description": "RiftGuard; fixed tell and bounded attacks.",
+    "enemy.region.crownskater.description": "CrownSkater; fixed tell and bounded attacks.",
+    "enemy.region.ruinchoir.description": "RuinChoir; fixed tell and bounded attacks.",
+    "enemy.region.royalsentinel.description": "RoyalSentinel; fixed tell and bounded attacks.",
+    "boss.region.bellkeeper.description": "Bellkeeper; fixed tell and bounded attacks.",
+    "boss.region.forgeheart.description": "Forgeheart; fixed tell and bounded attacks.",
+    "boss.region.mirrorregent.description": "MirrorRegent; fixed tell and bounded attacks.",
+    "boss.region.reedwidow.description": "ReedWidow; fixed tell and bounded attacks.",
+    "boss.region.indexer.description": "Indexer; fixed tell and bounded attacks.",
+    "boss.region.nullabbot.description": "NullAbbot; fixed tell and bounded attacks.",
+    "boss.region.scarmarshal.description": "ScarMarshal; fixed tell and bounded attacks.",
+    "boss.region.firstpattern.description": "FirstPattern; fixed tell and bounded attacks.",
+    "room.regional.0.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.1.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.2.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.3.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.4.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.5.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.6.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.7.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.8.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.9.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.10.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.11.description": "Ash room with validated spawn and return sockets.",
+    "room.regional.12.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.13.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.14.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.15.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.16.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.17.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.18.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.19.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.20.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.21.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.22.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.23.description": "Glass room with validated spawn and return sockets.",
+    "room.regional.24.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.25.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.26.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.27.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.28.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.29.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.30.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.31.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.32.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.33.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.34.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.35.description": "Hollow room with validated spawn and return sockets.",
+    "room.regional.36.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.37.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.38.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.39.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.40.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.41.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.42.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.43.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.44.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.45.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.46.description": "Crown room with validated spawn and return sockets.",
+    "room.regional.47.description": "Crown room with validated spawn and return sockets.",
+    "talent.threadseer-force.1.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-force.2.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-force.3.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-force.4.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-ward.1.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-ward.2.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-ward.3.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-ward.4.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-flow.1.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-flow.2.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-flow.3.description": "Connected branch; at most two final tradeoffs.",
+    "talent.threadseer-flow.4.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-force.1.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-force.2.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-force.3.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-force.4.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-ward.1.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-ward.2.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-ward.3.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-ward.4.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-flow.1.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-flow.2.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-flow.3.description": "Connected branch; at most two final tradeoffs.",
+    "talent.revenant-flow.4.description": "Connected branch; at most two final tradeoffs.",
+    "oath.red-covenant.description": "Reserve maximum Life instead of paying Focus; capacity returns without healing.",
+    "quest.covenant-mastery.description": "Three normalized encounters: reserve 20%, heal while reserved, defeat the boss."
+  },
+  "animations": [
+    "warden.idle",
+    "warden.attack",
+    "enemy.idle"
+  ],
+  "worldRules": [
+    {
+      "id": "law.reverberation",
+      "name": "Reverberation",
+      "description": "A left-side echo pulses; move into the central lane.",
+      "warningTicks": 90,
+      "period": 360,
+      "damagePercent": 8
+    },
+    {
+      "id": "law.glass",
+      "name": "Glass Shelter",
+      "description": "Breakable northern cover intercepts ordinary projectiles.",
+      "warningTicks": 90,
+      "period": 360,
+      "damagePercent": 0
+    },
+    {
+      "id": "law.vents",
+      "name": "Migrating Vents",
+      "description": "Vents alternate north and south; the central lane stays safe.",
+      "warningTicks": 90,
+      "period": 360,
+      "damagePercent": 8
+    },
+    {
+      "id": "law.tides",
+      "name": "Ash Tides",
+      "description": "The south terrace burns after its warning.",
+      "warningTicks": 90,
+      "period": 420,
+      "damagePercent": 8
+    },
+    {
+      "id": "law.watch",
+      "name": "Hollow Watch",
+      "description": "A northern gaze pulses after its warning.",
+      "warningTicks": 90,
+      "period": 480,
+      "damagePercent": 8
+    },
+    {
+      "id": "law.crown",
+      "name": "Crown Toll",
+      "description": "Side pillars pulse; pass through the broad central lane.",
+      "warningTicks": 90,
+      "period": 420,
+      "damagePercent": 8
+    }
+  ]
+}

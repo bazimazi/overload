@@ -1,0 +1,86 @@
+# Implementation status
+
+Updated 6 October 2026. **Implementation through A03 and quality/release preparation through R02 are delivered within the owner's requested scope. Human acceptance gates remain open.** Q01/Q02 have automated/local evidence; R01 is a review candidate; R02 compatibility is implemented, with expansion selection awaiting real player evidence. The owner arranged a tester, but no independent feedback or human release approval has arrived.
+
+## Delivered
+
+| Task | Implementation and evidence |
+| --- | --- |
+| F01-F03 | Pinned Godot 4.7.2 .NET and SDK 10.0.401, Windows x64 self-contained export, exact numeric foundations, project boundaries, independent world/UI scaling, input buffering and keyboard/controller menus. |
+| C01-C04 | Collision-based movement, action phases and cancellation, swept/projectile/melee effects, Life/Focus/flasks, three ordinary enemy roles and Bellkeeper, pause/death/retry. |
+| O01-O03 | Movement-earned Momentum, collision-earned Echo, bounded lifetimes/provenance, pure resolver with atomic costs, real Pursuit/Afterstrike/Crossing. Earlier evidence remains in decisions 0002-0004 and historical artifact logs. |
+| O04 | Shared-resolver HUD predictions and fallback reasons; three saved binding priorities at Hearth; controller editing and combat lock. Repeated previews are mutation-free and match accepted snapshots. |
+| V01 | Elsewhere place/lock/swap/expiry, no placement evade, same-room connectivity and safe nearby landing, Crossing suspension, Shelter wrapping, death/room/build clearing and one-oath constraint. |
+| V02 | Reward-free oath simulation and explicitly sandboxed four-wallet unlock. Ownership/payment is one transaction. Production qualification is reserved for P04. |
+| S01 | Checksummed versioned character aggregate, exact decimal counters, flushed temporary write, atomic replacement, three backups, writer lock, revision/receipt checks, schema-1 migration, newest-valid recovery and separate-profile recovery UI. |
+| S02 | Six equipment slots, item comparison and lock, gold/Alloy, fixed-price three-step quality upgrades and one chosen replaceable affix slot. No random failure or duplicate transaction payment. |
+| S03 | Uncapped XP/inverse, finite skill/talent budgets, four unique milestones, post-60 Might/Resolve ledger with auto/manual allocation, six skill ranks/two techniques each, twelve talents, four inscriptions/two equipped and free respec. |
+| S04 | Six offensive skills in Cleave + three selected active slots; Convergence/Shelter/Reprieve complete the six patterns. Hearth and eight authored rooms, unique run/room rewards, checkpoint resume, first-clear milestones, full-bag conversion and boss exit. |
+| S05 | Original SVG characters/court art, synthesized music/ambience/combat/UI audio, six volume channels, fullscreen, reduced flashes, room hints, five-page field guide, scrolling controller menus and Back navigation. Keyboard rebinding rejects conflicts. |
+| S06 | Self-contained Windows candidate, distributable ZIP tooling, asset provenance, build manifest/hashes and independent-playtest instructions. **Human playtest pending; S06 is not complete.** |
+| E01 | Runtime-backed XP, reference profile, tier, wallet and forge CSV reports; matched, entry-grade, undergeared and overleveled encounter sweeps. |
+| E02 | Exact Resonance/shared-grade combat scaling, tier-aware defense, three automatic allocation policies plus manual allocation, atomic bulk forge with bounded affordability search. |
+| E03 | Court unlocks Fracture board; lazy uncapped tier selection, seven authored groups, immutable per-run budgets, resumable checkpoints and replay/stale-claim protection. |
+| E04 | Schema-3 migration, atomic chapter offers and route choices, known-route selection, exact grade/frontier/run identity and reserved chain metadata; interrupted transaction recovery. Chain gameplay is completed by P07 below. |
+| E05 | Applicable EP01–EP11 tests, 20–300-digit benchmarks, runtime encounter sweeps, engine tiers 9–11 and large-tier UI inspection. E05 deferred procedural fairness and production trial portions to the P tasks below; see the [validation report](E05_VALIDATION.md). |
+| P01 | Versioned catalog/schema for 25 categories, 63 representative entries, path-specific references/cycles/localization/animation/rule validation and content reports. |
+| P02 | Versioned seed/rooms/geometry/graph, bounded fallback, conservative footprint connectivity and 10,000 seed checks; seven-chamber court-kit adapter. |
+| P03 | Four regions x Hunt/Breach/Vault; distinct objectives, exact activity budgets, six eligible Seals, 12 breadth flags and one-time regional bonuses. |
+| P04 | Separate Standard profile, four mastery quests, normalized three-stage trial, complete earned ritual qualification and atomic ownership/debits; accelerated/reload/crash checks. |
+| P05 | Base-hit Stillness and base-break Rupture with provenance/cooldowns; Focused, Shatter and Cascade discoveries; Assault/pattern/oath interaction checks. |
+| P06 | Six bounded world laws, four boss mutations, chapter disclosure/compatibility, targeted Anomaly Hunts, breakable cover and heavy-threat reservations. |
+| P07 | Saved three-leg chains, death/extraction/bonus banking, first cosmetic/Codex Sovereign Echo and bounded build records; EP12 and reload checks. |
+| A01 | Three saved Frames, eight skills each, Frame-owned allocations, twelve talents each, three equal-budget training builds per Frame, live wells/loom/tether/single echo/utility barriers, shared signature capability checks and runtime-backed build comparisons. Human build enjoyment remains open; item count is unchanged. |
+| A02 | Four regional palettes/rosters, 24 named enemy families sharing six ordinary templates, eight bosses, 48 validated regional room templates, sixteen-checkpoint campaign and First Pattern ending. New regional seeds use fracture.v3/rooms.v2; older expeditions and court checkpoints are preserved. |
+| A03 | Authority-owned Red Covenant reservations, normalized mastery challenge, first-oath/mastery/30-Seals-per-region qualification, atomic ownership/debits and free single-oath selection. Cap/expiry/healing/minimum/maximum-Life/stale/reload/fault checks pass. Optional Unfinished is cut after its dedicated design/QA audit. |
+| Q01 | Runtime-backed 306 ordinary-gear comparisons, fixed encounter reports, accelerated simulated-hour expedition/save loop and rendered stress/ordinary measurements. Human campaign/endgame balance and a real-time endurance session remain open. |
+| Q02 | Responsive output-pixel menus, 100%/125% text, high contrast, accessible wrapping button captions, pause on focus loss/controller disconnect, 80 rendered menu/display cases and synthetic input checks. Physical controller and additional hardware/DPI usability remain open. |
+| R01 | Self-contained review candidate, exact dirty source snapshot, dependency/toolchain/content hashes, evidence archive, clean install/update verification and human review/recovery/reporting sheet. Human signoff remains open. |
+| R02 | Old huge-value saves and all three active-run versions retain exact counters/geometry/budgets; future versions preserve every snapshot. Expansion selection is pending reviewed baseline and real player evidence. |
+
+## Current verification
+
+- Build: zero warnings and zero errors. **204 domain/content tests pass.** Coverage includes exact huge counters, recovery/migration, all previous progression transactions and the new Frame/Covenant/region cases.
+- Content: **three Frames, 24 skills plus shared Traverse/Flask, 24 regional enemy families, eight bosses and 48 templates**; **189 registry entries across 25 categories**, nine shared signatures. Every authored template passes conservative connectivity; 4,000 new regional layouts are tested alongside previous generator coverage.
+- **126 arena, 89 endless, 156 production and 327 expansion engine checks pass in source.** The expansion exercises every skill's live geometry, Frame equipment comparisons, nine saved builds, all 48 actual Elsewhere return routes, bosses, mastery, oath payment/selection/reload and campaign receipts. All four suites also pass in the fresh standalone Windows export; each standalone stderr log is empty.
+- **216/216 modeled build/oath encounters complete.** All nine base-contract profiles complete four ordinary regional samples and eight bosses; paired Covenant wins have 0.00% median time improvement. Avoidance, hit geometry and input assumptions are disclosed in `artifacts/expansion-a03/MODEL.md`. These are feasibility checks, not evidence of enjoyable builds or human oath balance.
+- The A03 standalone rendered capture at requested **1280x720** also passes **327 expansion checks**, with empty stderr. Reviewed Frame selection, gear comparisons, wells/loom/echo, regional palettes, boss labels/tells, Covenant reservation HUD and the ending. This is earlier Compatibility rendering evidence, not a performance measurement. The R01 default is Mobile/Vulkan, with fresh matrix/stress captures and Compatibility retained as a launch option.
+- **306/306 ordinary-gear model comparisons complete** across all campaign checkpoints and seven endgame samples at five tiers per Frame. All-attacks-connect and two-of-three-avoided assumptions are explicit. **80 rendered menu cases** cover five sizes and both text sizes, with containment/focus checks and captures. See [quality/release validation](Q_RELEASE_VALIDATION.md).
+- The default Mobile/Vulkan standalone stress passes after 30 seconds of warmup over five measured minutes: **p95 10.68 ms / p99 14.56 ms**, 60 enemies, bounded 200-projectile list, mixed ground effects and 89 Overload actions. Peak working set is approximately **497 MiB**. The simulated-hour save loop commits/reloads **120 checkpoints** in 116.04 wall seconds, with bounded records/receipts and small late retained-memory variation. This is local development-machine evidence; additional hardware and a real-time hour remain open.
+- Automated progression/challenge fixtures directly defeat enemies to exercise receipts; they do not prove human campaign or challenge completion. S06, real input-device feel, duration, oath comparison and additional hardware acceptance remain open.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File build/test.ps1 -Engine
+powershell -NoProfile -ExecutionPolicy Bypass -File build/export.ps1 -SmokeTest
+powershell -NoProfile -ExecutionPolicy Bypass -File build/quality.ps1 -Exported
+powershell -NoProfile -ExecutionPolicy Bypass -File build/release.ps1 -SkipExport
+powershell -NoProfile -ExecutionPolicy Bypass -File build/run.ps1
+```
+
+Current evidence: `artifacts/through-a03-validation.log`, `artifacts/a03-export-validation.log`, `artifacts/export-*-smoke.log`, `artifacts/a03-capture.log`, `artifacts/screenshots-expansion` and `artifacts/expansion-a03`. Earlier P07/E05/S06 logs, reports, captures and archives are preserved. A clean checkout imports assets before a direct engine run; export performs this import.
+
+## Candidate and save behavior
+
+Launch `artifacts/windows/Overload.exe`. The local R01 review package is identified in `artifacts/LATEST-CANDIDATE.json`; keep its entire `windows` folder together. Human review precedes public release. Earlier `artifacts/Overload-expansion-windows.zip` remains the A03 archive. Earlier P07/S06/E05 ZIPs are preserved. The package includes review/playtest instructions, asset provenance, Godot/.NET notices, file hashes, the actual dirty source snapshot and pinned toolchain/content hashes. Development tools and personal saves are excluded; synthetic validation fixtures are included as evidence. Packaging verifies the runtime/report hashes recorded by the full standalone quality run.
+
+A03 archive: **72.4 MiB**, **198 file hashes verified** against the packaged manifest. SHA256: `924EC4B491B34D38A4BFEE8174D78267032818B7B5E9D91C675D98DAA62E8848`.
+
+Fresh ordinary installs now start with a level-1 Standard Warden, six starter items and no synthetic currency. Existing slice profiles retain level 17 and their saved sandbox resources. Separate accelerated training profiles remain explicitly sandboxed. Room rewards save XP, wallets, one deterministic item and the next checkpoint together. Full bags convert a new drop to 25 gold and 5 Alloy, explicitly recorded in the reward journal. Visiting Hearth between rooms retains the checkpoint; replaying a completed journey starts a new run. Temporary combat resources reset and are never saved.
+
+Normal profiles are under Godot `user://characters`; smoke/capture/practice fixtures use isolated `user://tests/session-*` profiles. Schema 5 preserves prior counters, gear, wallets, Elsewhere ownership, eight-room Warden court and active old expedition geometry. New Standard characters choose a Frame at level 1; separate training profiles use equal-budget accelerated builds. New characters have a sixteen-checkpoint regional campaign. Regional Fractures retain seven chambers and fixed exact budgets, now selecting region-compatible authored rooms and rosters. A full bag forfeits the targeted expedition item as disclosed on entry.
+
+Elsewhere qualification remains level 100+, campaign, four masteries, twelve proofs, 120 Seals per region and the normalized trial. Red Covenant requires an already earned first oath, reservoir mastery and 30 Seals per region. One oath can be selected. No reservation, ground cast, echo or challenge stage is a saved mid-combat continuation. Optional Unfinished is absent from this candidate.
+
+See [A03 validation](A03_VALIDATION.md), [Frame/region/oath decision](decisions/0008-frames-regions-covenant.md), [A03 candidate checks](playtests/A03_CHECKS.md), [P07 evidence](P07_VALIDATION.md), [E05 evidence](E05_VALIDATION.md) and [independent tester instructions](playtests/S06_FIRST_PLAYTEST.md).
+
+## Open gates and next work
+
+1. Run the independent session arranged by the owner. Record control/comprehension failures and fix them before closing S06.
+2. Validate real keyboard/mouse and physical controller feel, aim, unplug/reconnect, menu scrolling, retry, audio balance and readability.
+3. Measure completion time, difficulty and useful skill/build choices. The 30-45 minute target has not been demonstrated. M1-M4 human acceptance remains open; the broader M4 gate calls for roughly 10-15 players.
+4. Validate frame-time targets on a nominated reference PC and additional display/hardware cases, plus a real-time hour. The development-machine rendered test passes. Enemy navigation is still a small authored-room steering adapter; production content needs further navigation work.
+
+The owner's request through R02 authorizes the quality/release tooling despite the pending S06 session; it does not close human gates. The next action is the arranged independent session, physical device/additional hardware checks and a human review of the concrete candidate. R02 expansion choice remains pending that evidence. There are twelve talent nodes per Frame and nine shared signatures; larger design budgets and final animation art are not claimed as completed release content. No commits, remote operations, publishing or messages to testers were performed.
+
+
+Q01-R02 evidence and limits: [validation report](Q_RELEASE_VALIDATION.md), [release review/recovery/expansion sheet](RELEASE_REVIEW.md), [decision 0009](decisions/0009-quality-release.md), `artifacts/r01-unit-validation.log`, `artifacts/r01-final-export-validation.log`, `artifacts/r01-final-quality-validation.log`, `artifacts/quality` and `artifacts/clean-install-verification.json`. The uniquely named candidate archives source, toolchain hashes and evidence; older candidates are preserved. No public release, expansion, commits or external messages were performed.

@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Overload release catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "version",
+    "definitions",
+    "text",
+    "animations",
+    "worldRules"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "version": {
+      "const": "release.foundation.v1"
+    },
+    "definitions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "category",
+          "name",
+          "descriptionKey",
+          "references",
+          "prerequisites"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]+$"
+          },
+          "category": {
+            "enum": [
+              "Activity",
+              "Affix",
+              "Attack",
+              "BossMutation",
+              "Chain",
+              "ChapterRoute",
+              "Encounter",
+              "Enemy",
+              "Frame",
+              "Inscription",
+              "ItemBase",
+              "LootTable",
+              "Override",
+              "Pattern",
+              "ProgressionCurve",
+              "Quest",
+              "Region",
+              "Reward",
+              "Room",
+              "Skill",
+              "SovereignEcho",
+              "TalentNode",
+              "Technique",
+              "Trial",
+              "WorldRule"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "descriptionKey": {
+            "type": "string"
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "prerequisites": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "animation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "text": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "animations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "worldRules": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "warningTicks",
+          "period",
+          "damagePercent"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "warningTicks": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 600
+          },
+          "period": {
+            "type": "integer",
+            "minimum": 90,
+            "maximum": 3600
+          },
+          "damagePercent": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 20
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

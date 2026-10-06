@@ -1,0 +1,1863 @@
+{
+  "Version": "expansion.v1",
+  "Skills": [
+    {
+      "id": "SunderingBlow",
+      "contentId": "skill.expansion.sunderingblow",
+      "family": "Assault",
+      "windup": 27,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 180,
+      "focusCost": 28,
+      "damage": 95,
+      "reach": 58,
+      "arcDegrees": 70,
+      "stagger": 45,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "Bulwark",
+      "contentId": "skill.expansion.bulwark",
+      "family": "Assault",
+      "windup": 6,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 300,
+      "focusCost": 22,
+      "damage": 0,
+      "reach": 0,
+      "arcDegrees": 0,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "None",
+      "BarrierPercent": 16
+    },
+    {
+      "id": "Needle",
+      "contentId": "skill.expansion.needle",
+      "family": "Assault",
+      "windup": 7,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 0,
+      "focusCost": 0,
+      "damage": 40,
+      "reach": 260,
+      "arcDegrees": 0,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 520,
+      "projectileRadius": 5,
+      "maxVictims": 1,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "EmberWell",
+      "contentId": "skill.expansion.emberwell",
+      "family": "Assault",
+      "windup": 18,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 180,
+      "focusCost": 25,
+      "damage": 115,
+      "reach": 144,
+      "arcDegrees": 0,
+      "stagger": 25,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "None",
+      "EffectDelay": 36,
+      "EffectPulses": 1,
+      "EffectInterval": 24,
+      "EffectRadius": 48
+    },
+    {
+      "id": "Tether",
+      "contentId": "skill.expansion.tether",
+      "family": "Assault",
+      "windup": 10,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 120,
+      "focusCost": 18,
+      "damage": 48,
+      "reach": 220,
+      "arcDegrees": 0,
+      "stagger": 25,
+      "push": 0,
+      "projectileSpeed": 440,
+      "projectileRadius": 5,
+      "maxVictims": 3,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance",
+      "SlowTicks": 120
+    },
+    {
+      "id": "StormLoom",
+      "contentId": "skill.expansion.stormloom",
+      "family": "Assault",
+      "windup": 24,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 300,
+      "focusCost": 32,
+      "damage": 120,
+      "reach": 160,
+      "arcDegrees": 0,
+      "stagger": 10,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "None",
+      "EffectDelay": 24,
+      "EffectPulses": 3,
+      "EffectInterval": 48,
+      "EffectRadius": 48
+    },
+    {
+      "id": "FrostFan",
+      "contentId": "skill.expansion.frostfan",
+      "family": "Assault",
+      "windup": 14,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 150,
+      "focusCost": 20,
+      "damage": 65,
+      "reach": 100,
+      "arcDegrees": 150,
+      "stagger": 25,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "ThreadCut",
+      "contentId": "skill.expansion.threadcut",
+      "family": "Assault",
+      "windup": 16,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 150,
+      "focusCost": 22,
+      "damage": 80,
+      "reach": 180,
+      "arcDegrees": 0,
+      "stagger": 30,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "CinderOrb",
+      "contentId": "skill.expansion.cinderorb",
+      "family": "Assault",
+      "windup": 20,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 120,
+      "focusCost": 24,
+      "damage": 90,
+      "reach": 240,
+      "arcDegrees": 0,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 240,
+      "projectileRadius": 5,
+      "maxVictims": 3,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "RecallThread",
+      "contentId": "skill.expansion.recallthread",
+      "family": "Assault",
+      "windup": 6,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 240,
+      "focusCost": 18,
+      "damage": 0,
+      "reach": 0,
+      "arcDegrees": 0,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "None",
+      "BarrierPercent": 10
+    },
+    {
+      "id": "ShardShot",
+      "contentId": "skill.expansion.shardshot",
+      "family": "Assault",
+      "windup": 8,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 0,
+      "focusCost": 0,
+      "damage": 42,
+      "reach": 240,
+      "arcDegrees": 0,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 480,
+      "projectileRadius": 5,
+      "maxVictims": 1,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "Reap",
+      "contentId": "skill.expansion.reap",
+      "family": "Assault",
+      "windup": 16,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 180,
+      "focusCost": 22,
+      "damage": 85,
+      "reach": 72,
+      "arcDegrees": 140,
+      "stagger": 35,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "EchoOrder",
+      "contentId": "skill.expansion.echoorder",
+      "family": "Assault",
+      "windup": 15,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 240,
+      "focusCost": 28,
+      "damage": 108,
+      "reach": 144,
+      "arcDegrees": 0,
+      "stagger": 10,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "None",
+      "EffectDelay": 24,
+      "EffectPulses": 3,
+      "EffectInterval": 24,
+      "EffectRadius": 0
+    },
+    {
+      "id": "Veil",
+      "contentId": "skill.expansion.veil",
+      "family": "Assault",
+      "windup": 6,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 240,
+      "focusCost": 16,
+      "damage": 0,
+      "reach": 0,
+      "arcDegrees": 0,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "None",
+      "BarrierPercent": 10
+    },
+    {
+      "id": "BoneVolley",
+      "contentId": "skill.expansion.bonevolley",
+      "family": "Assault",
+      "windup": 10,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 120,
+      "focusCost": 20,
+      "damage": 65,
+      "reach": 210,
+      "arcDegrees": 0,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 360,
+      "projectileRadius": 5,
+      "maxVictims": 3,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "GraveLine",
+      "contentId": "skill.expansion.graveline",
+      "family": "Assault",
+      "windup": 22,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 180,
+      "focusCost": 26,
+      "damage": 90,
+      "reach": 160,
+      "arcDegrees": 0,
+      "stagger": 30,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "SoulLance",
+      "contentId": "skill.expansion.soullance",
+      "family": "Assault",
+      "windup": 18,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 150,
+      "focusCost": 24,
+      "damage": 95,
+      "reach": 280,
+      "arcDegrees": 0,
+      "stagger": 15,
+      "push": 0,
+      "projectileSpeed": 520,
+      "projectileRadius": 5,
+      "maxVictims": 2,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    },
+    {
+      "id": "DuskRing",
+      "contentId": "skill.expansion.duskring",
+      "family": "Assault",
+      "windup": 18,
+      "active": 1,
+      "recovery": 18,
+      "cooldown": 180,
+      "focusCost": 25,
+      "damage": 75,
+      "reach": 96,
+      "arcDegrees": 180,
+      "stagger": 30,
+      "push": 0,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "maxVictims": 64,
+      "capabilities": "DirectDamage, AimOrigin, GroundAdvance"
+    }
+  ],
+  "Enemies": [
+    {
+      "role": "Pursuer",
+      "contentId": "enemy.region.cinderrunner",
+      "life": 120,
+      "damage": 12,
+      "speed": 68,
+      "reach": 32,
+      "arcDegrees": 85,
+      "windup": 30,
+      "recovery": 48,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "CinderRunner",
+      "Portrait": "cinderrunner",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Caster",
+      "contentId": "enemy.region.slagslinger",
+      "life": 120,
+      "damage": 16,
+      "speed": 44,
+      "reach": 230,
+      "arcDegrees": 10,
+      "windup": 48,
+      "recovery": 84,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 115,
+      "projectileRadius": 5,
+      "Name": "SlagSlinger",
+      "Portrait": "slagslinger",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Brute",
+      "contentId": "enemy.region.kilnguard",
+      "life": 160,
+      "damage": 20,
+      "speed": 42,
+      "reach": 55,
+      "arcDegrees": 130,
+      "windup": 54,
+      "recovery": 70,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 90,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "KilnGuard",
+      "Portrait": "kilnguard",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Pursuer",
+      "contentId": "enemy.region.ashskater",
+      "life": 150,
+      "damage": 12,
+      "speed": 88,
+      "reach": 32,
+      "arcDegrees": 85,
+      "windup": 30,
+      "recovery": 48,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "AshSkater",
+      "Portrait": "ashskater",
+      "Style": "Skirmisher",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Caster",
+      "contentId": "enemy.region.coalchoir",
+      "life": 150,
+      "damage": 16,
+      "speed": 44,
+      "reach": 230,
+      "arcDegrees": 10,
+      "windup": 60,
+      "recovery": 84,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 115,
+      "projectileRadius": 5,
+      "Name": "CoalChoir",
+      "Portrait": "coalchoir",
+      "Style": "Fan",
+      "VolleyCount": 3
+    },
+    {
+      "role": "Brute",
+      "contentId": "enemy.region.furnacesentinel",
+      "life": 190,
+      "damage": 20,
+      "speed": 32,
+      "reach": 55,
+      "arcDegrees": 130,
+      "windup": 60,
+      "recovery": 70,
+      "staggerThreshold": 60,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 90,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "FurnaceSentinel",
+      "Portrait": "furnacesentinel",
+      "Style": "Sentinel",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Pursuer",
+      "contentId": "enemy.region.reedstalker",
+      "life": 130,
+      "damage": 12,
+      "speed": 70,
+      "reach": 32,
+      "arcDegrees": 85,
+      "windup": 30,
+      "recovery": 48,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "ReedStalker",
+      "Portrait": "reedstalker",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Caster",
+      "contentId": "enemy.region.glassspitter",
+      "life": 130,
+      "damage": 16,
+      "speed": 46,
+      "reach": 230,
+      "arcDegrees": 10,
+      "windup": 48,
+      "recovery": 84,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 115,
+      "projectileRadius": 5,
+      "Name": "GlassSpitter",
+      "Portrait": "glassspitter",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Brute",
+      "contentId": "enemy.region.mirrorguard",
+      "life": 170,
+      "damage": 20,
+      "speed": 44,
+      "reach": 55,
+      "arcDegrees": 130,
+      "windup": 54,
+      "recovery": 70,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 90,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "MirrorGuard",
+      "Portrait": "mirrorguard",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Pursuer",
+      "contentId": "enemy.region.marshskater",
+      "life": 160,
+      "damage": 12,
+      "speed": 88,
+      "reach": 32,
+      "arcDegrees": 85,
+      "windup": 30,
+      "recovery": 48,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "MarshSkater",
+      "Portrait": "marshskater",
+      "Style": "Skirmisher",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Caster",
+      "contentId": "enemy.region.prismchoir",
+      "life": 160,
+      "damage": 16,
+      "speed": 46,
+      "reach": 230,
+      "arcDegrees": 10,
+      "windup": 60,
+      "recovery": 84,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 115,
+      "projectileRadius": 5,
+      "Name": "PrismChoir",
+      "Portrait": "prismchoir",
+      "Style": "Fan",
+      "VolleyCount": 3
+    },
+    {
+      "role": "Brute",
+      "contentId": "enemy.region.shardsentinel",
+      "life": 200,
+      "damage": 20,
+      "speed": 32,
+      "reach": 55,
+      "arcDegrees": 130,
+      "windup": 60,
+      "recovery": 70,
+      "staggerThreshold": 60,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 90,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "ShardSentinel",
+      "Portrait": "shardsentinel",
+      "Style": "Sentinel",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Pursuer",
+      "contentId": "enemy.region.pagehunter",
+      "life": 140,
+      "damage": 12,
+      "speed": 72,
+      "reach": 32,
+      "arcDegrees": 85,
+      "windup": 30,
+      "recovery": 48,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "PageHunter",
+      "Portrait": "pagehunter",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Caster",
+      "contentId": "enemy.region.inkslinger",
+      "life": 140,
+      "damage": 16,
+      "speed": 48,
+      "reach": 230,
+      "arcDegrees": 10,
+      "windup": 48,
+      "recovery": 84,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 115,
+      "projectileRadius": 5,
+      "Name": "InkSlinger",
+      "Portrait": "inkslinger",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Brute",
+      "contentId": "enemy.region.archiveguard",
+      "life": 180,
+      "damage": 20,
+      "speed": 46,
+      "reach": 55,
+      "arcDegrees": 130,
+      "windup": 54,
+      "recovery": 70,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 90,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "ArchiveGuard",
+      "Portrait": "archiveguard",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Pursuer",
+      "contentId": "enemy.region.marginskater",
+      "life": 170,
+      "damage": 12,
+      "speed": 88,
+      "reach": 32,
+      "arcDegrees": 85,
+      "windup": 30,
+      "recovery": 48,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "MarginSkater",
+      "Portrait": "marginskater",
+      "Style": "Skirmisher",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Caster",
+      "contentId": "enemy.region.nullchoir",
+      "life": 170,
+      "damage": 16,
+      "speed": 48,
+      "reach": 230,
+      "arcDegrees": 10,
+      "windup": 60,
+      "recovery": 84,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 115,
+      "projectileRadius": 5,
+      "Name": "NullChoir",
+      "Portrait": "nullchoir",
+      "Style": "Fan",
+      "VolleyCount": 3
+    },
+    {
+      "role": "Brute",
+      "contentId": "enemy.region.indexsentinel",
+      "life": 210,
+      "damage": 20,
+      "speed": 32,
+      "reach": 55,
+      "arcDegrees": 130,
+      "windup": 60,
+      "recovery": 70,
+      "staggerThreshold": 60,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 90,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "IndexSentinel",
+      "Portrait": "indexsentinel",
+      "Style": "Sentinel",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Pursuer",
+      "contentId": "enemy.region.scarrunner",
+      "life": 150,
+      "damage": 12,
+      "speed": 74,
+      "reach": 32,
+      "arcDegrees": 85,
+      "windup": 30,
+      "recovery": 48,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "ScarRunner",
+      "Portrait": "scarrunner",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Caster",
+      "contentId": "enemy.region.crownspitter",
+      "life": 150,
+      "damage": 16,
+      "speed": 50,
+      "reach": 230,
+      "arcDegrees": 10,
+      "windup": 48,
+      "recovery": 84,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 115,
+      "projectileRadius": 5,
+      "Name": "CrownSpitter",
+      "Portrait": "crownspitter",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Brute",
+      "contentId": "enemy.region.riftguard",
+      "life": 190,
+      "damage": 20,
+      "speed": 48,
+      "reach": 55,
+      "arcDegrees": 130,
+      "windup": 54,
+      "recovery": 70,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 90,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "RiftGuard",
+      "Portrait": "riftguard",
+      "Style": "Standard",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Pursuer",
+      "contentId": "enemy.region.crownskater",
+      "life": 180,
+      "damage": 12,
+      "speed": 88,
+      "reach": 32,
+      "arcDegrees": 85,
+      "windup": 30,
+      "recovery": 48,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "CrownSkater",
+      "Portrait": "crownskater",
+      "Style": "Skirmisher",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Caster",
+      "contentId": "enemy.region.ruinchoir",
+      "life": 180,
+      "damage": 16,
+      "speed": 50,
+      "reach": 230,
+      "arcDegrees": 10,
+      "windup": 60,
+      "recovery": 84,
+      "staggerThreshold": 40,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 60,
+      "projectileSpeed": 115,
+      "projectileRadius": 5,
+      "Name": "RuinChoir",
+      "Portrait": "ruinchoir",
+      "Style": "Fan",
+      "VolleyCount": 3
+    },
+    {
+      "role": "Brute",
+      "contentId": "enemy.region.royalsentinel",
+      "life": 220,
+      "damage": 20,
+      "speed": 32,
+      "reach": 55,
+      "arcDegrees": 130,
+      "windup": 60,
+      "recovery": 70,
+      "staggerThreshold": 60,
+      "stunTicks": 48,
+      "staggerImmunityTicks": 90,
+      "projectileSpeed": 0,
+      "projectileRadius": 0,
+      "Name": "RoyalSentinel",
+      "Portrait": "royalsentinel",
+      "Style": "Sentinel",
+      "VolleyCount": 1
+    },
+    {
+      "role": "Bellkeeper",
+      "contentId": "boss.region.bellkeeper",
+      "life": 4200,
+      "damage": 65,
+      "speed": 32,
+      "reach": 96,
+      "arcDegrees": 160,
+      "windup": 60,
+      "recovery": 100,
+      "staggerThreshold": 200,
+      "stunTicks": 120,
+      "staggerImmunityTicks": 240,
+      "projectileSpeed": 115,
+      "projectileRadius": 6,
+      "Name": "Bellkeeper",
+      "Portrait": "regional-bellkeeper",
+      "Style": "Standard",
+      "VolleyCount": 7
+    },
+    {
+      "role": "Bellkeeper",
+      "contentId": "boss.region.forgeheart",
+      "life": 4400,
+      "damage": 65,
+      "speed": 32,
+      "reach": 112,
+      "arcDegrees": 160,
+      "windup": 66,
+      "recovery": 112,
+      "staggerThreshold": 200,
+      "stunTicks": 120,
+      "staggerImmunityTicks": 240,
+      "projectileSpeed": 119,
+      "projectileRadius": 6,
+      "Name": "Forgeheart",
+      "Portrait": "regional-forgeheart",
+      "Style": "Mark",
+      "VolleyCount": 5
+    },
+    {
+      "role": "Bellkeeper",
+      "contentId": "boss.region.mirrorregent",
+      "life": 4600,
+      "damage": 65,
+      "speed": 32,
+      "reach": 128,
+      "arcDegrees": 160,
+      "windup": 72,
+      "recovery": 100,
+      "staggerThreshold": 200,
+      "stunTicks": 120,
+      "staggerImmunityTicks": 240,
+      "projectileSpeed": 123,
+      "projectileRadius": 6,
+      "Name": "MirrorRegent",
+      "Portrait": "regional-mirrorregent",
+      "Style": "Mirror",
+      "VolleyCount": 5
+    },
+    {
+      "role": "Bellkeeper",
+      "contentId": "boss.region.reedwidow",
+      "life": 4800,
+      "damage": 65,
+      "speed": 32,
+      "reach": 96,
+      "arcDegrees": 160,
+      "windup": 60,
+      "recovery": 112,
+      "staggerThreshold": 200,
+      "stunTicks": 120,
+      "staggerImmunityTicks": 240,
+      "projectileSpeed": 127,
+      "projectileRadius": 6,
+      "Name": "ReedWidow",
+      "Portrait": "regional-reedwidow",
+      "Style": "Mark",
+      "VolleyCount": 3
+    },
+    {
+      "role": "Bellkeeper",
+      "contentId": "boss.region.indexer",
+      "life": 5000,
+      "damage": 65,
+      "speed": 32,
+      "reach": 112,
+      "arcDegrees": 160,
+      "windup": 66,
+      "recovery": 100,
+      "staggerThreshold": 200,
+      "stunTicks": 120,
+      "staggerImmunityTicks": 240,
+      "projectileSpeed": 131,
+      "projectileRadius": 6,
+      "Name": "Indexer",
+      "Portrait": "regional-indexer",
+      "Style": "Fan",
+      "VolleyCount": 3
+    },
+    {
+      "role": "Bellkeeper",
+      "contentId": "boss.region.nullabbot",
+      "life": 5200,
+      "damage": 65,
+      "speed": 0,
+      "reach": 128,
+      "arcDegrees": 160,
+      "windup": 72,
+      "recovery": 112,
+      "staggerThreshold": 200,
+      "stunTicks": 120,
+      "staggerImmunityTicks": 240,
+      "projectileSpeed": 135,
+      "projectileRadius": 6,
+      "Name": "NullAbbot",
+      "Portrait": "regional-nullabbot",
+      "Style": "Sentinel",
+      "VolleyCount": 5
+    },
+    {
+      "role": "Bellkeeper",
+      "contentId": "boss.region.scarmarshal",
+      "life": 5400,
+      "damage": 65,
+      "speed": 40,
+      "reach": 96,
+      "arcDegrees": 160,
+      "windup": 60,
+      "recovery": 100,
+      "staggerThreshold": 200,
+      "stunTicks": 120,
+      "staggerImmunityTicks": 240,
+      "projectileSpeed": 139,
+      "projectileRadius": 6,
+      "Name": "ScarMarshal",
+      "Portrait": "regional-scarmarshal",
+      "Style": "Procession",
+      "VolleyCount": 3
+    },
+    {
+      "role": "Bellkeeper",
+      "contentId": "boss.region.firstpattern",
+      "life": 5600,
+      "damage": 65,
+      "speed": 32,
+      "reach": 112,
+      "arcDegrees": 160,
+      "windup": 66,
+      "recovery": 112,
+      "staggerThreshold": 200,
+      "stunTicks": 120,
+      "staggerImmunityTicks": 240,
+      "projectileSpeed": 143,
+      "projectileRadius": 6,
+      "Name": "FirstPattern",
+      "Portrait": "regional-firstpattern",
+      "Style": "FirstPattern",
+      "VolleyCount": 7
+    }
+  ],
+  "Rooms": [
+    {
+      "Id": 0,
+      "Region": "Ash",
+      "Name": "Furnace Gate",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 240,
+          "Y": 100,
+          "Width": 24,
+          "Height": 40
+        },
+        {
+          "X": 320,
+          "Y": 245,
+          "Width": 24,
+          "Height": 35
+        }
+      ]
+    },
+    {
+      "Id": 1,
+      "Region": "Ash",
+      "Name": "Furnace Crossing",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 280,
+          "Y": 88,
+          "Width": 32,
+          "Height": 56
+        },
+        {
+          "X": 360,
+          "Y": 248,
+          "Width": 32,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 2,
+      "Region": "Ash",
+      "Name": "Furnace Gallery",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 224,
+          "Y": 112,
+          "Width": 48,
+          "Height": 24
+        },
+        {
+          "X": 344,
+          "Y": 256,
+          "Width": 48,
+          "Height": 24
+        }
+      ]
+    },
+    {
+      "Id": 3,
+      "Region": "Ash",
+      "Name": "Furnace Works",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 272,
+          "Y": 96,
+          "Width": 24,
+          "Height": 56
+        },
+        {
+          "X": 272,
+          "Y": 248,
+          "Width": 24,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 4,
+      "Region": "Ash",
+      "Name": "Furnace Hall",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 208,
+          "Y": 104,
+          "Width": 32,
+          "Height": 40
+        },
+        {
+          "X": 368,
+          "Y": 240,
+          "Width": 32,
+          "Height": 48
+        }
+      ]
+    },
+    {
+      "Id": 5,
+      "Region": "Ash",
+      "Name": "Furnace Passage",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 248,
+          "Y": 80,
+          "Width": 56,
+          "Height": 40
+        },
+        {
+          "X": 328,
+          "Y": 264,
+          "Width": 56,
+          "Height": 24
+        }
+      ]
+    },
+    {
+      "Id": 6,
+      "Region": "Ash",
+      "Name": "Furnace Court",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 296,
+          "Y": 112,
+          "Width": 32,
+          "Height": 32
+        },
+        {
+          "X": 216,
+          "Y": 248,
+          "Width": 32,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 7,
+      "Region": "Ash",
+      "Name": "Furnace Bridge",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 240,
+          "Y": 96,
+          "Width": 24,
+          "Height": 48
+        },
+        {
+          "X": 384,
+          "Y": 256,
+          "Width": 24,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 8,
+      "Region": "Ash",
+      "Name": "Furnace Chamber",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 192,
+          "Y": 96,
+          "Width": 48,
+          "Height": 32
+        },
+        {
+          "X": 336,
+          "Y": 248,
+          "Width": 48,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 9,
+      "Region": "Ash",
+      "Name": "Furnace Sanctum",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 312,
+          "Y": 96,
+          "Width": 40,
+          "Height": 40
+        },
+        {
+          "X": 256,
+          "Y": 256,
+          "Width": 40,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 10,
+      "Region": "Ash",
+      "Name": "Furnace Enforcer",
+      "Boss": true,
+      "Obstacles": []
+    },
+    {
+      "Id": 11,
+      "Region": "Ash",
+      "Name": "Furnace Throne",
+      "Boss": true,
+      "Obstacles": []
+    },
+    {
+      "Id": 12,
+      "Region": "Glass",
+      "Name": "Reeds Gate",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 248,
+          "Y": 100,
+          "Width": 24,
+          "Height": 40
+        },
+        {
+          "X": 328,
+          "Y": 245,
+          "Width": 24,
+          "Height": 35
+        }
+      ]
+    },
+    {
+      "Id": 13,
+      "Region": "Glass",
+      "Name": "Reeds Crossing",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 288,
+          "Y": 88,
+          "Width": 32,
+          "Height": 56
+        },
+        {
+          "X": 368,
+          "Y": 248,
+          "Width": 32,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 14,
+      "Region": "Glass",
+      "Name": "Reeds Gallery",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 232,
+          "Y": 112,
+          "Width": 48,
+          "Height": 24
+        },
+        {
+          "X": 352,
+          "Y": 256,
+          "Width": 48,
+          "Height": 24
+        }
+      ]
+    },
+    {
+      "Id": 15,
+      "Region": "Glass",
+      "Name": "Reeds Works",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 280,
+          "Y": 96,
+          "Width": 24,
+          "Height": 56
+        },
+        {
+          "X": 280,
+          "Y": 248,
+          "Width": 24,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 16,
+      "Region": "Glass",
+      "Name": "Reeds Hall",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 216,
+          "Y": 104,
+          "Width": 32,
+          "Height": 40
+        },
+        {
+          "X": 376,
+          "Y": 240,
+          "Width": 32,
+          "Height": 48
+        }
+      ]
+    },
+    {
+      "Id": 17,
+      "Region": "Glass",
+      "Name": "Reeds Passage",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 256,
+          "Y": 80,
+          "Width": 56,
+          "Height": 40
+        },
+        {
+          "X": 336,
+          "Y": 264,
+          "Width": 56,
+          "Height": 24
+        }
+      ]
+    },
+    {
+      "Id": 18,
+      "Region": "Glass",
+      "Name": "Reeds Court",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 304,
+          "Y": 112,
+          "Width": 32,
+          "Height": 32
+        },
+        {
+          "X": 224,
+          "Y": 248,
+          "Width": 32,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 19,
+      "Region": "Glass",
+      "Name": "Reeds Bridge",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 248,
+          "Y": 96,
+          "Width": 24,
+          "Height": 48
+        },
+        {
+          "X": 392,
+          "Y": 256,
+          "Width": 24,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 20,
+      "Region": "Glass",
+      "Name": "Reeds Chamber",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 200,
+          "Y": 96,
+          "Width": 48,
+          "Height": 32
+        },
+        {
+          "X": 344,
+          "Y": 248,
+          "Width": 48,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 21,
+      "Region": "Glass",
+      "Name": "Reeds Sanctum",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 320,
+          "Y": 96,
+          "Width": 40,
+          "Height": 40
+        },
+        {
+          "X": 264,
+          "Y": 256,
+          "Width": 40,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 22,
+      "Region": "Glass",
+      "Name": "Reeds Enforcer",
+      "Boss": true,
+      "Obstacles": []
+    },
+    {
+      "Id": 23,
+      "Region": "Glass",
+      "Name": "Reeds Throne",
+      "Boss": true,
+      "Obstacles": []
+    },
+    {
+      "Id": 24,
+      "Region": "Hollow",
+      "Name": "Stacks Gate",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 232,
+          "Y": 100,
+          "Width": 24,
+          "Height": 40
+        },
+        {
+          "X": 312,
+          "Y": 245,
+          "Width": 24,
+          "Height": 35
+        }
+      ]
+    },
+    {
+      "Id": 25,
+      "Region": "Hollow",
+      "Name": "Stacks Crossing",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 272,
+          "Y": 88,
+          "Width": 32,
+          "Height": 56
+        },
+        {
+          "X": 352,
+          "Y": 248,
+          "Width": 32,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 26,
+      "Region": "Hollow",
+      "Name": "Stacks Gallery",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 216,
+          "Y": 112,
+          "Width": 48,
+          "Height": 24
+        },
+        {
+          "X": 336,
+          "Y": 256,
+          "Width": 48,
+          "Height": 24
+        }
+      ]
+    },
+    {
+      "Id": 27,
+      "Region": "Hollow",
+      "Name": "Stacks Works",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 264,
+          "Y": 96,
+          "Width": 24,
+          "Height": 56
+        },
+        {
+          "X": 264,
+          "Y": 248,
+          "Width": 24,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 28,
+      "Region": "Hollow",
+      "Name": "Stacks Hall",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 200,
+          "Y": 104,
+          "Width": 32,
+          "Height": 40
+        },
+        {
+          "X": 360,
+          "Y": 240,
+          "Width": 32,
+          "Height": 48
+        }
+      ]
+    },
+    {
+      "Id": 29,
+      "Region": "Hollow",
+      "Name": "Stacks Passage",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 240,
+          "Y": 80,
+          "Width": 56,
+          "Height": 40
+        },
+        {
+          "X": 320,
+          "Y": 264,
+          "Width": 56,
+          "Height": 24
+        }
+      ]
+    },
+    {
+      "Id": 30,
+      "Region": "Hollow",
+      "Name": "Stacks Court",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 288,
+          "Y": 112,
+          "Width": 32,
+          "Height": 32
+        },
+        {
+          "X": 208,
+          "Y": 248,
+          "Width": 32,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 31,
+      "Region": "Hollow",
+      "Name": "Stacks Bridge",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 232,
+          "Y": 96,
+          "Width": 24,
+          "Height": 48
+        },
+        {
+          "X": 376,
+          "Y": 256,
+          "Width": 24,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 32,
+      "Region": "Hollow",
+      "Name": "Stacks Chamber",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 184,
+          "Y": 96,
+          "Width": 48,
+          "Height": 32
+        },
+        {
+          "X": 328,
+          "Y": 248,
+          "Width": 48,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 33,
+      "Region": "Hollow",
+      "Name": "Stacks Sanctum",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 304,
+          "Y": 96,
+          "Width": 40,
+          "Height": 40
+        },
+        {
+          "X": 248,
+          "Y": 256,
+          "Width": 40,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 34,
+      "Region": "Hollow",
+      "Name": "Stacks Enforcer",
+      "Boss": true,
+      "Obstacles": []
+    },
+    {
+      "Id": 35,
+      "Region": "Hollow",
+      "Name": "Stacks Throne",
+      "Boss": true,
+      "Obstacles": []
+    },
+    {
+      "Id": 36,
+      "Region": "Crown",
+      "Name": "Rift Gate",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 256,
+          "Y": 100,
+          "Width": 24,
+          "Height": 40
+        },
+        {
+          "X": 336,
+          "Y": 245,
+          "Width": 24,
+          "Height": 35
+        }
+      ]
+    },
+    {
+      "Id": 37,
+      "Region": "Crown",
+      "Name": "Rift Crossing",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 296,
+          "Y": 88,
+          "Width": 32,
+          "Height": 56
+        },
+        {
+          "X": 376,
+          "Y": 248,
+          "Width": 32,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 38,
+      "Region": "Crown",
+      "Name": "Rift Gallery",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 240,
+          "Y": 112,
+          "Width": 48,
+          "Height": 24
+        },
+        {
+          "X": 360,
+          "Y": 256,
+          "Width": 48,
+          "Height": 24
+        }
+      ]
+    },
+    {
+      "Id": 39,
+      "Region": "Crown",
+      "Name": "Rift Works",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 288,
+          "Y": 96,
+          "Width": 24,
+          "Height": 56
+        },
+        {
+          "X": 288,
+          "Y": 248,
+          "Width": 24,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 40,
+      "Region": "Crown",
+      "Name": "Rift Hall",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 224,
+          "Y": 104,
+          "Width": 32,
+          "Height": 40
+        },
+        {
+          "X": 384,
+          "Y": 240,
+          "Width": 32,
+          "Height": 48
+        }
+      ]
+    },
+    {
+      "Id": 41,
+      "Region": "Crown",
+      "Name": "Rift Passage",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 264,
+          "Y": 80,
+          "Width": 56,
+          "Height": 40
+        },
+        {
+          "X": 344,
+          "Y": 264,
+          "Width": 56,
+          "Height": 24
+        }
+      ]
+    },
+    {
+      "Id": 42,
+      "Region": "Crown",
+      "Name": "Rift Court",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 312,
+          "Y": 112,
+          "Width": 32,
+          "Height": 32
+        },
+        {
+          "X": 232,
+          "Y": 248,
+          "Width": 32,
+          "Height": 40
+        }
+      ]
+    },
+    {
+      "Id": 43,
+      "Region": "Crown",
+      "Name": "Rift Bridge",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 256,
+          "Y": 96,
+          "Width": 24,
+          "Height": 48
+        },
+        {
+          "X": 400,
+          "Y": 256,
+          "Width": 24,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 44,
+      "Region": "Crown",
+      "Name": "Rift Chamber",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 208,
+          "Y": 96,
+          "Width": 48,
+          "Height": 32
+        },
+        {
+          "X": 352,
+          "Y": 248,
+          "Width": 48,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 45,
+      "Region": "Crown",
+      "Name": "Rift Sanctum",
+      "Boss": false,
+      "Obstacles": [
+        {
+          "X": 328,
+          "Y": 96,
+          "Width": 40,
+          "Height": 40
+        },
+        {
+          "X": 272,
+          "Y": 256,
+          "Width": 40,
+          "Height": 32
+        }
+      ]
+    },
+    {
+      "Id": 46,
+      "Region": "Crown",
+      "Name": "Rift Enforcer",
+      "Boss": true,
+      "Obstacles": []
+    },
+    {
+      "Id": 47,
+      "Region": "Crown",
+      "Name": "Rift Throne",
+      "Boss": true,
+      "Obstacles": []
+    }
+  ]
+}

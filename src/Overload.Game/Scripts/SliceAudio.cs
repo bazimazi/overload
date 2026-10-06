@@ -1,0 +1,76 @@
+using Godot;
+
+namespace Overload.Game;
+public partial class SliceAudio : Node
+{
+    public static readonly string[] Channels = ["Master", "Music", "Ambience", "Player", "Enemy", "UI"];
+    private readonly Dictionary<string, AudioStreamWav> sounds = [];
+    private readonly Dictionary<string, AudioStreamPlayer> loops = [];
+    private readonly Dictionary<string, List<AudioStreamPlayer>> voices = [];
+    private readonly Dictionary<string, int> volumes = [];
+    private string settingsPath = "";
+    public bool ReducedFlash { get; private set; }
+    public bool ShowTutorialHints { get; private set; } = true;
+    public int TextPercent { get; private set; } = 100;
+    public bool HighContrast { get; private set; }
+    public void Initialize(bool smoke)
+    {
+        settingsPath = smoke ? "user://tests/presentation.cfg" : "user://presentation.cfg";
+        var config = new ConfigFile(); config.Load(settingsPath);
+        foreach (var channel in Channels)
+        {
+            if (AudioServer.GetBusIndex(channel) < 0) { AudioServer.AddBus(); AudioServer.SetBusName(AudioServer.BusCount - 1, channel); AudioServer.SetBusSend(AudioServer.BusCount - 1, "Master"); }
+            SetVolume(channel, Math.Clamp(config.GetValue("audio", channel, channel == "Master" ? 70 : channel is "Music" or "Ambience" ? 50 : 80).AsInt32(), 0, 100), false);
+            voices[channel] = [];
+        }
+        foreach (var name in new[] { "strike", "hit", "memory", "ui", "bell", "music", "ambience" })
+            sounds[name] = GD.Load<AudioStreamWav>($"res://Assets/{name}.wav");
+        ReducedFlash = config.GetValue("accessibility", "reduced_flash", false).AsBool();
+        ShowTutorialHints = config.GetValue("accessibility", "tutorial_hints", true).AsBool();
+        TextPercent = config.GetValue("accessibility", "text_percent", 100).AsInt32() == 125 ? 125 : 100;
+        HighContrast = config.GetValue("accessibility", "high_contrast", false).AsBool();
+        foreach (var name in new[] { "music", "ambience" })
+        {
+            var stream = sounds[name]; stream.LoopMode = AudioStreamWav.LoopModeEnum.Forward; stream.LoopEnd = (int)Math.Round(stream.GetLength() * stream.MixRate);
+            var player = new AudioStreamPlayer { Stream = stream, Bus = name == "music" ? "Music" : "Ambience" };
+            AddChild(player); loops[name] = player; if (!smoke) player.Play();
+        }
+    }
+    public void StartLoops() { foreach (var player in loops.Values) if (!player.Playing) player.Play(); }
+    public int Volume(string channel) => volumes[channel];
+    public void SetVolume(string channel, int value, bool save = true)
+    {
+        volumes[channel] = value; var bus = AudioServer.GetBusIndex(channel);
+        AudioServer.SetBusMute(bus, value == 0); AudioServer.SetBusVolumeDb(bus, Mathf.LinearToDb(Math.Max(.001f, value / 100f)));
+        if (save) Save();
+    }
+    public void ToggleFlash() { ReducedFlash = !ReducedFlash; Save(); }
+    public void ToggleHints() { ShowTutorialHints = !ShowTutorialHints; Save(); }
+    public void ToggleText() { TextPercent = TextPercent == 100 ? 125 : 100; Save(); }
+    public void ToggleContrast() { HighContrast = !HighContrast; Save(); }
+    private void Save()
+    {
+        var config = new ConfigFile();
+        foreach (var pair in volumes) config.SetValue("audio", pair.Key, pair.Value);
+        config.SetValue("accessibility", "reduced_flash", ReducedFlash); config.SetValue("accessibility", "tutorial_hints", ShowTutorialHints);
+        config.SetValue("accessibility", "text_percent", TextPercent); config.SetValue("accessibility", "high_contrast", HighContrast);
+        if (config.Save(settingsPath) != Error.Ok) GD.PushWarning("Presentation settings could not be saved");
+    }
+    public void Play(string name, string channel)
+    {
+        if (!sounds.TryGetValue(name, out var stream)) return;
+        var pool = voices[channel]; var player = pool.FirstOrDefault(p => !p.Playing);
+        if (player is null)
+        {
+            if (pool.Count == 4) return;
+            player = new AudioStreamPlayer { Bus = channel }; pool.Add(player); AddChild(player);
+        }
+        player.Stream = stream; player.Play();
+    }
+    public void StopAll()
+    {
+        foreach (var player in GetChildren().OfType<AudioStreamPlayer>()) { player.Stop(); player.Stream = null; }
+        voices.Clear(); loops.Clear(); sounds.Clear();
+    }
+    public override void _ExitTree() => StopAll();
+}

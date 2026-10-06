@@ -1,0 +1,29 @@
+; Overload M0/M1 prototype. Open with the pinned .NET editor.
+config_version=5
+
+[application]
+config/name="Overload — Combat Arena"
+run/main_scene="res://Scenes/Arena.tscn"
+config/features=PackedStringArray("4.7", "C#", "Mobile")
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/size/min_width=960
+window/size/min_height=540
+window/stretch/mode="disabled"
+
+[dotnet]
+project/assembly_name="Overload.Game"
+
+[physics]
+common/physics_ticks_per_second=60
+
+[rendering]
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+textures/default_filters/use_nearest_mipmap_filter=false
+textures/canvas_textures/default_texture_filter=0
+environment/defaults/default_clear_color=Color(0.025, 0.035, 0.055, 1)
