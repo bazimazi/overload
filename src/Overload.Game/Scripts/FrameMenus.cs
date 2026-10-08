@@ -33,7 +33,7 @@ public partial class ArenaHud
         {
             var slot=profile.Slot;
             if(profile.State is not { } state){ Text(slot+": "+profile.Notice,14,muted);continue; }
-            AddButton($"{state.Frame} / Level {CounterText.Short(state.ValidatedLevel)} / {state.Mode} / Room {state.CheckpointRoom+1}",()=>{if(arena.SelectCharacter(slot))Title();else SavedFrames();},first);first=false;
+            AddButton($"{state.Frame} / Level {CounterText.Short(state.ValidatedLevel)} / {state.Mode} / {(state.World is {} world?world.ActiveZone.Name:$"Room {state.CheckpointRoom+1}")}",()=>{if(arena.SelectCharacter(slot))Title();else SavedFrames();},first);first=false;
         }
         if(first)Text("No readable saved characters found.",16,muted);
         if(!string.IsNullOrEmpty(arena.SaveProblem))Text(arena.SaveProblem,14,gold);

@@ -12,6 +12,7 @@ public sealed class EnemyDirector
     }
     private readonly Dictionary<int, Schedule> schedules = [];
     public void Reset() => schedules.Clear();
+    public void Retire(int actorId)=>schedules.Remove(actorId);
     public void Advance(ActorBody enemy, ActorBody player, long tick, CombatEffects effects,string? mutation=null, IReadOnlyList<ActorBody>? allies=null, TacticalNavigation? navigation=null)
     {
         var state = enemy.Enemy!;
@@ -74,7 +75,7 @@ public sealed class EnemyDirector
             if (schedule.Heavy || ranged) effects.WarnHeavyAttack();
             enemy.AttackAge = 0; enemy.TellTicks = definition.Windup+(mutation=="mutation.patience"?24:0);
             enemy.Velocity = Vector2.Zero;
-            if(boss&&(mutation=="mutation.anchor"||definition.Style==EnemyStyle.FirstPattern)&&ranged) { enemy.ReturnMark=enemy.Position;enemy.MoveAndCollide(new Vector2(0,enemy.Position.Y<185?64:-64)); }
+            if(boss&&(mutation=="mutation.anchor"||definition.Style==EnemyStyle.FirstPattern)&&ranged) { enemy.ReturnMark=enemy.Position;enemy.MoveAndCollide(enemy.Facing.Orthogonal()*64); }
             if(enemy.ReturnMark is null && (definition.Style==EnemyStyle.Mark || definition.Style==EnemyStyle.Sentinel&&boss))enemy.ReturnMark=player.Position;
             if(definition.Style==EnemyStyle.Mirror)enemy.MoveAndCollide(enemy.Facing.Orthogonal()*32);
             enemy.AttackAim = enemy.Facing; enemy.Volley = ranged;

@@ -25,7 +25,7 @@ public partial class Arena
             if (name.Any(c => !char.IsAsciiLetterOrDigit(c) && c != '-')) throw new InvalidDataException("Invalid profile folder name");
             var path = ProfileRoot + "/" + name;
             characterPath = ProjectSettings.GlobalizePath(path);
-            Character = new CharacterStore(characterPath, PracticeTier is { } tier ? () => EndlessFixtures.Reference(tier) : trainingBuild is { } build ? () => FrameRules.BuildFixture(frame,build) : standard ? () => FrameRules.Create(frame) : separate ? () => FrameRules.Create(frame,false) : IsSmoke ? null : () => FrameRules.Create(frame)); SaveProblem = "";
+            Character = new CharacterStore(characterPath, PracticeTier is { } tier ? () => EndlessFixtures.Reference(tier) : trainingBuild is { } build ? () => FrameRules.BuildFixture(frame,build) : standard ? () => IsSmoke?FrameRules.Create(frame):WorldRules.Enroll(FrameRules.Create(frame)) : separate ? () => FrameRules.Create(frame,false) : IsSmoke ? null : () => WorldRules.Enroll(FrameRules.Create(frame))); SaveProblem = "";
             ApplyCharacterBuild();
             if (separate && !IsSmoke) { config.SetValue("profile", "name", name); if (config.Save("user://profile.cfg") != Error.Ok) throw new IOException("Could not save profile selection"); }
         }

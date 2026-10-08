@@ -1,10 +1,14 @@
 # Overload implementation plan
 
+W01–W06's connected-world implementation is delivered in [World implementation](WORLD_IMPLEMENTATION.md): seventeen authored zones, exploration persistence, regional scenarios/kits, map UI, and graph-driven Fractures. [STATUS](STATUS.md) distinguishes executed checks from independent human acceptance. The plan below retains its earlier production estimates and historical milestones.
+
 Build a small, measurable combat game first, prove the Overload and Override interaction, then expand progression and content. This plan is written for an AI coding agent working with a human product owner and, when available, an artist and playtesters. It defines intended work; no game code or executed gameplay tests are claimed by these documents.
 
 The owner confirmed Windows-first offline single-player development using Godot and C#, with uncapped character levels, continuing power progression, and uncapped difficulty. Co-op is a future decision. Milestones are gated by evidence rather than elapsed time, and the agent should complete one coherent task at a time while keeping the project runnable. The formulas, storage rules, and acceptance cases in [endless progression](ENDLESS_PROGRESSION.md) are required architecture, not an optional expansion.
 
 Implementation through A03 and quality/release preparation through R02 are recorded in [STATUS](STATUS.md), [A03 validation](A03_VALIDATION.md) and [quality/release validation](Q_RELEASE_VALIDATION.md). Unfinished is cut under A03's optional scope. Human acceptance, additional hardware, release signoff and evidence-based expansion selection remain open; automated work does not close those prerequisites.
+
+The owner requested deep reference research followed by the full implementation. [The study](WORLD_MAP_RESEARCH.md) and [original proposal](WORLD_MAP_DESIGN.md) led to [W01–W06 implementation](WORLD_IMPLEMENTATION.md), including physically traversed campaign/Fracture graphs and save compatibility. Its player-understanding and commercial-quality gates remain separate from automated delivery.
 
 ## Technical baseline
 

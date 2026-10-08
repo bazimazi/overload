@@ -14,7 +14,8 @@ public sealed record Expedition(Guid Id, BigInteger Sequence, BigInteger Tier, s
     BigInteger XpBudget, BigInteger GoldBudget, BigInteger AlloyBudget, ImmutableArray<int> Rooms,
     int NextGroup = 0, ImmutableHashSet<int>? ClaimedGroups = null, Guid? ChainId = null, int ChainLeg = 0)
 {
-    public bool Completed => NextGroup == 7;
+    public bool Completed => Map?.Completed ?? NextGroup == 7;
+    public FractureMapRun? Map { get; init; }
     public ImmutableHashSet<int> Claims => ClaimedGroups ?? [];
     public Region Region { get; init; }
     public ActivityFamily Activity { get; init; }
@@ -98,11 +99,17 @@ public static class EndlessRules
     public static CharacterState Claim(CharacterState s, Guid runId, BigInteger sequence, int group)
     {
         var run = s.Fracture;
+        if(run?.Map is not null)throw new InvalidOperationException("This expedition uses physical map objectives");
         if (run is null || run.Id != runId || run.Sequence != sequence || group is < 0 or > 6) throw new InvalidOperationException("Stale expedition reward");
         if (run.Claims.Contains(group)) return s;
         if (group != run.NextGroup || run.Completed) throw new InvalidOperationException("Complete the active encounter group first");
         var updated = FoundationRules.AddXp(s, GroupXp(run, group)) with { Fracture = run with { NextGroup = group + 1, ClaimedGroups = run.Claims.Add(group) } };
         if (group < 6) return updated;
+        return Finish(updated,run);
+    }
+    public static CharacterState Finish(CharacterState updated,Expedition run)
+    {
+        var s=updated;
         var cleared = BigInteger.Max(s.HighestClearedTier, run.Tier);
         var unlocked = BigInteger.Max(s.HighestUnlockedTier, run.Tier + 1);
         var nextChapter = ChapterAt(unlocked);
@@ -145,6 +152,7 @@ public static class EndlessRules
             || !s.ChapterOffers.IsEmpty && (s.PendingChapter <= s.Chapter || s.PendingChapter != ChapterAt(s.HighestUnlockedTier)))
             throw new InvalidDataException("Invalid frontier or saved chapter routes");
         if (s.Fracture is not { } r) return;
+        if(r.ContentVersion==FractureMapRules.Version){FractureMapRules.Validate(s,r);return;}
         if (!s.FractureUnlocked || r.Id == Guid.Empty || r.Sequence != s.ExpeditionSequence || r.Sequence < 1 || r.Tier < 1 || r.Tier > s.HighestUnlockedTier
             || r.ContentVersion is not (Version or EndgameRules.Version or RegionalContent.ExpeditionVersion) || !Routes.Any(t => t.Id == r.RouteId)
             || r.Seed != Seed(r.Tier, r.Id, r.ContentVersion==Version?r.RouteId:$"{r.RouteId}|{r.Region}|{r.Activity}|{(r.Anomaly?r.Mutation:null)}", r.ContentVersion)

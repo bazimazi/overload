@@ -3,9 +3,10 @@ using System.Numerics;
 namespace Overload.Domain;
 
 /// <summary>Bounded room navigation using the same footprints as the world adapter.</summary>
-public sealed class TacticalNavigation(IEnumerable<RoomBlock> obstacles)
+public sealed class TacticalNavigation(IEnumerable<RoomBlock> obstacles, RoomBlock? bounds = null)
 {
-    private const float Step = 12;
+    private readonly float Step = bounds is null ? 12 : 24;
+    private readonly RoomBlock floor = bounds ?? LevelGeometry.Court.Bounds;
     private readonly RoomBlock[] blocks = obstacles.ToArray();
     private readonly Dictionary<float, Grid> grids = [];
     private sealed record Grid(Vector2[] Points, int[][] Edges);
@@ -25,7 +26,7 @@ public sealed class TacticalNavigation(IEnumerable<RoomBlock> obstacles)
         }
         return true;
     }
-    private static bool Inside(Vector2 p, float r) => p.X > 28 + r && p.X < 612 - r && p.Y > 56 + r && p.Y < 314 - r;
+    private bool Inside(Vector2 p, float r) => p.X > floor.X + r && p.X < floor.X + floor.Width - r && p.Y > floor.Y + r && p.Y < floor.Y + floor.Height - r;
     private static bool Clip(float origin, float direction, float min, float max, ref float low, ref float high)
     {
         if (Math.Abs(direction) < .0001f) return origin >= min && origin <= max;
@@ -36,10 +37,10 @@ public sealed class TacticalNavigation(IEnumerable<RoomBlock> obstacles)
     private Grid Build(float radius)
     {
         var points = new List<Vector2>(); var cells = new Dictionary<(int X, int Y), int>();
-        for (var y = 0; 57 + radius + y * Step < 314 - radius; y++)
-            for (var x = 0; 29 + radius + x * Step < 612 - radius; x++)
+        for (var y = 0; floor.Y + 1 + radius + y * Step < floor.Y + floor.Height - radius; y++)
+            for (var x = 0; floor.X + 1 + radius + x * Step < floor.X + floor.Width - radius; x++)
             {
-                var p = new Vector2(29 + radius + x * Step, 57 + radius + y * Step);
+                var p = new Vector2(floor.X + 1 + radius + x * Step, floor.Y + 1 + radius + y * Step);
                 if (!Clear(p, p, radius)) continue;
                 cells[(x, y)] = points.Count; points.Add(p);
             }
@@ -59,7 +60,11 @@ public sealed class TacticalNavigation(IEnumerable<RoomBlock> obstacles)
         if (radius <= 0 || !float.IsFinite(radius)) throw new ArgumentOutOfRangeException(nameof(radius));
         if (Clear(from, to, radius)) return [to];
         if (!Clear(from, from, radius) || !Clear(to, to, radius)) return [];
-        if (!grids.TryGetValue(radius, out var grid)) grids[radius] = grid = Build(radius);
+        if (!grids.TryGetValue(radius, out var grid))
+        {
+            if (grids.Count >= 8) grids.Clear();
+            grids[radius] = grid = Build(radius);
+        }
         int Nearest(Vector2 p) => Enumerable.Range(0, grid.Points.Length)
             .Where(i => Vector2.DistanceSquared(p, grid.Points[i]) < Step * Step * 9 && Clear(p, grid.Points[i], radius))
             .OrderBy(i => Vector2.DistanceSquared(p, grid.Points[i])).FirstOrDefault(-1);

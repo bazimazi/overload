@@ -87,6 +87,12 @@ public sealed class PlayerCombat
         UnreservedMaximumLife = EndlessRules.PlayerAmount(CombatMath.Points(profile.Hero.Life), character?.Resolve ?? 0, grade);
         Reset();
     }
+    public void ResetForLevel(bool rest)
+    {
+        var life=Life;var focus=Focus;var flasks=FlaskCharges;
+        Reset();
+        if(!rest){Life=BigInteger.Min(life,MaximumLife);Focus=Math.Min(focus,MaximumFocus);FlaskCharges=flasks;}
+    }
     public void Reset()
     {
         reservations.Clear(); PeakReservation=0; HealedUnderReservation=false;

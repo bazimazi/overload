@@ -10,7 +10,7 @@ RUNTIME = ROOT / 'src/Overload.Game/Assets/Pixel'
 frames = 0
 images = 0
 for path in sorted(RUNTIME.glob('*.png')):
-    original = SOURCE / path.name
+    original = ROOT / 'assets/source/world-v1/landmarks.png' if path.name == 'world-landmarks.png' else SOURCE / path.name
     assert original.exists(), f'Original missing: {path.name}'
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     assert digest == hashlib.sha256(original.read_bytes()).hexdigest(), f'Artwork changed during import: {path.name}'

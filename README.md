@@ -1,14 +1,14 @@
 # Overload
 
-Overload is a Godot C# action RPG prototype about learning new ways to act and earning the right to rewrite one character rule. The A03 candidate has three Frames, 24 skills, nine shared signatures, Elsewhere and Red Covenant, four regional rosters, eight bosses and 48 room templates. New characters play a sixteen-checkpoint regional campaign ending with First Pattern. Earlier court saves remain resumable. Human playtest and release-quality gates remain open.
+Overload is a Godot C# action RPG prototype about learning new ways to act and earning the right to rewrite one character rule. New characters explore seventeen connected zones across Hearth and four regions, reclaim refuges, restore infrastructure, and face eight bosses before the First Pattern finale. Fractures add seeded physical branches and Hunt/Breach/Vault objectives. Three Frames, 24 skills, nine signatures and two earned oaths retain their combat rules. Earlier room-based saves remain resumable. Human playtest and release-quality gates remain open.
 
 ## Play the prototype
 
 On this workspace, launch **`artifacts/windows/Overload.exe`**. Keep the entire `artifacts/windows` folder together: the executable needs its `.pck` and managed runtime directory. The export includes the .NET runtime and does not require the editor.
 
-The review build uses Mobile/Vulkan rendering. To select Compatibility/OpenGL explicitly on other hardware, launch `Overload.exe --rendering-method gl_compatibility --rendering-driver opengl3`. Additional hardware validation remains open.
+The current build uses Compatibility/OpenGL rendering. Additional hardware validation remains open.
 
-The current experience build and runtime hashes are identified by **`artifacts/LATEST-EXPERIENCE.json`**. **`artifacts/LATEST-CANDIDATE.json`** identifies the earlier R01 archive, with its source snapshot and historical quality evidence. Follow the [release review sheet](docs/RELEASE_REVIEW.md); earlier A03/P07/E05/S06 archives are preserved. Use the [S06 feedback sheet](docs/playtests/S06_FIRST_PLAYTEST.md) for the independent session. S06 and human release acceptance stay open until those sessions and fixes are recorded.
+The current connected-world build and hashes are identified by **`artifacts/LATEST-WORLD.json`**. **`artifacts/LATEST-EXPERIENCE.json`** records the earlier presentation upgrade. **`artifacts/LATEST-CANDIDATE.json`** identifies the earlier R01 archive, with its source snapshot and historical quality evidence. Follow the [release review sheet](docs/RELEASE_REVIEW.md); earlier A03/P07/E05/S06 archives are preserved. Use the [S06 feedback sheet](docs/playtests/S06_FIRST_PLAYTEST.md) for the independent session. S06 and human release acceptance stay open until those sessions and fixes are recorded.
 
 To build from source on Windows, install .NET SDK **10.0.401**, then run from the repository root:
 
@@ -29,11 +29,11 @@ Setup downloads and checksum-verifies Godot **4.7.2 .NET** and matching template
 | Menu navigation / confirm / back | Arrows / Enter / Escape | D-pad / A / B |
 | Diagnostics | F3 | Keyboard only |
 
-Fresh ordinary installs start with a level-1 Standard Warden. Choose **Create separate Standard character** at Hearth to select Warden, Threadseer or Revenant and start at level 1. Their four-region campaign has sixteen checkpoints and eight bosses. **Compare accelerated training builds** creates one of three equal-budget builds per Frame in a separate sandbox save. Older characters can still begin or resume their eight-room court. Practice encounters grant no rewards. Room clears bank XP, gold, Alloy and gear atomically; retry restores Life, Focus and flasks.
+Fresh installs start a level-1 Standard Warden in the connected campaign. Select **Explore the world**, walk to a road, and press **G** to interact. **Tab** opens the discovered local map; **M** opens regional travel. Controller: **D-pad Up** interacts, **Back/View** opens the local map, **D-pad Right** opens regional travel, **B** returns. Safe waypoints restore supplies and permit fast travel. Ash opens Glass and Hollow in either order; their resolutions open Crown. Older eight-room and sixteen-checkpoint journeys resume through their original adapters. See [World implementation](docs/WORLD_IMPLEMENTATION.md).
 
 Each Frame has a free basic and three equipped active skills from its eight-skill collection. Rank skills, choose techniques, learn twelve connected talent nodes, equip two inscriptions, compare/forge six gear slots, or respec at Hearth. Threadseer places delayed wells and looms; Revenant commands one echo and uses ranged pressure. Control/utility casts keep their authored behavior and cannot dispatch direct-damage patterns. Character XP and post-60 Resonance have no designed level cap.
 
-Completing your campaign opens **Fracture board and attunement**. Seven-group expeditions use authored rooms at any unlocked tier, bank fixed XP budgets, and unlock the next tier on completion. Spend gold and Alloy on shared attunement grades up to your highest cleared tier. Every ten tiers offers a saved chapter route with targeted equipment; known routes remain available. Character's exact ledger complements abbreviated HUD counters. To inspect tiers directly in separate test profiles, run `artifacts/windows/Overload.exe -- --fracture-practice=10` (also try 9 and 11).
+Completing the campaign opens **Fracture Atlas and attunement**. New expeditions have real branching routes, required Hunt/Breach/Vault objectives and optional guarded caches at any unlocked tier. Required objectives allocate 80% of fixed XP; caches allocate 20%, forfeited if left behind. Completion retains exact gold, Alloy, targeted equipment and frontier/chapter rules. Older seven-group saves keep their original checkpoints.
 
 The board offers Hunt, Breach and Vault in Ash, Glass, Hollow and Crown. Tier 10+ earns regional Seals and breadth proofs. A Standard character can earn Elsewhere through level 100+, campaign completion, four mastery quests, twelve proofs, 120 Seals per region and the normalized Trial of Contradiction. Use **Create separate Standard character** at Hearth for a level-1 start without synthetic currency. New Stillness/Rupture patterns come from mastery and the trial. Chains bank three regional legs, while Anomaly Hunts disclose a chosen boss mutation and Sovereign Echo rewards are cosmetic/Codex records.
 
@@ -75,6 +75,8 @@ Prepared on 5 October 2026. All balance values, playtime estimates, content coun
 3. [Endless progression](docs/ENDLESS_PROGRESSION.md) — uncapped levels, XP, repeatable growth, equipment attunement, difficulty scaling, evolving encounters, and numerical safety.
 4. [Implementation plan](docs/IMPLEMENTATION_PLAN.md) — architecture, milestones, agent tasks, tests, production estimates, and release gates.
 5. [Research and decisions](docs/RESEARCH.md) — primary sources, their implications, alternatives, and unresolved assumptions.
+6. [World and map research](docs/WORLD_MAP_RESEARCH.md) — Diablo II–IV and PoE 1–2 comparison, versioned sources, and audit of the current world.
+7. [Connected world proposal](docs/WORLD_MAP_DESIGN.md) — regional geography, Foundry scenario, explorable maps, persistence, and W01–W06 delivery plan.
 
 ## Working decisions
 

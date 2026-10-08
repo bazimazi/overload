@@ -82,8 +82,10 @@ public partial class ArenaHud : Control
         ClearMenu("THE PALIMPSEST / HEARTH", "O V E R L O A D", "Fight to remember. Change how you fight.");
         home = true; LayoutMenu();
         var s = arena.Character.State;
+        if(s.World is not null)AddButton($"Explore the world · {s.World.ActiveZone.Name}",arena.StartWorld,true);
+        else if(s.RunId==Guid.Empty||s.CheckpointRoom==JourneyRules.Length(s))AddButton("Enter the connected world campaign",arena.StartWorld);
         Text($"{s.Frame}  /  Level {CounterText.Short(s.ValidatedLevel)}  /  {(s.Mode==ProfileMode.Standard?"Standard journey":"Training character")}", 14, gold);
-        AddButton(arena.Character.State.RunId != Guid.Empty && arena.Character.State.CheckpointRoom < JourneyRules.Length(arena.Character.State) ? $"Resume court — room {arena.Character.State.CheckpointRoom + 1}/{JourneyRules.Length(arena.Character.State)}" : arena.Character.State.RegionalCampaign?"Begin the four-region campaign":"Begin the eight-room court", () => { if (arena.IsSmoke) arena.StartEncounter(0); else arena.StartJourney(); }, true);
+        if(s.World is null) AddButton(arena.Character.State.RunId != Guid.Empty && arena.Character.State.CheckpointRoom < JourneyRules.Length(arena.Character.State) ? $"Resume court — room {arena.Character.State.CheckpointRoom + 1}/{JourneyRules.Length(arena.Character.State)}" : arena.Character.State.RegionalCampaign?"Begin the four-region campaign":"Begin the eight-room court", () => { if (arena.IsSmoke) arena.StartEncounter(0); else arena.StartJourney(); }, true);
         var grid = new GridContainer { Columns = 2, SizeFlagsHorizontal = SizeFlags.ExpandFill }; grid.AddThemeConstantOverride("h_separation", 10); grid.AddThemeConstantOverride("v_separation", 10); options.AddChild(grid);
         HomeCard(grid, "Memories", "Overload bindings", Bindings);
         HomeCard(grid, "Arsenal", "Equipment & forge", Inventory);

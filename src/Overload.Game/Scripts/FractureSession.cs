@@ -22,6 +22,7 @@ public partial class Arena
     {
         var run = Character!.State.Fracture!;
         if (run.Completed) { ReturnToTitle(); return; }
+        if(run.Map is not null){EnterFractureMap();return;}
         StartEncounter(0);
         FractureActive = true; EncounterTier = run.Tier; FractureGroup = run.NextGroup;
         completedGroupTicks=0;

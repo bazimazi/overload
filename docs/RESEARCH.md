@@ -1,5 +1,7 @@
 # Overload research and decisions
 
+The dedicated [world and map study](WORLD_MAP_RESEARCH.md), researched 8 October 2026, extends this initial study with Diablo II–IV and Path of Exile 1–2 world design, procedural layouts, exploration, narrative consequences, and dated Atlas revisions. Its [companion proposal](WORLD_MAP_DESIGN.md) defines the world-specific implementation sequence. [World implementation](WORLD_IMPLEMENTATION.md) records the delivered gameplay, verification and remaining human acceptance work; the research and proposal preserve their original evidence and hypotheses.
+
 Research was conducted on 5 October 2026 using publisher announcements, official engine and language documentation, developer documentation, and product listings. The purpose was to extract applicable design and production lessons, not to reproduce another game's content or claim knowledge of every current balance patch. Gameplay feel has not been tested in the reference games during this planning session.
 
 The design, mechanics, item limits, milestones, performance targets, time estimates, and rarity targets in this repository are recommendations to validate. Sources support the specific observations below; they do not establish that Overload will succeed or that its proposed mechanics are globally unprecedented.

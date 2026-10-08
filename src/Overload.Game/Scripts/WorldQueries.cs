@@ -12,8 +12,9 @@ public static class WorldQueries
             if (SegmentCircle(polygon[i], polygon[(i + 1) % polygon.Length], point, radius) is not null) return true;
         return false;
     }
-    public static bool Connected(Vector2 origin, Vector2 destination, float radius, Rect2[]? walls = null)
+    public static bool Connected(Vector2 origin, Vector2 destination, float radius, Rect2[]? walls = null, Overload.Domain.TacticalNavigation? navigation = null)
     {
+        if(navigation is not null)return navigation.Clear(new(origin.X,origin.Y),new(destination.X,destination.Y),radius)||navigation.FindPath(new(origin.X,origin.Y),new(destination.X,destination.Y),radius).Length>0;
         bool Clear(Vector2 a, Vector2 b)
         {
             var steps = Math.Max(1, (int)Math.Ceiling(a.DistanceTo(b) / 4));

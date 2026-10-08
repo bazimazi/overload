@@ -81,7 +81,7 @@ public sealed class CharacterStore
         if (envelope.Payload is null || envelope.Sha256 != Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(envelope.Payload)))) throw new InvalidDataException("Save checksum mismatch");
         using var document = JsonDocument.Parse(envelope.Payload);
         if (!document.RootElement.TryGetProperty("SchemaVersion", out var schema) || !schema.TryGetInt32(out var version)) throw new InvalidDataException("Missing save schema");
-        if (version > 5) throw new FutureSaveException();
+        if (version > 6) throw new FutureSaveException();
         if (version < 1) throw new InvalidDataException("Unknown save version");
         if (document.RootElement.TryGetProperty("ContentVersion", out var content))
         {
@@ -91,8 +91,9 @@ public sealed class CharacterStore
         foreach (var key in new[] { "CharacterId", "Revision", "TotalXp", "Gold", "Alloy" })
             if (!document.RootElement.TryGetProperty(key, out _)) throw new InvalidDataException($"Missing character field: {key}");
         var state = JsonSerializer.Deserialize<CharacterState>(envelope.Payload, JsonOptions) ?? throw new InvalidDataException("Empty character");
-        if (version >= 3 && state.Fracture is { ContentVersion: not (EndlessRules.Version or EndgameRules.Version or RegionalContent.ExpeditionVersion) }) throw new FutureSaveException();
+        if (version >= 3 && state.Fracture is { ContentVersion: not (EndlessRules.Version or EndgameRules.Version or RegionalContent.ExpeditionVersion or FractureMapRules.Version) }) throw new FutureSaveException();
         if(state.Fracture?.Layout is { Version:not (ExpeditionGenerator.Version or RegionalContent.GeneratorVersion) })throw new FutureSaveException();
+        if(state.Fracture?.Map is { GeneratorVersion:not FractureMapGenerator.Version })throw new FutureSaveException();
         if (version == 1) state = state with { SchemaVersion = 2, ValidatedLevel = Progression.LevelAt(state.TotalXp),
             Bindings = state.Bindings.IsDefault ? [] : [.. state.Bindings.Where(b => b is not null && CharacterRules.KnownPatterns.Contains(b.PatternId))],
             Journal = [.. state.Journal.IsDefault ? [] : state.Journal, "Migrated v1 character; removed bindings disabled without changing progression."] };
@@ -103,6 +104,8 @@ public sealed class CharacterStore
         if (version <= 3) state = state with { SchemaVersion = 4 };
         if (version <= 4) state = state with { SchemaVersion = 5, Frame = FrameId.Warden, RegionalCampaign = false,
             RedCovenantOwned = false, RedCovenantSelected = false, CovenantMastery = false };
+        if(version<=5) state=state with { SchemaVersion=6, World=null };
+        if(state.World is { Version:not WorldContent.Version })throw new FutureSaveException();
         CharacterRules.Validate(state); return state;
     }
     public bool Transact(long expectedRevision, string receipt, Func<CharacterState, CharacterState> update)

@@ -13,6 +13,7 @@ public partial class Arena
     public void StartJourney()
     {
         if (Character is null) return;
+        if(Character.State.World is not null){StartWorld();return;}
         if (Character.State.RunId == Guid.Empty || Character.State.CheckpointRoom == JourneyRules.Length(Character.State))
             if (!UpdateCharacter(s => JourneyRules.Begin(s, Guid.NewGuid()))) { Hud.Title(); return; }
         EnterJourneyRoom(Character.State.CheckpointRoom);
@@ -37,7 +38,7 @@ public partial class Arena
         foreach (var spawn in definition.Spawns) Spawn(spawn.Role, spawn.Position);
         Effects.Record(definition.Name); Hud.HideMenu();
     }
-    public void RetryCurrentRoom() { if(TrialActive||SovereignActive) RetrySpecial();else if (FractureActive) EnterFractureGroup(); else if (JourneyActive) EnterJourneyRoom(JourneyRoom); else StartEncounter(Wave); }
+    public void RetryCurrentRoom() { if(WorldActive)RetryWorld();else if(TrialActive||SovereignActive) RetrySpecial();else if (FractureActive) EnterFractureGroup(); else if (JourneyActive) EnterJourneyRoom(JourneyRoom); else StartEncounter(Wave); }
     private void CompleteJourneyRoom()
     {
         Playing = false; PlayerState.Reset(); Controls.ClearBuffer(); Effects.Reset();

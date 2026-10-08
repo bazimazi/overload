@@ -6,6 +6,7 @@ try {
     Invoke-Checked $DotNet @('test', 'Overload.sln', '-c', 'Release', '--no-build')
     Invoke-Checked $DotNet @('run', '--project', 'src/Overload.Tools', '-c', 'Release', '--no-build', '--', 'validate-content')
     Invoke-Checked $DotNet @('run', '--project', 'src/Overload.Tools', '-c', 'Release', '--no-build', '--', 'frame-report')
+    Invoke-Checked $DotNet @('run', '--project', 'src/Overload.Tools', '-c', 'Release', '--no-build', '--', 'world-report')
     if ($Engine) {
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--editor', '--import')
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--smoke-test')
@@ -13,5 +14,6 @@ try {
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--production-smoke')
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--expansion-smoke')
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--experience-smoke')
+        Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--world-smoke')
     }
 } finally { Pop-Location }

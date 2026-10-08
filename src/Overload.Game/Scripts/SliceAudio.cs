@@ -10,6 +10,7 @@ public partial class SliceAudio : Node
     private readonly Dictionary<string, int> volumes = [];
     private string settingsPath = "";
     private bool paused;
+    private bool silentFixture;
     private float intensity, targetIntensity;
     private ulong lastWarning;
     public bool ReducedFlash { get; private set; }
@@ -18,6 +19,7 @@ public partial class SliceAudio : Node
     public bool HighContrast { get; private set; }
     public void Initialize(bool smoke)
     {
+        silentFixture=smoke;
         settingsPath = smoke ? "user://tests/presentation.cfg" : "user://presentation.cfg";
         var config = new ConfigFile(); config.Load(settingsPath);
         foreach (var channel in Channels)
@@ -41,6 +43,17 @@ public partial class SliceAudio : Node
     }
     public void StartLoops() { foreach (var player in loops.Values) if (!player.Playing) player.Play(); }
     public void SetPaused(bool value) => paused = value;
+    public void SetRegion(Overload.Domain.Region region,bool restored)
+    {
+        if(loops.TryGetValue("ambience",out var ambience))
+        {
+            var path=$"res://Assets/Audio/world-{region.ToString().ToLowerInvariant()}.wav";
+            if(ResourceLoader.Exists(path)){var stream=GD.Load<AudioStreamWav>(path);stream.LoopMode=AudioStreamWav.LoopModeEnum.Forward;stream.LoopEnd=(int)(stream.GetLength()*stream.MixRate);ambience.Stream=stream;if(!silentFixture&&!ambience.Playing)ambience.Play();}
+            ambience.PitchScale=restored?.88f:1;
+        }
+    }
+    public void SetHearth()
+    {if(loops.TryGetValue("ambience",out var ambience)){ambience.Stream=sounds["ambience"];ambience.PitchScale=1;if(!silentFixture&&!ambience.Playing)ambience.Play();}}
     public void SetEncounter(bool combat, bool boss) => targetIntensity = combat ? boss ? 1 : .55f : 0;
     public override void _Process(double delta)
     {

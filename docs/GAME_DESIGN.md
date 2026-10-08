@@ -1,5 +1,7 @@
 # Overload game design
 
+The [connected-world implementation](WORLD_IMPLEMENTATION.md) now supplies Hearth and four regional arcs through seventeen explorable zones, physical travel and fog, reclaimed refuges, eight placed bosses, convergent endings, and seeded objective-driven Fractures. Older room campaigns remain compatible. The original research/design assumptions below still require player validation.
+
 The recommended game combines an immediately satisfying action RPG combat loop with deliberate positioning, skill combinations, and expressive character builds. Its identity is a character who can carry several answers to the same situation. Overload adds those answers; Override eventually changes what a fundamental action means.
 
 This is a production proposal for a small team supported by AI development agents. Every uncited mechanic and numerical target below is an original design proposal, not a claim about an existing game or proven player preference. The first release scope is a ceiling to reassess after the vertical slice.
@@ -30,6 +32,8 @@ Diablo IV's later Lord of Hatred announcement describes moving build-defining ch
 The intended blend is accessible pacing and feedback with meaningful attack commitment and boss learning. It should not alternate between helplessly slow opening hours and unreadable endgame effects. Tune a stable combat language that survives progression.
 
 ## World and narrative
+
+The [connected world proposal](WORLD_MAP_DESIGN.md) expands this setting into regional geography, a causal Foundry scenario, discoverable refuges, world changes, and a first playable exploration slice. Its basis is the [world and map research](WORLD_MAP_RESEARCH.md). This is proposed next work; the existing sixteen-checkpoint implementation remains the current campaign.
 
 The setting is the **Palimpsest**, a civilization built over successive versions of reality. Ancient laws assign every creature a role: a guardian holds, a hunter pursues, the dead remain dead. A catastrophe has exposed discarded versions of those laws.
 
@@ -171,6 +175,8 @@ Initial reward target: one meaningful equipment candidate per completed combat r
 Do not let Overload or Override multiply ritual rewards. Rarer access should reflect play breadth and demonstrated competence, not an exponential advantage for the first characters who unlock it.
 
 ## Encounters and world structure
+
+The [world design requirements](WORLD_MAP_DESIGN.md#geometry-generation-and-content-production) are implemented through shared geometry, physical travel and graph-driven Fractures; see [current behavior and evidence](WORLD_IMPLEMENTATION.md). Older journeys retain their original traversal.
 
 Use authored rooms assembled into constrained graphs. The campaign uses mostly authored sequences; expeditions remix compatible rooms, enemy groups, and optional objectives. Generate the graph first, validate required paths and exits, then populate encounters, then decorate. Keep bosses and story spaces handcrafted.
 

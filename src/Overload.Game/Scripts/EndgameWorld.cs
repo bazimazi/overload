@@ -25,20 +25,20 @@ public partial class EndgameWorld : Node2D
     }
     public void Configure(ImmutableArray<string> selected,string? mutation,ActivityFamily family,bool? assisted=null)
     { if(assisted is { } value)Assisted=value;rules=selected;activity=family;entry=arena.PlayerState.Tick;keystone=false;cover=rules.Contains("law.glass")||arena.FractureActive&&arena.Character!.State.Fracture!.Region==Region.Glass;coverSprite.Visible=cover;coverHits=0;QueueRedraw(); }
-    public void Clear() { rules=[];cover=false;coverSprite.Visible=false;keystone=false;QueueRedraw(); }
+    public void Clear() { Position=Vector2.Zero;rules=[];cover=false;coverSprite.Visible=false;keystone=false;QueueRedraw(); }
     private void BreakCover(bool friendly)
-    { cover=false;coverSprite.Visible=false;arena.Effects.CoverShards(new(336,120));if(friendly)arena.CoverBroken(); }
+    { cover=false;coverSprite.Visible=false;arena.Effects.CoverShards(Position+new Vector2(336,120));if(friendly)arena.CoverBroken(); }
     public void SetAssisted(bool value) { if(!arena.Playing)Assisted=value; }
     public bool CoverCollision(Vector2 from,Vector2 to,bool friendly,bool heavy=false)
     {
-        if(!cover || WorldQueries.SegmentCircle(from,to,new(336,120),18) is null)return false;
+        if(!cover || WorldQueries.SegmentCircle(from,to,Position+new Vector2(336,120),18) is null)return false;
         if(friendly) { coverHits++;if(coverHits>=1) BreakCover(true); }
         else if(heavy)BreakCover(false);
         return true;
     }
     public void StrikeCover(Vector2 origin,Vector2 aim,AttackRecipe recipe)
     {
-        if(cover&& (recipe.Geometry==AttackGeometry.Lane?WorldQueries.SegmentCircle(origin,origin+aim*recipe.Reach,new(336,120),18) is not null:WorldQueries.SectorOverlaps(origin,aim,recipe.Reach,recipe.ArcDegrees,new(336,120),18)))
+        if(cover&& (recipe.Geometry==AttackGeometry.Lane?WorldQueries.SegmentCircle(origin,origin+aim*recipe.Reach,Position+new Vector2(336,120),18) is not null:WorldQueries.SectorOverlaps(origin,aim,recipe.Reach,recipe.ArcDegrees,Position+new Vector2(336,120),18)))
         BreakCover(true);
     }
     public void Advance()
@@ -50,7 +50,7 @@ public partial class EndgameWorld : Node2D
         {
             var rule=WorldLaws.Rules.Single(r=>r.Id==id);
             if(rule.DamagePercent==0 || tick%rule.Period!=rule.WarningTicks)continue;
-            foreach(var area in WorldLaws.Areas(id,tick))if(new Rect2(area.X,area.Y,area.Width,area.Height).Grow(arena.Player.Radius).HasPoint(arena.Player.Position))
+            foreach(var area in WorldLaws.Areas(id,tick))if(new Rect2(Position+new Vector2(area.X,area.Y),new(area.Width,area.Height)).Grow(arena.Player.Radius).HasPoint(arena.Player.Position))
                 arena.PlayerState.ReceiveHit(Progression.TierScaled(CombatMath.Points(250)*rule.DamagePercent/100,arena.EncounterTier)*(Assisted?50:100)/100,false);
         }
         QueueRedraw();
@@ -83,6 +83,6 @@ public partial class EndgameWorld : Node2D
             DrawString(ThemeDB.FallbackFont,new(533,155),"KEYSTONE",fontSize:8,modulate:new("e4bf7d"));
         }
         foreach(var enemy in arena.Enemies.Where(e=>e.ReturnMark is not null&&!e.Enemy!.Dead))
-        {var mark=enemy.ReturnMark!.Value;DrawArc(mark,34,0,Mathf.Tau,32,new Color("c7b3ef"),2);DrawString(ThemeDB.FallbackFont,mark+new Vector2(-32,-39),enemy.Enemy!.Definition.Style is EnemyStyle.Mark or EnemyStyle.Sentinel && arena.ActiveMutation!="mutation.anchor"?"MARKED PULSE":"RETURN MARK",fontSize:9);}
+        {var mark=enemy.ReturnMark!.Value-Position;DrawArc(mark,34,0,Mathf.Tau,32,new Color("c7b3ef"),2);DrawString(ThemeDB.FallbackFont,mark+new Vector2(-32,-39),enemy.Enemy!.Definition.Style is EnemyStyle.Mark or EnemyStyle.Sentinel && arena.ActiveMutation!="mutation.anchor"?"MARKED PULSE":"RETURN MARK",fontSize:9);}
     }
 }

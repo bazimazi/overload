@@ -40,7 +40,7 @@ public partial class ArenaHud
     {
         if (arena.PlayerState is null) return;
         if (home && MenuVisible) DrawHearth();
-        else { if (arena.CheckpointRest) DrawCheckpointHud(); else DrawFightHud(); if (MenuVisible) DrawRect(new(Vector2.Zero, Size), new Color("050b10", .72f)); }
+        else { if (arena.CheckpointRest) DrawCheckpointHud(); else DrawFightHud(); if(arena.WorldActive&&!MenuVisible){CenterWrite(new(Size.X/2,Size.Y-124),Fit(arena.WorldPrompt,Size.X-60,14),14,gold);if(arena.LocalMapVisible)DrawLocalWorldMap();} if (MenuVisible) DrawRect(new(Vector2.Zero, Size), new Color("050b10", .72f)); }
     }
     private void DrawHearth()
     {
@@ -52,7 +52,7 @@ public partial class ArenaHud
         DrawLine(new(x, 140), new(Size.X - 60, 140), new Color("b18e58", .55f));
         if (arena.Character?.State is { } character)
         {
-            var completed=character.RegionalCampaign ? Math.Min(4,character.CheckpointRoom/4) : character.FractureUnlocked?4:0;
+            var completed=character.World?.Resolved.Count??(character.RegionalCampaign ? Math.Min(4,character.CheckpointRoom/4) : character.FractureUnlocked?4:0);
             Write(new(x,164),$"HEARTH / {completed} OF 4 REGIONS RECLAIMED",11,muted);
             for(var i=0;i<4;i++)
             { var p=new Vector2(x+i*28,185); DrawPolyline([p+new Vector2(-4,0),p+new Vector2(0,-5),p+new Vector2(4,0),p+new Vector2(0,5),p+new Vector2(-4,0)],i<completed?gold:muted.Darkened(.5f),1); }

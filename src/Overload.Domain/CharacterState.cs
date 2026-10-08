@@ -6,7 +6,8 @@ namespace Overload.Domain;
 public enum ProfileMode { Standard, SliceSandbox }
 public sealed record CharacterState
 {
-    public int SchemaVersion { get; init; } = 5;
+    public int SchemaVersion { get; init; } = 6;
+    public WorldProgress? World { get; init; }
     public FrameId Frame { get; init; }
     public bool RegionalCampaign { get; init; }
     public bool RedCovenantOwned { get; init; }
@@ -72,7 +73,7 @@ public static class CharacterRules
         if (s.EquippedSkills.IsDefault || s.EquippedSkills.Length != 3 || s.EquippedSkills.Distinct().Count() != 3
             || s.EquippedSkills.Any(id => !FrameRules.Skills(s.Frame).Contains(id) || id == FrameRules.Basic(s.Frame)))
             throw new InvalidDataException("Choose three distinct active skills from your Frame");
-        if (s.SchemaVersion != 5 || !Enum.IsDefined(s.Frame) || s.RedCovenantSelected && (!s.RedCovenantOwned || s.ElsewhereSelected)
+        if (s.SchemaVersion != 6 || !Enum.IsDefined(s.Frame) || s.RedCovenantSelected && (!s.RedCovenantOwned || s.ElsewhereSelected)
             || s.ContentVersion != "slice.v1" || s.CharacterId == Guid.Empty || s.Revision < 0 || !Enum.IsDefined(s.Mode) || !Enum.IsDefined(s.ResonancePolicy) || s.TotalXp < 0
             || s.ValidatedLevel != Progression.LevelAt(s.TotalXp) || s.Gold < 0 || s.Alloy < 0 || s.Seals.IsDefault || s.Seals.Length != 4 || s.Seals.Any(v => v < 0)
             || s.ElsewhereSelected && !s.ElsewhereOwned || s.Bindings.IsDefault || s.Bindings.Length > EndgameRules.BindingSlots(s) || s.Bindings.Any(b => b is null) || s.Bindings.Select(b => b.PatternId).Distinct().Count() != s.Bindings.Length
@@ -83,6 +84,7 @@ public static class CharacterRules
             throw new InvalidDataException("Invalid character balances, references or progression");
         if (s.ClaimedRooms.Count != s.CheckpointRoom || !Enumerable.Range(0, s.CheckpointRoom).All(s.ClaimedRooms.Contains)
             || s.RunId == Guid.Empty && s.CheckpointRoom != 0) throw new InvalidDataException("Inconsistent journey checkpoint");
+        if(s.World is {} world) WorldRules.Validate(world);
         EndgameRules.Validate(s);
         EndlessRules.Validate(s);
     }

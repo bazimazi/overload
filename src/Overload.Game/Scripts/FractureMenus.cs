@@ -15,7 +15,7 @@ public partial class ArenaHud
         { Text("Complete your campaign to open Fractures and shared attunement.", 18, ink); AddButton("Back", Title, true); return; }
         if (!s.ChapterOffers.IsEmpty)
         {
-            Text($"Chapter {CounterText.Short(s.PendingChapter)}: choose a saved route. Each uses the same XP and wallet budget, with a different targeted item. Room assemblies are drawn from the authored court.", 17, ink);
+            Text($"Chapter {CounterText.Short(s.PendingChapter)}: choose a saved route. Each uses the same XP and wallet budget, with a different targeted item. Branching maps contain guarded objectives and optional caches.", 17, ink);
             foreach (var id in s.ChapterOffers)
             {
                 var route = EndlessRules.Routes.Single(r => r.Id == id);
@@ -25,7 +25,7 @@ public partial class ArenaHud
         }
         else if (s.Fracture is { Completed: false } run)
         {
-            Text($"Tier {CounterText.Short(run.Tier)} · group {run.NextGroup + 1}/7\nBanked group XP stays saved on death or abandonment. Completion awards {CounterText.Short(run.GoldBudget)} gold and {CounterText.Short(run.AlloyBudget)} Alloy.", 17, ink);
+            Text($"Tier {CounterText.Short(run.Tier)} · {(run.Map is {} map?$"{map.Required.Count(map.Claims.Contains)}/{map.Required.Count} objectives":$"group {run.NextGroup+1}/7")}\nBanked XP stays saved on death or abandonment. Completion awards {CounterText.Short(run.GoldBudget)} gold and {CounterText.Short(run.AlloyBudget)} Alloy.", 17, ink);
             AddButton("Resume saved expedition", () => arena.StartFracture(run.Tier), true);
             AddButton("Abandon expedition (keep banked XP)", () => { arena.UpdateCharacter(EndlessRules.Abandon); Fractures(); });
         }
@@ -34,7 +34,7 @@ public partial class ArenaHud
             selectedTier = BigInteger.Clamp(selectedTier, 1, s.HighestUnlockedTier);
             Text($"Selected tier {CounterText.Short(selectedTier)} · suggested level {CounterText.Short(Progression.ReferenceLevel(selectedTier))}", 20, ink);
             var route = EndlessRules.Routes.Single(r => r.Id == s.SelectedRoute);
-            Text($"{route.Region}: targeted {route.Target} · fixed XP {CounterText.Short(EndlessRules.ExpeditionXp(selectedTier))}\nCompletion: {CounterText.Short(selectedTier * 200)} gold / {CounterText.Short(selectedTier * 100)} Alloy\nGenerated regional rooms: six groups + boss. Supplies reset at each checkpoint. Full bags forfeit the targeted drop.", 16, muted);
+            Text($"{route.Region}: targeted {route.Target} · maximum XP {CounterText.Short(EndlessRules.ExpeditionXp(selectedTier))}\nCompletion: {CounterText.Short(selectedTier * 200)} gold / {CounterText.Short(selectedTier * 100)} Alloy\nPhysical branches and objective gates. Main objectives bank 80% of XP; optional caches bank 20%. Full bags forfeit the targeted drop. Saved older runs retain their room checkpoints.", 16, muted);
             AddButton("Begin selected tier", () => arena.StartRegional(selectedTier,selectedRegion,anomaly?ActivityFamily.Hunt:selectedActivity,anomaly?selectedMutation:null,anomaly), true);
             ActivityOptions();
             AddButton("Select frontier", () => { selectedTier = s.HighestUnlockedTier; Fractures(); });

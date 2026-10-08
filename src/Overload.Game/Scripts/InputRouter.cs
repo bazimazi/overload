@@ -7,7 +7,7 @@ public readonly record struct PlayerIntent(Vector2 Move, Vector2 Aim, SkillId? A
 
 public sealed class InputRouter
 {
-    public static readonly string[] Names = ["move_left", "move_right", "move_up", "move_down", "cleave", "pulse", "lance", "special", "evade", "flask", "pause", "interact"];
+    public static readonly string[] Names = ["move_left", "move_right", "move_up", "move_down", "cleave", "pulse", "lance", "special", "evade", "flask", "pause", "interact", "local_map", "region_map"];
     private readonly string settingsPath;
     private SkillId? buffered;
     private SkillId? pressed;
@@ -20,7 +20,7 @@ public sealed class InputRouter
     public InputRouter(bool smoke)
     {
         settingsPath = smoke ? "user://tests/controls.cfg" : "user://controls.cfg";
-        Key[] keys = [Key.A, Key.D, Key.W, Key.S, Key.None, Key.Q, Key.E, Key.R, Key.Space, Key.F, Key.Escape, Key.G];
+        Key[] keys = [Key.A, Key.D, Key.W, Key.S, Key.None, Key.Q, Key.E, Key.R, Key.Space, Key.F, Key.Escape, Key.G, Key.Tab, Key.M];
         for (var i = 0; i < Names.Length; i++)
         {
             if (!InputMap.HasAction(Names[i])) InputMap.AddAction(Names[i], 0.2f);
@@ -31,6 +31,7 @@ public sealed class InputRouter
         AddButton("special", JoyButton.B);
         AddButton("evade", JoyButton.A); AddButton("flask", JoyButton.LeftShoulder); AddButton("pause", JoyButton.Start);
         AddButton("interact", JoyButton.DpadUp);
+        AddButton("local_map",JoyButton.Back);AddButton("region_map",JoyButton.DpadRight);
         AddButton("ui_accept", JoyButton.A); AddButton("ui_cancel", JoyButton.B);
         AddButton("ui_up", JoyButton.DpadUp); AddButton("ui_down", JoyButton.DpadDown);
         AddButton("ui_left", JoyButton.DpadLeft); AddButton("ui_right", JoyButton.DpadRight);
@@ -104,7 +105,7 @@ public sealed class InputRouter
     public string Glyph(string action)
     {
         if (Controller)
-            return action switch { "cleave" => "RB", "pulse" => "X", "lance" => "Y", "special" => "B", "evade" => "A", "flask" => "LB", "pause" => "START", "interact" => "D-PAD UP", _ => "LS" };
+            return action switch { "cleave" => "RB", "pulse" => "X", "lance" => "Y", "special" => "B", "evade" => "A", "flask" => "LB", "pause" => "START", "interact" => "D-PAD UP", "local_map"=>"VIEW", "region_map"=>"D-PAD RIGHT", _ => "LS" };
         var key = InputMap.ActionGetEvents(action).OfType<InputEventKey>().FirstOrDefault();
         return key is null ? "LMB" : OS.GetKeycodeString(key.PhysicalKeycode).ToUpperInvariant();
     }

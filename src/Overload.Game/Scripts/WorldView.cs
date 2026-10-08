@@ -18,6 +18,7 @@ public partial class WorldView : Node2D
     public static readonly Rect2[] Walls = [new(16, 44, 608, 12), new(16, 314, 608, 14), new(16, 44, 12, 284), new(612, 44, 12, 284), new(205, 117, 24, 28), new(411, 237, 24, 28)];
     public Rect2[] CurrentWalls { get; private set; } = Walls;
     public TacticalNavigation Navigation { get; private set; } = new([]);
+    public LevelGeometry Geometry { get; private set; } = LevelGeometry.Court;
     public override void _Ready()
     {
         foreach (var name in new[] { "court", "ash", "glass", "hollow", "crown", "hearth" }) backgrounds[name] = GD.Load<Texture2D>($"res://Assets/Pixel/{name}.png");
@@ -25,6 +26,8 @@ public partial class WorldView : Node2D
     }
     public void Configure(Rect2[] obstacles)
     {
+        Exploration=null;
+        Geometry=new(LevelGeometry.Court.Bounds,[..obstacles.Select(r=>new RoomBlock((int)r.Position.X,(int)r.Position.Y,(int)r.Size.X,(int)r.Size.Y))]);
         exitOpen=false;
         foreach (var body in GetChildren().OfType<StaticBody2D>()) { body.CollisionLayer = 0; body.QueueFree(); }
         foreach (var prop in GetChildren().OfType<CourtProp>()) prop.QueueFree();
@@ -41,6 +44,7 @@ public partial class WorldView : Node2D
     public void Render(double delta, bool paused) { if (!paused) time += (float)Math.Min(delta, .05); QueueRedraw(); }
     public override void _Draw()
     {
+        if(Exploration is not null) { DrawExploration();return; }
         var name = hearth ? "hearth" : region?.ToString().ToLowerInvariant() ?? "court";
         // Overscan aligns the clear authored floor with the existing 28..612 / 56..314 collision field.
         DrawTextureRect(backgrounds[name], new(-28, -32, 696, 424), false);

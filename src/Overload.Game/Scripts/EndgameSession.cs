@@ -22,14 +22,14 @@ public partial class Arena
     private readonly Dictionary<long,(SkillId Skill,ActionImplementation Implementation)> trialActions=[];
     private bool masteryEarned;
     private EndgameWorld laws=null!;
-    public string? ActiveMutation => SovereignActive?"mutation.anchor":FractureActive&&FractureGroup==6?Character?.State.Fracture?.Mutation:TrialActive&&TrialStage==2?"mutation.anchor":null;
+    public string? ActiveMutation => SovereignActive?"mutation.anchor":FractureActive&&(FractureGroup==6||GraphFracture&&Enemies.Any(e=>e.Enemy is {Dead:false,Definition.Role:EnemyRole.Bellkeeper}))?Character?.State.Fracture?.Mutation:TrialActive&&TrialStage==2?"mutation.anchor":null;
     public bool HazardAssisted=>laws?.Assisted??false;
     public void SetHazardAssisted(bool value)=>laws.SetAssisted(value);
     public void StartRegional(BigInteger tier,Region region,ActivityFamily activity,string? mutation=null,bool anomaly=false)
     {
         if(Playing || Character is null)return;
         if(Character.State.Fracture is not { Completed:false })
-            if(!UpdateCharacter(s=>EndgameRules.Begin(s,tier,Guid.NewGuid(),region,activity,mutation,anomaly,laws?.Assisted??false,true))){Hud.Fractures();return;}
+            if(!UpdateCharacter(s=>!IsSmoke||OS.GetCmdlineUserArgs().Any(a=>a is "--world-smoke" or "--world-review")?FractureMapRules.Begin(s,tier,Guid.NewGuid(),region,activity,mutation,anomaly,laws?.Assisted??false):EndgameRules.Begin(s,tier,Guid.NewGuid(),region,activity,mutation,anomaly,laws?.Assisted??false,true))){Hud.Fractures();return;}
         EnterFractureGroup();
     }
     public void ObserveTrialAction(SkillId skill,ActionImplementation implementation,long root)
@@ -129,5 +129,5 @@ public partial class Arena
         masteryEarned=run.MasteryEarned; laws.Configure(run.WorldRules,FractureGroup==6?run.Mutation:null,run.Activity,run.Assisted);
     }
     public bool EndgameObjectiveReady => !FractureActive || !RegionalContent.IsRegional(Character!.State.Fracture!.ContentVersion) || laws.ObjectiveReady;
-    public string EndgameHint => CovenantChallengeActive?$"RED COVENANT {TrialStage+1}/3 / {(TrialStage==0?"Reach 20% Life reserved, then defeat guardians.":TrialStage==1?"Use Flask while hurt with Life reserved; defeat guardians.":"Defeat the boss with the reservoir tradeoff.")}":TrialActive?$"CONTRADICTION {TrialStage+1}/3 - Normalized power; no Override. {(TrialStage==0?"Land two Assault skills or signatures.":TrialStage==1?"Follow the safe lane.":"Defeat the remembering bell.")}":SovereignActive?"SOVEREIGN ECHO - Leave its return mark before the volley.":FractureActive&&RegionalContent.IsRegional(Character!.State.Fracture!.ContentVersion)?laws.Hint:"";
+    public string EndgameHint => CovenantChallengeActive?$"RED COVENANT {TrialStage+1}/3 / {(TrialStage==0?"Reach 20% Life reserved, then defeat guardians.":TrialStage==1?"Use Flask while hurt with Life reserved; defeat guardians.":"Defeat the boss with the reservoir tradeoff.")}":TrialActive?$"CONTRADICTION {TrialStage+1}/3 - Normalized power; no Override. {(TrialStage==0?"Land two Assault skills or signatures.":TrialStage==1?"Follow the safe lane.":"Defeat the remembering bell.")}":SovereignActive?"SOVEREIGN ECHO - Leave its return mark before the volley.":GraphFracture?WorldZone!.Objective:FractureActive&&RegionalContent.IsRegional(Character!.State.Fracture!.ContentVersion)?laws.Hint:"";
 }

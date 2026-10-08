@@ -19,7 +19,7 @@ public sealed class ArenaActionPreflight(Arena arena) : IActionPreflight
         {
             var point = new Vector2(anchor.Position.X, anchor.Position.Y);
             Vector2? landing = null;
-            if (anchor.RoomId == arena.RoomId && origin.DistanceTo(point) <= 256 && WorldQueries.Connected(origin, point, arena.Player.Radius, arena.CollisionWalls))
+            if (anchor.RoomId == arena.RoomId && origin.DistanceTo(point) <= 256 && WorldQueries.Connected(origin, point, arena.Player.Radius, arena.CollisionWalls,arena.WorldNavigation))
                 for (var ring = 0; ring <= 4 && landing is null; ring++)
                     for (var direction = 0; direction < (ring == 0 ? 1 : 8); direction++)
                     {

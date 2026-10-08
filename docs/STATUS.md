@@ -1,10 +1,14 @@
 # Implementation status
 
+Connected world implemented 8 October 2026. [World implementation](WORLD_IMPLEMENTATION.md) records W01–W06: seventeen explorable zones, physical travel, persistent fog/waypoints/refuges, four regional arcs and eight placed bosses, convergent endings, new-character activation, and immutable graph-driven Fractures. The [Diablo/PoE study](WORLD_MAP_RESEARCH.md) and [original proposal](WORLD_MAP_DESIGN.md) remain the design basis. Schema 6 preserves legacy journeys and expeditions. Independent human acceptance remains open.
+
+Current world evidence: **228 domain/content tests**, all **six standalone suites**, a rendered walkthrough covering all three Frames and all three Fracture activities, **71 world captures**, six map display/text-size cases, and **13 PNG pairs / 332 frames** validated. **10,000 physical map samples** found zero unreachable maps; the shortest/longest seeds also pass rendered room-visibility checks. The local 1280×720 sample passed at **p95 9.17 ms / p99 9.44 ms**; a ten-minute accelerated simulation passed with bounded actors and approximately 30 KB saves. `artifacts/LATEST-WORLD.json` identifies the current Windows build, hashes and evidence. Fixture defeats and accelerated time do not establish human combat quality, pacing or real-time endurance.
+
 Updated 8 October 2026 for the experience upgrade: pixel-art rendering and action-phase animation, tactical enemy navigation, bounded pack windups, contextual Overload coaching, continuous campaign checkpoints, reward comparison/equip-and-continue, revised bindings UI and adaptive synthesized audio are implemented. The current presentation uses Compatibility rendering. Details, verification commands and remaining quality limits are in [experience upgrade](EXPERIENCE_UPGRADE.md). Historical A03/R02 evidence below is preserved and does not certify the new presentation or close human acceptance.
 
-Current upgrade evidence: **210 pure tests**, all five standalone smoke suites (**717 checks** total), a standalone rendered review (**32 screenshots**), **80 menu/display cases**, validated **12 PNG pairs / 328 frames**, and a passing local stress sample (**p95 10.84 ms / p99 14.92 ms**). The fresh playable build is `artifacts/windows/Overload.exe`; the implementation, screenshots and logs belong to this repository's current workspace, `C:\dev\github\bazimazi\overload`.
+Earlier experience-upgrade evidence: **210 pure tests**, all five standalone smoke suites (**717 checks** total), a standalone rendered review (**32 screenshots**), **80 menu/display cases**, validated **12 PNG pairs / 328 frames**, and a passing local stress sample (**p95 10.84 ms / p99 14.92 ms**). The fresh playable build is `artifacts/windows/Overload.exe`; the implementation, screenshots and logs belong to this repository's current workspace, `C:\dev\github\bazimazi\overload`.
 
-`artifacts/LATEST-EXPERIENCE.json` records this build's runtime hashes. `artifacts/LATEST-CANDIDATE.json` continues to identify the older R01 archive; it is preserved rather than relabeled as evidence for this upgrade.
+`artifacts/LATEST-EXPERIENCE.json` records the earlier experience build's runtime hashes. `artifacts/LATEST-CANDIDATE.json` continues to identify the older R01 archive; it is preserved rather than relabeled as evidence for the current world.
 
 Updated 6 October 2026. **Implementation through A03 and quality/release preparation through R02 are delivered within the owner's requested scope. Human acceptance gates remain open.** Q01/Q02 have automated/local evidence; R01 is a review candidate; R02 compatibility is implemented, with expansion selection awaiting real player evidence. The owner arranged a tester, but no independent feedback or human release approval has arrived.
 
@@ -44,7 +48,7 @@ Updated 6 October 2026. **Implementation through A03 and quality/release prepara
 | R01 | Self-contained review candidate, exact dirty source snapshot, dependency/toolchain/content hashes, evidence archive, clean install/update verification and human review/recovery/reporting sheet. Human signoff remains open. |
 | R02 | Old huge-value saves and all three active-run versions retain exact counters/geometry/budgets; future versions preserve every snapshot. Expansion selection is pending reviewed baseline and real player evidence. |
 
-## Current verification
+## Historical A03/R02 verification
 
 - Build: zero warnings and zero errors. **204 domain/content tests pass.** Coverage includes exact huge counters, recovery/migration, all previous progression transactions and the new Frame/Covenant/region cases.
 - Content: **three Frames, 24 skills plus shared Traverse/Flask, 24 regional enemy families, eight bosses and 48 templates**; **189 registry entries across 25 categories**, nine shared signatures. Every authored template passes conservative connectivity; 4,000 new regional layouts are tested alongside previous generator coverage.
@@ -63,7 +67,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File build/release.ps1 -SkipExpor
 powershell -NoProfile -ExecutionPolicy Bypass -File build/run.ps1
 ```
 
-Current evidence: `artifacts/through-a03-validation.log`, `artifacts/a03-export-validation.log`, `artifacts/export-*-smoke.log`, `artifacts/a03-capture.log`, `artifacts/screenshots-expansion` and `artifacts/expansion-a03`. Earlier P07/E05/S06 logs, reports, captures and archives are preserved. A clean checkout imports assets before a direct engine run; export performs this import.
+Historical A03/R02 evidence: `artifacts/through-a03-validation.log`, `artifacts/a03-export-validation.log`, `artifacts/a03-capture.log`, `artifacts/screenshots-expansion` and `artifacts/expansion-a03`. The `artifacts/export-*-smoke.log` files are refreshed by current exports. Earlier P07/E05/S06 logs, reports, captures and archives are preserved. A clean checkout imports assets before a direct engine run; export performs this import.
 
 ## Candidate and save behavior
 

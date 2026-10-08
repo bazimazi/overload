@@ -38,7 +38,7 @@ public sealed class SaveTests : IDisposable
     {
         var xp = Progression.TotalXp(BigInteger.Pow(10, 30));
         var old = new CharacterState { SchemaVersion = 1, TotalXp = xp, ValidatedLevel = 1 };
-        var migrated = CharacterStore.Decode(CharacterStore.Encode(old)); Assert.Equal(xp, migrated.TotalXp); Assert.Equal(5, migrated.SchemaVersion);
+        var migrated = CharacterStore.Decode(CharacterStore.Encode(old)); Assert.Equal(xp, migrated.TotalXp); Assert.Equal(6, migrated.SchemaVersion);
         Assert.Equal(BigInteger.Pow(10, 30), migrated.ValidatedLevel);
         Directory.CreateDirectory(directory); var future = CharacterStore.Encode(migrated with { SchemaVersion = 999 });
         File.WriteAllText(Path.Combine(directory, "character.json"), future);

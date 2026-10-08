@@ -8,17 +8,25 @@ public partial class Arena
     private float shakeTime, shakePower, presentationTime;
     private string presentedRoom = "";
     public float ArrivalTime { get; private set; }
-    public string ArrivalTitle => JourneyActive ? Character!.State.RegionalCampaign && JourneyRoom % 4 == 0 ? RegionName((Overload.Domain.Region)(JourneyRoom/4)) : JourneyName : FractureActive ? RegionName(Character!.State.Fracture!.Region) + " / FRACTURE " + Overload.Domain.CounterText.Short(EncounterTier) : Wave == 3 ? EncounterBossName : "The Broken Court";
+    public string ArrivalTitle => WorldActive ? WorldZone.Name : JourneyActive ? Character!.State.RegionalCampaign && JourneyRoom % 4 == 0 ? RegionName((Overload.Domain.Region)(JourneyRoom/4)) : JourneyName : FractureActive ? RegionName(Character!.State.Fracture!.Region) + " / FRACTURE " + Overload.Domain.CounterText.Short(EncounterTier) : Wave == 3 ? EncounterBossName : "The Broken Court";
     public void Impact(float power) { if (Audio.ReducedFlash) return; shakeTime = .14f; shakePower = Math.Min(2.5f, Math.Max(shakePower, power)); }
     public void PresentHearth()
     {
         if (Playing) return;
         world.SetHearth(); world.Configure([]);
+        Audio.SetHearth();
         Player.SetFrame(Character?.State.Frame ?? Overload.Domain.FrameId.Warden);
         Player.Position = new(430,224); Player.Velocity = Vector2.Zero; Player.Facing = Vector2.Down; Player.TeleportVisual();
     }
     private void RenderPresentation(double delta)
     {
+        if(WorldActive)
+        {
+            var b=WorldZone.Geometry.Bounds;
+            viewCamera.Position=new Vector2(Math.Clamp(Player.Position.X,b.X+320,b.X+b.Width-320),Math.Clamp(Player.Position.Y,b.Y+180,b.Y+b.Height-180)).Round();
+            world.Viewer=viewCamera.Position;
+        }
+        else viewCamera.Position=new(320,180);
         var dt = (float)Math.Min(delta, .05);
         if (!Paused) presentationTime += dt;
         if (RoomId != presentedRoom && Playing) { presentedRoom = RoomId; ArrivalTime = 2.6f; }

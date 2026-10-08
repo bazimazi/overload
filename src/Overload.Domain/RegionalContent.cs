@@ -21,5 +21,5 @@ public static class RegionalContent
     }
     public static EnemyDefinition Boss(Region region, int variant) => Enemies.Single(e=>e.Role==EnemyRole.Bellkeeper&&e.ContentId==new[]{"boss.region.bellkeeper","boss.region.forgeheart","boss.region.mirrorregent","boss.region.reedwidow","boss.region.indexer","boss.region.nullabbot","boss.region.scarmarshal","boss.region.firstpattern"}[(int)region*2+variant]);
     public static EnemyDefinition Enemy(Region region, int index) => Enemies.Where(e=>e.Role!=EnemyRole.Bellkeeper).ElementAt((int)region*6+index);
-    public static bool IsRegional(string version) => version is EndgameRules.Version or ExpeditionVersion;
+    public static bool IsRegional(string version) => version is EndgameRules.Version or ExpeditionVersion or FractureMapRules.Version;
 }

@@ -1,13 +1,14 @@
 using Overload.Content;
 using Overload.Tools;
 
-if (args.Length == 0 || args[0] is not ("validate-content" or "balance-report" or "content-report" or "generator-report" or "frame-report" or "quality-report" or "release-update"))
+if (args.Length == 0 || args[0] is not ("validate-content" or "balance-report" or "content-report" or "generator-report" or "world-report" or "frame-report" or "quality-report" or "release-update"))
 {
     Console.Error.WriteLine("Usage: validate-content [path] | balance-report [output-directory]");
     return 2;
 }
 try
 {
+    if(args[0]=="world-report"){WorldReports.Export(args.Length>1?args[1]:"artifacts/world");return 0;}
     if(args[0]=="release-update")
     {
         if(args.Length!=3)throw new ArgumentException("release-update requires archived runtime directory and output directory");
@@ -46,6 +47,8 @@ try
     }
     var path = args.Length > 1 ? args[1] : "src/Overload.Game/Content/arena.json";
     var profile = ProfileLoader.Load(File.ReadAllText(path));
+    foreach(var zone in Overload.Domain.WorldContent.Zones.Values)Overload.Domain.WorldContent.Validate(zone);
+    Console.WriteLine("VALID world.v1: 17 connected authored zones, physical exits and regional reward manifests");
     Console.WriteLine($"VALID {profile.Id}: {profile.Skills.Length} actions, {profile.Enemies.Length} enemy roles, {profile.Overload.Patterns.Length} pattern definitions, {profile.Overload.Bindings.Length} bindings");
     ExpansionLoader.Load(profile,File.ReadAllText("src/Overload.Game/Content/expansion.json"));
     Console.WriteLine("VALID expansion.v1: 3 Frames, 24 skills, 24 regional families, 8 bosses, 48 rooms");

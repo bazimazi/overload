@@ -43,7 +43,7 @@ public sealed class ProductionSaveTests:IDisposable
     public void SchemaThreeActiveExpeditionRemainsLoadableAndUnknownGeneratorsAreRejected()
     {
         var legacy=EndlessRules.Begin(ProductionTests.Reference(),10,Guid.NewGuid()) with { SchemaVersion=3 };
-        var loaded=CharacterStore.Decode(CharacterStore.Encode(legacy));Assert.Equal(5,loaded.SchemaVersion);Assert.Equal(legacy.Fracture!.Id,loaded.Fracture!.Id);Assert.True(legacy.Fracture.Rooms.SequenceEqual(loaded.Fracture.Rooms));
+        var loaded=CharacterStore.Decode(CharacterStore.Encode(legacy));Assert.Equal(6,loaded.SchemaVersion);Assert.Equal(legacy.Fracture!.Id,loaded.Fracture!.Id);Assert.True(legacy.Fracture.Rooms.SequenceEqual(loaded.Fracture.Rooms));
         var regional=EndgameRules.Begin(ProductionTests.Reference(),10,Guid.NewGuid(),Region.Ash,ActivityFamily.Hunt);
         Assert.Throws<FutureSaveException>(()=>CharacterStore.Decode(CharacterStore.Encode(regional with { Fracture=regional.Fracture! with { Layout=regional.Fracture.Layout! with { Version="rooms.future" } } })));
     }
