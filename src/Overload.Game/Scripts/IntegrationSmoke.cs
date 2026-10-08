@@ -51,10 +51,14 @@ public sealed class IntegrationSmoke(Arena arena)
             case 372: Check(arena.Hud.MenuVisible && !arena.Playing, "return to title"); Joy(JoyButton.A, true); break;
             case 374: Joy(JoyButton.A, false); break;
             case 379: Check(arena.Playing, "controller confirms title selection"); arena.ReturnToTitle(); break;
+            case 380: Joy(JoyButton.DpadDown, true); break;
+            case 381: Joy(JoyButton.DpadDown, false); break;
             case 382: Joy(JoyButton.DpadDown, true); break;
             case 383: Joy(JoyButton.DpadDown, false); break;
-            case 385: Joy(JoyButton.A, true); break;
-            case 386: Joy(JoyButton.A, false); break;
+            case 384: Joy(JoyButton.DpadDown, true); break;
+            case 385: Joy(JoyButton.DpadDown, false); Joy(JoyButton.DpadRight, true); break;
+            case 386: Joy(JoyButton.DpadRight, false); Joy(JoyButton.A, true); break;
+            case 387: Joy(JoyButton.A, false); break;
             case 390:
                 Check(arena.Playing && arena.Wave == 3, "controller navigates to boss practice");
                 arena.StartEncounter(0); ClearEnemies();

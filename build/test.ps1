@@ -7,9 +7,11 @@ try {
     Invoke-Checked $DotNet @('run', '--project', 'src/Overload.Tools', '-c', 'Release', '--no-build', '--', 'validate-content')
     Invoke-Checked $DotNet @('run', '--project', 'src/Overload.Tools', '-c', 'Release', '--no-build', '--', 'frame-report')
     if ($Engine) {
+        Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--editor', '--import')
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--smoke-test')
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--endless-smoke')
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--production-smoke')
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--expansion-smoke')
+        Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--experience-smoke')
     }
 } finally { Pop-Location }

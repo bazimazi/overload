@@ -56,12 +56,13 @@ public partial class Arena : Node
     public override void _Notification(int what)
     {
         if (what == NotificationWMCloseRequest) QuitGame();
-        if (what == NotificationWMWindowFocusOut && !IsSmoke && Playing && !Paused) TogglePause();
+        if (what == NotificationWMWindowFocusOut && !IsSmoke && (Playing || CheckpointRest) && !Paused) TogglePause();
     }
 
     public override void _Ready()
     {
         GetTree().AutoAcceptQuit = false;
+        DisplayServer.WindowSetTitle("Overload — The Palimpsest");
         // Simulation is 60 Hz. Bound redundant renders on high-refresh displays while retaining headroom.
         Engine.MaxFps=DisplayServer.GetName()=="headless"?0:120;
         var practice = OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--fracture-practice=",StringComparison.Ordinal));
@@ -70,7 +71,7 @@ public partial class Arena : Node
             try { PracticeTier=Quantity.Parse(practice.Split('=')[1]).Value; if(PracticeTier<1) throw new FormatException(); }
             catch(FormatException) { GD.PushError("Practice tier must be a positive decimal integer");GetTree().Quit(1);return; }
         }
-        IsSmoke = practice is not null || OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--quality-", StringComparison.Ordinal) || a is "--smoke-test" or "--capture-slice" or "--endless-smoke" or "--capture-endless" or "--production-smoke" or "--capture-production" or "--expansion-smoke" or "--capture-expansion");
+        IsSmoke = practice is not null || OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--quality-", StringComparison.Ordinal) || a is "--experience-smoke" or "--experience-review" or "--smoke-test" or "--capture-polish" or "--capture-slice" or "--endless-smoke" or "--capture-endless" or "--production-smoke" or "--capture-production" or "--expansion-smoke" or "--capture-expansion");
         try { Balance = ProfileLoader.Load(FileAccess.GetFileAsString("res://Content/arena.json")); Balance = ExpansionLoader.Load(Balance, FileAccess.GetFileAsString("res://Content/expansion.json")); ReleaseContent.Load(FileAccess.GetFileAsString("res://Content/release.json")); }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); return; }
         BaseBalance = Balance;
@@ -87,7 +88,7 @@ public partial class Arena : Node
         worldContainer.AddChild(viewport);
         LayoutWorld();
         world = new WorldView(); viewport.AddChild(world);
-        world.AddChild(new Camera2D { Position = new Vector2(320, 180), PositionSmoothingEnabled = false });
+        viewCamera = new Camera2D { Position = new Vector2(320, 180), PositionSmoothingEnabled = false }; world.AddChild(viewCamera);
         Player = new ActorBody { ActorId = 0, Position = new Vector2(140, 190) }; world.AddChild(Player);
         motion = new(this);
         Effects = new CombatEffects { ZIndex = 100 }; Effects.Initialize(this); world.AddChild(Effects);
@@ -106,15 +107,17 @@ public partial class Arena : Node
         if(OS.GetCmdlineUserArgs().Contains("--production-smoke"))CallDeferred(nameof(RunProductionSmoke));
         if(OS.GetCmdlineUserArgs().Contains("--expansion-smoke")||OS.GetCmdlineUserArgs().Contains("--capture-expansion"))CallDeferred(nameof(RunExpansionSmoke));
         if(OS.GetCmdlineUserArgs().Any(a=>a.StartsWith("--quality-",StringComparison.Ordinal)))CallDeferred(nameof(BeginQuality));
+        if(OS.GetCmdlineUserArgs().Contains("--capture-polish"))CallDeferred(nameof(ReviewPolish));
+        if(OS.GetCmdlineUserArgs().Any(a=>a is "--experience-smoke" or "--experience-review"))CallDeferred(nameof(ReviewExperience));
         GD.Print("OVERLOAD_READY arena.v1");
     }
     public override void _Process(double delta)
     {
         LayoutWorld(); MeasureQualityFrame();
+        if (Player is not null) RenderPresentation(delta);
         var frame=Engine.GetPhysicsFrames();
         if(Player is null||frame==lastRedrawPhysicsFrame)return;
         lastRedrawPhysicsFrame=frame;
-        foreach(var body in Enemies.Append(Player))body.QueueRedraw();
         Effects.QueueRedraw();Hud.QueueRedraw();
     }
     private void ControllerConnectionChanged(long device, bool connected)
@@ -158,10 +161,13 @@ public partial class Arena : Node
         JourneyActive = false; world.SetRegion(null); world.Configure(WorldView.Walls.Skip(4).ToArray());
         deathReceipt=Guid.NewGuid();
         Wave = wave; Playing = true; Paused = false; transitionTicks = 0; deathShown = false;
+        Audio.SetPaused(false);
         Controls.ClearBuffer(); PlayerState.Reset(); Effects.Reset(); director.Reset();
+        ResetExperience();
         foreach (var enemy in Enemies) { enemy.CollisionLayer = 0; enemy.CollisionMask = 0; enemy.QueueFree(); }
         Enemies.Clear();
         Player.Position = new Vector2(140, 190); Player.Velocity = Vector2.Zero; Player.Facing = Vector2.Right;
+        Player.TeleportVisual(); presentedRoom = ""; ArrivalTime = 2.6f;
         motion.Reset(); Player.SetFrame(Character?.State.Frame??FrameId.Warden);
         if (wave == 3) Spawn(EnemyRole.Bellkeeper, new(430, 180));
         else
@@ -180,23 +186,27 @@ public partial class Arena : Node
     }
     public void ReturnToTitle()
     {
+        CheckpointRest=false;
         FractureActive = false; EncounterTier = 1; TrialActive=false;SovereignActive=false;laws?.Clear();
         covenantChallenge=false; JourneyActive = false; Playing = false; Paused = false; Controls.ClearBuffer(); motion.Reset(); PlayerState.Reset();
         if (OathPractice) { PlayerState.TryChangeOaths(practiceReturnOath ? ["oath.elsewhere"] : []); OathPractice = false; }
         ApplyCharacterBuild();
-        PlayerState.Memories.Clear(MemoryClearReason.EncounterExit); Predictions.Clear(); Effects.Reset(); Hud.Title();
+        PlayerState.Memories.Clear(MemoryClearReason.EncounterExit); Predictions.Clear(); Effects.Reset(); Audio.SetPaused(false);
+        foreach (var enemy in Enemies) { enemy.CollisionLayer = 0; enemy.QueueFree(); } Enemies.Clear();
+        Player.Position = new(430, 224); Player.Velocity = Vector2.Zero; Player.Facing = Vector2.Down; Player.TeleportVisual(); Hud.Title();
     }
     public void TogglePause()
     {
-        if (!Playing || PlayerState.Dead) return;
+        if ((!Playing && !CheckpointRest) || PlayerState.Dead) return;
         Paused = !Paused; Controls.ClearBuffer();
+        Audio.SetPaused(Paused);
         if (Paused) Hud.Pause(); else Hud.HideMenu();
     }
     public override void _UnhandledInput(InputEvent input)
     {
         Controls.Observe(input);
         if (Hud.TryCaptureKey(input)) { GetViewport().SetInputAsHandled(); return; }
-        if (input.IsActionPressed("pause") && Playing) { TogglePause(); GetViewport().SetInputAsHandled(); }
+        if (input.IsActionPressed("pause") && (Playing || CheckpointRest)) { TogglePause(); GetViewport().SetInputAsHandled(); }
         if (input is InputEventKey { Pressed: true, Echo: false, Keycode: Key.F3 }) Debug = !Debug;
     }
     public override void _PhysicsProcess(double delta)
@@ -207,12 +217,14 @@ public partial class Arena : Node
         RecordQualityStage("fixture",qualityStart);
         smoke?.BeforeTick();
         endlessSmoke?.Tick();
+        if (CheckpointRest) { AdvanceCheckpoint();smoke?.AfterTick();return; }
         if (!Playing || Paused || PlayerState.Dead)
         {
             if (PlayerState.Dead && !deathShown) { deathShown = true; motion.Reset(); Effects.Reset(); if(BankEndgameDeath())Hud.Death(); }
             smoke?.AfterTick(); return;
         }
         PlayerState.AdvanceClock();
+        foreach (var body in Enemies.Append(Player)) body.BeginTick();
         // Every live hostile in this authored arena actively pursues or targets the Warden.
         PlayerState.SetCombatActive(Enemies.Any(e => !e.Enemy!.Dead));
         Player.Flash = false;
@@ -224,7 +236,14 @@ public partial class Arena : Node
         {
             id = EquippedAction(id);
             var aim = id == SkillId.Traverse && intent.Move.LengthSquared() > 0 ? intent.Move : intent.Aim;
-            if (PlayerState.TryStart(id, new(aim.X, aim.Y))) Controls.ClearBuffer();
+            if (PlayerState.TryStart(id, new(aim.X, aim.Y)))
+            {
+                Controls.ClearBuffer();
+                if (id == SkillId.Traverse) Audio.Play("evade", "Player");
+                else if (id == SkillId.Flask) Audio.Play("heal", "Player");
+                if (PlayerState.Action?.Implementation is { } implementation && implementation != ActionImplementation.Base) Audio.Play("overload", "Player");
+            }
+            else if (id != FrameRules.Basic(Character?.State.Frame ?? FrameId.Warden)) NoticeRejectedAction();
         }
         Player.Facing = intent.Aim;
         var velocity = intent.Move * Balance.Hero.Speed;
@@ -240,7 +259,8 @@ public partial class Arena : Node
         var movementKind = PlayerState.Action?.Definition.Id == SkillId.Traverse ? LocomotionKind.StandardEvade : LocomotionKind.Walk;
         motion.Move(velocity);
         var displacement = Player.Position - beforeMovement;
-        foreach (var enemy in Enemies.OrderBy(e => e.ActorId)) director.Advance(enemy, Player, PlayerState.Tick, Effects,ActiveMutation);
+        ObserveExperience(displacement);
+        foreach (var enemy in Enemies.OrderBy(e => e.ActorId)) director.Advance(enemy, Player, PlayerState.Tick, Effects,ActiveMutation,Enemies,world.Navigation);
         RecordQualityStage("movement/director",qualityStart);qualityStart=QualityTimestamp;
         PlayerState.Memories.ObservePosition(new(Player.Position.X,Player.Position.Y));
         Effects.PlayerAction();
@@ -266,6 +286,7 @@ public partial class Arena : Node
         }
         Player.AnchorHalo=Character?.State.SovereignRewards.Contains("echo.anchor")==true;
         Player.Evasion = PlayerState.Evading;
+        Player.PublishPose(PlayerState);
         if (!PlayerState.Dead && Enemies.All(e => e.Enemy!.Dead) && EndgameObjectiveReady)
         {
             transitionTicks++;

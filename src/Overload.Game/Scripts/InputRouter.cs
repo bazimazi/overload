@@ -7,19 +7,20 @@ public readonly record struct PlayerIntent(Vector2 Move, Vector2 Aim, SkillId? A
 
 public sealed class InputRouter
 {
-    public static readonly string[] Names = ["move_left", "move_right", "move_up", "move_down", "cleave", "pulse", "lance", "special", "evade", "flask", "pause"];
+    public static readonly string[] Names = ["move_left", "move_right", "move_up", "move_down", "cleave", "pulse", "lance", "special", "evade", "flask", "pause", "interact"];
     private readonly string settingsPath;
     private SkillId? buffered;
     private SkillId? pressed;
     private long expires;
     private Vector2 lastAim = Vector2.Right;
     private Vector2 lastMouse;
+    private bool pointerObserved;
     public bool Controller { get; private set; }
     public Vector2 PointerPosition { get; private set; }
     public InputRouter(bool smoke)
     {
         settingsPath = smoke ? "user://tests/controls.cfg" : "user://controls.cfg";
-        Key[] keys = [Key.A, Key.D, Key.W, Key.S, Key.None, Key.Q, Key.E, Key.R, Key.Space, Key.F, Key.Escape];
+        Key[] keys = [Key.A, Key.D, Key.W, Key.S, Key.None, Key.Q, Key.E, Key.R, Key.Space, Key.F, Key.Escape, Key.G];
         for (var i = 0; i < Names.Length; i++)
         {
             if (!InputMap.HasAction(Names[i])) InputMap.AddAction(Names[i], 0.2f);
@@ -29,6 +30,7 @@ public sealed class InputRouter
         AddButton("cleave", JoyButton.RightShoulder); AddButton("pulse", JoyButton.X); AddButton("lance", JoyButton.Y);
         AddButton("special", JoyButton.B);
         AddButton("evade", JoyButton.A); AddButton("flask", JoyButton.LeftShoulder); AddButton("pause", JoyButton.Start);
+        AddButton("interact", JoyButton.DpadUp);
         AddButton("ui_accept", JoyButton.A); AddButton("ui_cancel", JoyButton.B);
         AddButton("ui_up", JoyButton.DpadUp); AddButton("ui_down", JoyButton.DpadDown);
         AddButton("ui_left", JoyButton.DpadLeft); AddButton("ui_right", JoyButton.DpadRight);
@@ -43,7 +45,7 @@ public sealed class InputRouter
     private static void AddAxis(string action, JoyAxis axis, float value) => InputMap.ActionAddEvent(action, new InputEventJoypadMotion { Axis = axis, AxisValue = value, Device = -1 });
     public void Observe(InputEvent input)
     {
-        if (input is InputEventMouse mouse) PointerPosition = mouse.Position;
+        if (input is InputEventMouse mouse) { PointerPosition = mouse.Position; pointerObserved = true; }
         if (input is InputEventJoypadButton || input is InputEventJoypadMotion motion && Mathf.Abs(motion.AxisValue) > 0.25f) Controller = true;
         if (input is InputEventKey or InputEventMouseButton) Controller = false;
         if (input.IsEcho()) return;
@@ -60,9 +62,9 @@ public sealed class InputRouter
         Vector2 stick = Vector2.Zero;
         if (devices.Count > 0) stick = new(Input.GetJoyAxis(devices[0], JoyAxis.RightX), Input.GetJoyAxis(devices[0], JoyAxis.RightY));
         if (stick.Length() > 0.22f) { lastAim = stick.Normalized(); Controller = true; }
-        else if (mouse.DistanceSquaredTo(lastMouse) > 1) { lastAim = (mouse - player).Normalized(); Controller = false; }
+        else if (pointerObserved && mouse.DistanceSquaredTo(lastMouse) > 1) { lastAim = (mouse - player).Normalized(); Controller = false; }
         else if (Controller && move.LengthSquared() > 0.01f) lastAim = move.Normalized();
-        else if (!Controller && mouse.DistanceSquaredTo(player) > 1) lastAim = (mouse - player).Normalized();
+        else if (pointerObserved && !Controller && mouse.DistanceSquaredTo(player) > 1) lastAim = (mouse - player).Normalized();
         lastMouse = mouse;
         // Higher-priority deliberate presses supersede a held basic attack.
         SkillId? requested = pressed ?? (Input.IsActionPressed("cleave") ? SkillId.Cleave : null);
@@ -102,7 +104,7 @@ public sealed class InputRouter
     public string Glyph(string action)
     {
         if (Controller)
-            return action switch { "cleave" => "RB", "pulse" => "X", "lance" => "Y", "special" => "B", "evade" => "A", "flask" => "LB", "pause" => "START", _ => "LS" };
+            return action switch { "cleave" => "RB", "pulse" => "X", "lance" => "Y", "special" => "B", "evade" => "A", "flask" => "LB", "pause" => "START", "interact" => "D-PAD UP", _ => "LS" };
         var key = InputMap.ActionGetEvents(action).OfType<InputEventKey>().FirstOrDefault();
         return key is null ? "LMB" : OS.GetKeycodeString(key.PhysicalKeycode).ToUpperInvariant();
     }

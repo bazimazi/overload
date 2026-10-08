@@ -59,6 +59,15 @@ try {
         Write-Output $output
         $errors = Get-Content $stderr -Raw
         if ($process.ExitCode -ne 0 -or $output -notmatch 'OVERLOAD_EXPANSION_SMOKE_OK' -or $errors -match 'ERROR:') { throw "Exported expansion smoke failed: $errors" }
+        $stdout = Join-Path $RepoRoot 'artifacts/export-experience-smoke.log'
+        $stderr = Join-Path $RepoRoot 'artifacts/export-experience-smoke-errors.log'
+        $process = Start-Process -FilePath (Join-Path $RepoRoot 'artifacts/windows/Overload.exe') -ArgumentList @('--headless', '--fixed-fps', '60', '--', '--experience-smoke') -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+        $null = $process.Handle
+        if (!$process.WaitForExit(60000)) { $process.Kill(); throw 'Exported experience smoke test timed out' }
+        $output = Get-Content $stdout -Raw
+        Write-Output $output
+        $errors = Get-Content $stderr -Raw
+        if ($process.ExitCode -ne 0 -or $output -notmatch 'OVERLOAD_EXPERIENCE_OK' -or $errors -match 'ERROR:') { throw "Exported experience smoke failed: $errors" }
 
     }
 } finally { Pop-Location }

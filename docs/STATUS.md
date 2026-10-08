@@ -1,5 +1,11 @@
 # Implementation status
 
+Updated 8 October 2026 for the experience upgrade: pixel-art rendering and action-phase animation, tactical enemy navigation, bounded pack windups, contextual Overload coaching, continuous campaign checkpoints, reward comparison/equip-and-continue, revised bindings UI and adaptive synthesized audio are implemented. The current presentation uses Compatibility rendering. Details, verification commands and remaining quality limits are in [experience upgrade](EXPERIENCE_UPGRADE.md). Historical A03/R02 evidence below is preserved and does not certify the new presentation or close human acceptance.
+
+Current upgrade evidence: **210 pure tests**, all five standalone smoke suites (**717 checks** total), a standalone rendered review (**32 screenshots**), **80 menu/display cases**, validated **12 PNG pairs / 328 frames**, and a passing local stress sample (**p95 10.84 ms / p99 14.92 ms**). The fresh playable build is `artifacts/windows/Overload.exe`; the implementation, screenshots and logs belong to this repository's current workspace, `C:\dev\github\bazimazi\overload`.
+
+`artifacts/LATEST-EXPERIENCE.json` records this build's runtime hashes. `artifacts/LATEST-CANDIDATE.json` continues to identify the older R01 archive; it is preserved rather than relabeled as evidence for this upgrade.
+
 Updated 6 October 2026. **Implementation through A03 and quality/release preparation through R02 are delivered within the owner's requested scope. Human acceptance gates remain open.** Q01/Q02 have automated/local evidence; R01 is a review candidate; R02 compatibility is implemented, with expansion selection awaiting real player evidence. The owner arranged a tester, but no independent feedback or human release approval has arrived.
 
 ## Delivered

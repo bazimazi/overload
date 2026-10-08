@@ -1,0 +1,33 @@
+using Godot;
+
+namespace Overload.Game;
+
+public partial class Arena
+{
+    private Camera2D viewCamera = null!;
+    private float shakeTime, shakePower, presentationTime;
+    private string presentedRoom = "";
+    public float ArrivalTime { get; private set; }
+    public string ArrivalTitle => JourneyActive ? Character!.State.RegionalCampaign && JourneyRoom % 4 == 0 ? RegionName((Overload.Domain.Region)(JourneyRoom/4)) : JourneyName : FractureActive ? RegionName(Character!.State.Fracture!.Region) + " / FRACTURE " + Overload.Domain.CounterText.Short(EncounterTier) : Wave == 3 ? EncounterBossName : "The Broken Court";
+    public void Impact(float power) { if (Audio.ReducedFlash) return; shakeTime = .14f; shakePower = Math.Min(2.5f, Math.Max(shakePower, power)); }
+    public void PresentHearth()
+    {
+        if (Playing) return;
+        world.SetHearth(); world.Configure([]);
+        Player.SetFrame(Character?.State.Frame ?? Overload.Domain.FrameId.Warden);
+        Player.Position = new(430,224); Player.Velocity = Vector2.Zero; Player.Facing = Vector2.Down; Player.TeleportVisual();
+    }
+    private void RenderPresentation(double delta)
+    {
+        var dt = (float)Math.Min(delta, .05);
+        if (!Paused) presentationTime += dt;
+        if (RoomId != presentedRoom && Playing) { presentedRoom = RoomId; ArrivalTime = 2.6f; }
+        if (!Paused) ArrivalTime = Math.Max(0, ArrivalTime - dt);
+        if (!Paused) shakeTime = Math.Max(0, shakeTime - dt);
+        if (shakeTime <= 0 || Paused || Audio.ReducedFlash) { shakePower = 0; viewCamera.Offset = Vector2.Zero; }
+        else viewCamera.Offset = new Vector2(MathF.Sin(presentationTime * 110), MathF.Cos(presentationTime * 135)).Round() * MathF.Ceiling(shakePower * shakeTime / .14f);
+        foreach (var body in Enemies.Append(Player)) body.Render(delta, Paused);
+        world.Render(delta, Paused); Effects.RenderJuice(delta, Paused);
+        Audio.SetEncounter(Playing && Enemies.Any(e=>!e.Enemy!.Dead),Enemies.Any(e=>e.Enemy is { Dead:false,Definition.Role:Overload.Domain.EnemyRole.Bellkeeper }));
+    }
+}

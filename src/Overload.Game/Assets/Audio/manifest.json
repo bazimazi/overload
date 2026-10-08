@@ -1,0 +1,90 @@
+{
+  "author": "Original synthesis authored for Overload, 2026-10-08",
+  "source": "build/generate-palimpsest-audio.py",
+  "assets": [
+    {
+      "name": "music",
+      "seconds": 48,
+      "sampleRate": 22050,
+      "loop": true,
+      "peakDbFS": -17.08
+    },
+    {
+      "name": "combat",
+      "seconds": 48,
+      "sampleRate": 22050,
+      "loop": true,
+      "peakDbFS": -14.81
+    },
+    {
+      "name": "ambience",
+      "seconds": 16,
+      "sampleRate": 22050,
+      "loop": true,
+      "peakDbFS": -29.11
+    },
+    {
+      "name": "strike",
+      "seconds": 0.24,
+      "sampleRate": 22050,
+      "loop": false,
+      "peakDbFS": -10.75
+    },
+    {
+      "name": "hit",
+      "seconds": 0.28,
+      "sampleRate": 22050,
+      "loop": false,
+      "peakDbFS": -8.69
+    },
+    {
+      "name": "cast",
+      "seconds": 0.5,
+      "sampleRate": 22050,
+      "loop": false,
+      "peakDbFS": -22.66
+    },
+    {
+      "name": "evade",
+      "seconds": 0.22,
+      "sampleRate": 22050,
+      "loop": false,
+      "peakDbFS": -28.76
+    },
+    {
+      "name": "defeat",
+      "seconds": 0.65,
+      "sampleRate": 22050,
+      "loop": false,
+      "peakDbFS": -12.49
+    },
+    {
+      "name": "heal",
+      "seconds": 0.9,
+      "sampleRate": 22050,
+      "loop": false,
+      "peakDbFS": -12.55
+    },
+    {
+      "name": "overload",
+      "seconds": 0.65,
+      "sampleRate": 22050,
+      "loop": false,
+      "peakDbFS": -12.87
+    },
+    {
+      "name": "reward",
+      "seconds": 1.5,
+      "sampleRate": 22050,
+      "loop": false,
+      "peakDbFS": -12.49
+    },
+    {
+      "name": "warning",
+      "seconds": 0.38,
+      "sampleRate": 22050,
+      "loop": false,
+      "peakDbFS": -16.07
+    }
+  ]
+}

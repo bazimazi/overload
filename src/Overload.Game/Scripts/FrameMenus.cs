@@ -1,4 +1,5 @@
 using Overload.Domain;
+using Godot;
 namespace Overload.Game;
 public partial class ArenaHud
 {
@@ -10,14 +11,33 @@ public partial class ArenaHud
     public void NewFrameMenu()
     {
         ClearMenu("NEW CHARACTER", "Choose a Frame", "Each character has its own progression, equipment and earned oaths.");
+        var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 16); options.AddChild(row);
         foreach(var frame in Enum.GetValues<FrameId>())
         {
-            Text(frame+": "+string.Join(", ",FrameRules.Skills(frame).Take(4)),15,gold);
-            AddButton("Begin Standard "+frame,()=>{arena.OpenCharacter(true,true,frame);Title();},frame==FrameId.Warden);
-
+            var card=new VBoxContainer { SizeFlagsHorizontal=SizeFlags.ExpandFill };card.AddThemeConstantOverride("separation",10);row.AddChild(card);
+            card.AddChild(new TextureRect { Texture=PixelAtlas.Load(frame.ToString().ToLowerInvariant()).Portrait(), CustomMinimumSize=new(0,130), ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize, StretchMode=TextureRect.StretchModeEnum.KeepAspectCentered, TextureFilter=TextureFilterEnum.Nearest, MouseFilter=MouseFilterEnum.Ignore });
+            var name=new Label { Text=frame.ToString(),HorizontalAlignment=HorizontalAlignment.Center };name.AddThemeColorOverride("font_color",gold);card.AddChild(name);
+            var fantasy=frame switch { FrameId.Warden=>"Steel, pressure and counterplay.\nHold the line. Break their guard.",FrameId.Threadseer=>"Spatial spells and delayed control.\nWeave a battlefield of your own.",_=>"Ranged pressure and a loyal echo.\nStrike, vanish and return." };
+            var description=new Label { Text=fantasy, AutowrapMode=TextServer.AutowrapMode.WordSmart, HorizontalAlignment=HorizontalAlignment.Center };description.AddThemeFontSizeOverride("font_size",FontSize(14));description.AddThemeColorOverride("font_color",muted);card.AddChild(description);
+            var button=new Button { Text="Begin "+frame,CustomMinimumSize=new(0,44) };button.AddThemeFontSizeOverride("font_size",FontSize(16));button.Pressed+=()=>{arena.OpenCharacter(true,true,frame);Title();};card.AddChild(button);if(frame==FrameId.Warden)button.GrabFocus();
         }
+        AddButton("Continue an existing character",SavedFrames);
         AddButton("Compare accelerated training builds",TrainingFrames);
         AddButton("Back",Title);goBack=Title;
+    }
+    private void SavedFrames()
+    {
+        ClearMenu("YOUR JOURNEYS", "Characters", "Choose a saved Frame. Each journey retains its own checkpoint and earned rewards.");
+        var first=true;
+        foreach(var profile in arena.SavedCharacters())
+        {
+            var slot=profile.Slot;
+            if(profile.State is not { } state){ Text(slot+": "+profile.Notice,14,muted);continue; }
+            AddButton($"{state.Frame} / Level {CounterText.Short(state.ValidatedLevel)} / {state.Mode} / Room {state.CheckpointRoom+1}",()=>{if(arena.SelectCharacter(slot))Title();else SavedFrames();},first);first=false;
+        }
+        if(first)Text("No readable saved characters found.",16,muted);
+        if(!string.IsNullOrEmpty(arena.SaveProblem))Text(arena.SaveProblem,14,gold);
+        AddButton("Choose a new Frame",NewFrameMenu);AddButton("Back",Title,first);goBack=Title;
     }
     private void TrainingFrames()
     {

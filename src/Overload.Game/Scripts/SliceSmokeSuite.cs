@@ -63,7 +63,7 @@ public sealed class SliceSmokeSuite(Arena arena, Action<bool, string> check, Act
             if (age == 102)
             {
                 var s = arena.Character!.State;
-                check(!arena.Playing && arena.Hud.MenuVisible && s.CheckpointRoom == room + 1 && s.Revision == revision + 1,
+                check(!arena.Playing && (arena.CheckpointRest || arena.Hud.MenuVisible) && s.CheckpointRoom == room + 1 && s.Revision == revision + 1,
                     $"room {room + 1} saves one reward and opens continuation");
                 var reloaded = CharacterStore.Decode(CharacterStore.Encode(s));
                 check(reloaded.TotalXp == s.TotalXp && reloaded.Inventory.Length == s.Inventory.Length && reloaded.CheckpointRoom == room + 1, $"room {room + 1} checkpoint round-trips");

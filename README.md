@@ -8,7 +8,7 @@ On this workspace, launch **`artifacts/windows/Overload.exe`**. Keep the entire 
 
 The review build uses Mobile/Vulkan rendering. To select Compatibility/OpenGL explicitly on other hardware, launch `Overload.exe --rendering-method gl_compatibility --rendering-driver opengl3`. Additional hardware validation remains open.
 
-The current review candidate is identified by **`artifacts/LATEST-CANDIDATE.json`**, with a uniquely named `Overload-rc-*-windows.zip`, its SHA256, complete source snapshot and quality evidence. Follow the [release review sheet](docs/RELEASE_REVIEW.md). Earlier A03/P07/E05/S06 archives are preserved. Use the [S06 feedback sheet](docs/playtests/S06_FIRST_PLAYTEST.md) for the independent session. S06 and human release acceptance stay open until those sessions and fixes are recorded.
+The current experience build and runtime hashes are identified by **`artifacts/LATEST-EXPERIENCE.json`**. **`artifacts/LATEST-CANDIDATE.json`** identifies the earlier R01 archive, with its source snapshot and historical quality evidence. Follow the [release review sheet](docs/RELEASE_REVIEW.md); earlier A03/P07/E05/S06 archives are preserved. Use the [S06 feedback sheet](docs/playtests/S06_FIRST_PLAYTEST.md) for the independent session. S06 and human release acceptance stay open until those sessions and fixes are recorded.
 
 To build from source on Windows, install .NET SDK **10.0.401**, then run from the repository root:
 
@@ -95,6 +95,12 @@ Prepared on 5 October 2026. All balance values, playtime estimates, content coun
 The owner confirmed Godot with C#, Windows first, and offline single-player on 5 October 2026. Co-op is a later, separately scoped decision. The implementation agent must check for subsequent decisions before scaffolding. The empty workspace contained no existing engine project or repository instructions when inspected.
 
 The owner also requires uncapped levels, ongoing power progression, and uncapped difficulty. Level 60 is a foundation milestone, not a maximum; tier 10 is an early endgame milestone, not an endpoint. This requirement replaces the original finite progression proposal. Prototype playtime and authored content budgets do not cap the progression systems.
+
+## Experience upgrade
+
+The current playable pass adds pixel-art environments and Frames, a distinct Hearth, action-phase animation and effects, tactical enemy navigation, contextual Overload coaching, signature selection, adaptive audio and continuous campaign checkpoints. After a room is saved, walk into the exit or press **G / D-pad up** to continue; **Q / X** equips the reward and continues. Pause provides the reward comparison and a return to Hearth. These bindings can be remapped. See [experience changes and verification](docs/EXPERIENCE_UPGRADE.md).
+
+Launch the self-contained Windows candidate at `artifacts/windows/Overload.exe`, keeping its entire folder together. Source builds use the pinned Godot .NET editor; set `OVERLOAD_GODOT` if the editor is outside `.tools`. Run `build/review-experience.ps1 -Exported -Rendered` for isolated navigation/checkpoint checks and screenshots of the candidate.
 
 ## Implementation scope
 

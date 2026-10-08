@@ -41,6 +41,7 @@ public partial class CombatEffects
             var provenance=primary;
             if(cast.Pulse>0) { if(!cast.Root.TryChild(primary,out provenance)){groundCasts.Remove(cast);continue;}provenance=provenance with { Source=SourceKind.SecondaryEffect }; }
             var pulses=cast.Pulses;
+            RunePulse(cast.Origin, cast.Radius, cast.Skill == SkillId.EmberWell ? new Color("edb073") : new Color("baa6ed"));
             var amount=cast.Damage*(cast.Pulse+1)/pulses-cast.Damage*cast.Pulse/pulses;
             foreach(var target in arena.Enemies.Where(e=>!e.Enemy!.Dead&&e.Position.DistanceTo(cast.Origin)<=cast.Radius+e.Radius&&WorldQueries.ClearRay(this,cast.Origin,e.Position)).OrderBy(e=>e.ActorId))
                 HitEnemy(target,amount,cast.Stagger,provenance,cast.Origin,cast.Aim);
@@ -60,10 +61,25 @@ public partial class CombatEffects
         foreach(var cast in groundCasts)
         {
             var color=cast.Skill==SkillId.EmberWell?new Color("f1ac70"):new Color("a49ce2");
-            DrawCircle(cast.Origin,cast.Radius,new Color(color,.10f));DrawArc(cast.Origin,cast.Radius,0,Mathf.Tau,32,color,1);
-            WriteEffect(cast.Origin+new Vector2(-28,-54),cast.Skill==SkillId.EmberWell?"EMBER / 0.6s":"STORM / 3 PULSES",9,color);
+            DrawCircle(cast.Origin,cast.Radius,new Color(color,.07f));
+            DrawArc(cast.Origin,cast.Radius,0,Mathf.Tau,48,new Color(color,.7f),1);
+            DrawArc(cast.Origin,cast.Radius*.82f,0,Mathf.Tau,48,new Color(color,.3f),1);
+            for(var i=0;i<8;i++)
+            {
+                var a=juiceTime*.6f+i*Mathf.Tau/8;var direction=Vector2.FromAngle(a);
+                var point=cast.Origin+direction*cast.Radius*.9f;
+                DrawLine(point-direction*3,point+direction*3,color,1);
+                if(cast.Skill==SkillId.EmberWell)
+                { var spark=cast.Origin+Vector2.FromAngle(a+juiceTime)*cast.Radius*(.3f+(i%3)*.15f);DrawRect(new(spark.Round()-new Vector2(0,(juiceTime*12+i*7)%12),new(1,2)),new Color(color,.65f)); }
+                else
+                { var p=cast.Origin+direction*cast.Radius*.55f;DrawPolyline([cast.Origin,p+direction.Orthogonal()*MathF.Sin(juiceTime*12+i)*6,point],new Color(color,.25f),1); }
+            }
         }
         if(commandedEcho is { } echo)
-        { DrawCircle(echo.Origin,10,new Color("8ebbb3"));DrawArc(echo.Origin,15,0,Mathf.Tau,24,new Color("c4e6d4"),1);WriteEffect(echo.Origin+new Vector2(-20,-22),"ECHO",9); }
+        {
+            DrawArc(echo.Origin,14,0,Mathf.Tau,24,new Color("a8d2c8",.5f),1);
+            var facing=((int)MathF.Round(echo.Aim.Angle()/(Mathf.Tau/8))+8)%8;
+            var atlas=PixelAtlas.Load("revenant");atlas.Draw(this,facing,echo.Due-arena.PlayerState.Tick<8?atlas.Windup:atlas.Idle,echo.Origin,new Color(.7f,1,.9f,.48f));
+        }
     }
 }

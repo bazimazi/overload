@@ -13,18 +13,22 @@ public partial class ArenaHud : Control
     private string? capture;
     private Label? captureLabel;
     private readonly Color ink = new("dae4e8"), gold = new("e4bf7d");
+    private bool home;
     private Color muted => arena.Audio.HighContrast ? new("d2e3ea") : new("8eabb6");
     public bool MenuVisible => menu.Visible;
     public void Initialize(Arena owner) => arena = owner;
     public override void _Ready()
     {
         MouseFilter = MouseFilterEnum.Ignore;
+        InitializeSlotHints();
+        InitializeCheckpointButtons();
         menu = new CenterContainer { MouseFilter = MouseFilterEnum.Stop };
         AddChild(menu); menu.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         panel = new PanelContainer();
-        panel.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color("14232f"), BorderColor = new Color("5f716f"),
+        panel.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color("101a20", .97f), BorderColor = new Color("756449"),
             BorderWidthLeft = 1, BorderWidthRight = 1, BorderWidthTop = 2, BorderWidthBottom = 1,
-            ContentMarginLeft = 24, ContentMarginRight = 24, ContentMarginTop = 16, ContentMarginBottom = 16 });
+            ContentMarginLeft = 28, ContentMarginRight = 28, ContentMarginTop = 24, ContentMarginBottom = 24,
+            ShadowColor = new Color(0,0,0,.45f), ShadowSize = 12 });
         menu.AddChild(panel);
         scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled, FollowFocus = true };
         panel.AddChild(scroll);
@@ -34,14 +38,19 @@ public partial class ArenaHud : Control
     private void LayoutMenu()
     {
         if (scroll is null) return;
-        scroll.CustomMinimumSize = new Vector2(Math.Clamp(Size.X - 96, 300, 800), Math.Clamp(Size.Y - 96, 180, 600));
+        var wideHome = home && Size.X >= 1100;
+        menu.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        if (wideHome) { menu.OffsetLeft = 44; menu.OffsetRight = -(Size.X - Math.Min(570, Size.X * .46f)); menu.OffsetTop = 40; menu.OffsetBottom = -40; }
+        scroll.CustomMinimumSize = new Vector2(wideHome ? Math.Min(470, Size.X * .4f) : Math.Clamp(Size.X - 116, 300, 760), Math.Clamp(Size.Y - 132, 180, 570));
     }
     private int FontSize(int size) => (int)Math.Round(size * arena.Audio.TextPercent / 100f);
     private void ClearMenu(string eyebrow, string title, string subtitle)
     {
+        home = false;
         foreach (var child in options.GetChildren()) { options.RemoveChild(child); child.QueueFree(); }
         menu.Show(); capture = null;
-        LayoutMenu(); menu.Theme = new Theme { DefaultFontSize=FontSize(18) };
+        LayoutMenu(); menu.Theme = MakeTheme();
+        Theme=menu.Theme;
         goBack = () => { if (arena.Playing) Pause(); else Title(); };
         Text(eyebrow, 14, gold); Text(title, 38, ink); Text(subtitle, 17, muted);
         options.AddChild(new Control { CustomMinimumSize = new Vector2(0, 8) }); QueueRedraw();
@@ -59,8 +68,9 @@ public partial class ArenaHud : Control
         caption.AddThemeFontSizeOverride("font_size", FontSize(19));
         button.AddChild(caption); caption.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); caption.OffsetLeft=16;caption.OffsetRight=-16;
         button.Resized += () => button.CustomMinimumSize = new Vector2(0, Math.Max(44, caption.GetMinimumSize().Y + 12));
-        button.AddThemeStyleboxOverride("normal", new StyleBoxFlat { BgColor = new Color("243b49"), ContentMarginLeft = 16, ContentMarginRight = 16 });
-        button.AddThemeStyleboxOverride("hover", new StyleBoxFlat { BgColor = new Color("365567") });
+        button.AddThemeStyleboxOverride("normal", ButtonStyle(new Color("1e2d33"), new Color("3d4c4e")));
+        button.AddThemeStyleboxOverride("hover", ButtonStyle(new Color("2a4147"), gold));
+        button.AddThemeStyleboxOverride("pressed", ButtonStyle(new Color("365450"), gold));
         button.AddThemeStyleboxOverride("focus", new StyleBoxFlat { BgColor = new Color(0, 0, 0, 0), BorderColor = gold,
             BorderWidthLeft = 2, BorderWidthRight = 2, BorderWidthTop = 2, BorderWidthBottom = 2 });
         button.Pressed += () => { arena.Audio.Play("ui", "UI"); action(); }; options.AddChild(button); if (focus) button.GrabFocus();
@@ -68,19 +78,24 @@ public partial class ArenaHud : Control
     public void Title()
     {
         if (arena.Character is null) { SaveRecovery(); return; }
-        ClearMenu("HEARTH / "+arena.Character.State.Frame+" / "+arena.Character.State.Mode.ToString().ToUpperInvariant(), "O V E R L O A D", "A broken court. An old bell. One more attempt.");
+        arena.PresentHearth();
+        ClearMenu("THE PALIMPSEST / HEARTH", "O V E R L O A D", "Fight to remember. Change how you fight.");
+        home = true; LayoutMenu();
+        var s = arena.Character.State;
+        Text($"{s.Frame}  /  Level {CounterText.Short(s.ValidatedLevel)}  /  {(s.Mode==ProfileMode.Standard?"Standard journey":"Training character")}", 14, gold);
         AddButton(arena.Character.State.RunId != Guid.Empty && arena.Character.State.CheckpointRoom < JourneyRules.Length(arena.Character.State) ? $"Resume court — room {arena.Character.State.CheckpointRoom + 1}/{JourneyRules.Length(arena.Character.State)}" : arena.Character.State.RegionalCampaign?"Begin the four-region campaign":"Begin the eight-room court", () => { if (arena.IsSmoke) arena.StartEncounter(0); else arena.StartJourney(); }, true);
-        AddButton("Practice the Bellkeeper", () => arena.StartEncounter(3));
-        AddButton("Bindings", Bindings);
-        AddButton("Fracture board and attunement", Fractures);
-        AddButton("Equipment and forge", Inventory);
-        AddButton("Character, talents and Codex", CharacterMenu);
-        AddButton("Oath journey and Trial of Contradiction", Oaths);
-        if(!arena.IsSmoke)AddButton("Create separate Standard character",NewFrameMenu);
-        AddButton("Field guide / tutorial", Tutorial); AddButton("Settings", Settings);
-        AddButton("Controls", Controls); AddButton("Quit", () => arena.QuitGame());
+        var grid = new GridContainer { Columns = 2, SizeFlagsHorizontal = SizeFlags.ExpandFill }; grid.AddThemeConstantOverride("h_separation", 10); grid.AddThemeConstantOverride("v_separation", 10); options.AddChild(grid);
+        HomeCard(grid, "Memories", "Overload bindings", Bindings);
+        HomeCard(grid, "Arsenal", "Equipment & forge", Inventory);
+        HomeCard(grid, "Character", "Skills, talents & Codex", CharacterMenu);
+        HomeCard(grid, "Fracture Atlas", "Endless expeditions", Fractures);
+        HomeCard(grid, "Forbidden oaths", "Override & mastery", Oaths);
+        HomeCard(grid, "The Bellkeeper", "Combat practice", () => arena.StartEncounter(3));
+        var links = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; options.AddChild(links);
+        HomeLink(links, "Field guide", Tutorial); HomeLink(links, "Settings", Settings); HomeLink(links, "Controls", Controls); HomeLink(links, "Quit", () => arena.QuitGame());
+        HomeLink(links,"Characters",NewFrameMenu);
         goBack = null;
-        Text("Move → Pursuit / Crossing   ·   Evade a hit → Afterstrike", 14, muted);
+        Text("Motion becomes Pursuit. A perfect evade becomes Afterstrike.", 13, muted);
         if (!string.IsNullOrEmpty(arena.Character.Notice)) Text(arena.Character.Notice, 12, gold);
     }
     public void HideMenu() { menu.Hide(); capture = null; QueueRedraw(); }
@@ -89,7 +104,9 @@ public partial class ArenaHud : Control
         ClearMenu("TAKE A BREATH", "Paused", "The encounter clock is stopped.");
         AddButton("Continue", arena.TogglePause, true); AddButton("Controls", Controls);
         AddButton("Field guide", Tutorial); AddButton("Settings", Settings);
-        AddButton("Retry this encounter", arena.RetryCurrentRoom); AddButton("Return to Hearth", arena.ReturnToTitle);
+        if (arena.CheckpointRest) AddButton("Review checkpoint rewards",arena.InspectCheckpoint);
+        else AddButton("Retry this encounter", arena.RetryCurrentRoom);
+        AddButton("Return to Hearth", arena.ReturnToTitle);
         goBack = arena.TogglePause;
     }
     public void Death()
@@ -137,101 +154,5 @@ public partial class ArenaHud : Control
     private void Bar(Rect2 rect, float fraction, Color color)
     {
         DrawRect(rect, new Color("283842")); DrawRect(new Rect2(rect.Position, new Vector2(rect.Size.X * fraction, rect.Size.Y)), color);
-    }
-    public override void _Draw()
-    {
-        if (arena is null || arena.PlayerState is null) return;
-        var width = Size.X; var height = Size.Y;
-        DrawRect(new Rect2(0, 0, width, 90), new Color("101c29"));
-        if (width >= 1200)
-        {
-            Write(new(30, 28), "O V E R L O A D", 21, gold);
-            Write(new(30, 54), $"{arena.Character?.State.Frame.ToString().ToUpperInvariant()} / {arena.RegionTitle}", 12, muted);
-            Write(new(30, 76), $"{arena.Character?.State.Mode.ToString().ToUpperInvariant()}  ·  LEVEL {CounterText.Short(arena.Character?.State.ValidatedLevel ?? 1)}", 12, muted);
-        }
-        var state = arena.PlayerState;
-        var left = width < 1200 ? 24 : Math.Max(300, width / 2 - 270);
-        Write(new(left, 26), $"LIFE   {CounterText.Short(state.Life / 1000)} / {CounterText.Short(state.MaximumLife / 1000)}", 16, ink);
-        Bar(new(left, 34, 230, 10), CombatMath.BarBasisPoints(state.Life, state.MaximumLife) / 10000f, new Color("de8087"));
-        Write(new(left, 68), state.RedCovenantActive?$"RESERVED {state.ReservedPermille/10f:0.#}% / 40%":$"FOCUS   {state.Focus / 1000} / {state.MaximumFocus / 1000}", 16, ink);
-        Bar(new(left, 76, 230, 5), state.RedCovenantActive?state.ReservedPermille/400f:state.Focus / (float)state.MaximumFocus, state.RedCovenantActive?new Color("de8087"):new Color("70bfd1"));
-        DrawMemories(left + 250);
-        Write(new(width - 315, 28), $"{arena.Controls.Glyph("pause")}  PAUSE     F3  INSPECT", 14, muted);
-        Write(new(width - 315, 53), arena.Playing ? $"{arena.Enemies.Count(e => !e.Enemy!.Dead)} HOSTILES REMAIN" : "ENTER THE COURT", 16, ink);
-        Write(new(width - 315, 77), "MOVE → AIM → COMMIT → EVADE", 12, gold);
-        DrawRect(new Rect2(0, height - 94, width, 94), new Color("101c29"));
-        var input = new[] { "cleave", "pulse", "lance", "special", "evade", "flask" };
-        var ids = new[] { arena.EquippedAction(SkillId.Cleave), arena.EquippedAction(SkillId.ShieldPulse), arena.EquippedAction(SkillId.ChainLance), arena.EquippedAction(SkillId.Faultline), SkillId.Traverse, SkillId.Flask };
-        var labels = ids.Select(id => id.ToString().ToUpperInvariant()).ToArray();
-        var tileWidth = Math.Min(190, (width - 48) / 6);
-        var start = (width - tileWidth * 6) / 2;
-        for (var i = 0; i < ids.Length; i++)
-        {
-            var x = start + i * tileWidth; var cooldown = state.Cooldown(ids[i]);
-            DrawRect(new Rect2(x, height - 82, tileWidth - 10, 63), new Color("223743"));
-            DrawRect(new Rect2(x, height - 82, 3, 63), cooldown > 0 ? muted : gold);
-            Write(new(x + 12, height - 60), arena.Controls.Glyph(input[i]), 16, gold); Write(new(x + 12, height - 39), labels[i], 13, ink);
-            var hint = cooldown > 0 ? $"{cooldown / 60f:0.0}s" : ids[i] == SkillId.Flask ? $"{state.FlaskCharges} charges" : $"{arena.Balance.Skills.Single(s => s.Id == ids[i]).FocusCost} Focus";
-            if (arena.Predictions.TryGetValue(ids[i], out var prediction) && prediction.Selection.Accepted)
-                hint = prediction.Selection.Implementation == ActionImplementation.Base ? "Next: base" : $"Next: {prediction.Selection.Implementation}";
-            if (ids[i] == SkillId.Traverse && state.ElsewhereActive) hint = cooldown > 0 ? $"{cooldown / 60f:0.0}s" : state.Anchor is null ? "Place anchor" : "Return to anchor";
-            if (state.Action is { } active && active.Definition.Id == ids[i] && active.Implementation != ActionImplementation.Base) hint = active.Implementation.ToString();
-            if(state.RedCovenantActive&&cooldown==0&&arena.Balance.Skills.Single(s=>s.Id==ids[i]).FocusCost>0)hint=$"{arena.Balance.Skills.Single(s=>s.Id==ids[i]).FocusCost*.4f:0.#}% Life / 4s";
-            Write(new(x + 12, height - 24), hint, 11, muted);
-        }
-        if (arena.Playing)
-        {
-            Write(new(38, 119), arena.Objective, 15, ink);
-            if(arena.PracticeTier is not null) Write(new(38,140),"ISOLATED FRACTURE PRACTICE · Your ordinary character is unchanged.",13,gold);
-            if (arena.JourneyActive && arena.Audio.ShowTutorialHints) Write(new(38, 140), arena.JourneyLesson, 13, gold);
-            if (arena.OathPractice) Write(new(38, 142), "ELSEWHERE SIMULATION · Place, wait, then return. No instant dodge without an anchor.", 13, gold);
-            if(!string.IsNullOrEmpty(arena.EndgameHint))Write(new(38,151),arena.EndgameHint,12,gold);
-            if(arena.ActiveMutation is { } mutation)Write(new(38, height-130),WorldLaws.MutationDescription(mutation),12,gold);
-            var explanation = arena.Predictions.Values.SelectMany(p => p.Selection.Rejections).FirstOrDefault();
-            if (explanation is not null) Write(new(38, height - 105), $"Fallback: {explanation.Reason}", 13, gold);
-            var boss = arena.Enemies.FirstOrDefault(e => e.Enemy!.Definition.Role == EnemyRole.Bellkeeper)?.Enemy;
-            if (boss is not null)
-            {
-                var bossY = !string.IsNullOrEmpty(arena.EndgameHint) || arena.PracticeTier is not null || arena.JourneyActive && arena.Audio.ShowTutorialHints ? 172 : 143;
-                Write(new(width / 2 - 100, bossY), (boss.Definition.Name??"Bellkeeper").ToUpperInvariant()+(boss.Enraged?" / ENRAGED":""), 14, gold);
-                Bar(new(width / 2 - 200, bossY + 10, 400, 6), CombatMath.BarBasisPoints(boss.Life, boss.MaximumLife) / 10000f, gold);
-                Bar(new(width / 2 - 200, bossY + 19, 400, 3), boss.Stagger / (float)boss.Definition.StaggerThreshold, new Color("acb9c3"));
-            }
-        }
-        if (arena.Debug)
-        {
-            DrawRect(new Rect2(38, 180, 410, 228), new Color(0.025f, 0.05f, 0.08f, 0.94f));
-            var action = state.Action;
-            Write(new(50, 203), $"Tick {state.Tick} | {action?.Definition.Id.ToString() ?? "Idle"} {action?.Phase(state.Tick)}", 14, ink);
-            Write(new(50, 224), $"{state.LastSelection?.Implementation.ToString() ?? "Base"} | Strain {state.Strain / 1000f:0.0}/100 | Projectiles {arena.Effects.ProjectileCount}", 13, muted);
-            Write(new(50, 245), state.LastReason, 13, gold);
-            var memories = state.Memories;
-            Write(new(50, 264), $"Travel {memories.MomentumDistance / 32:0.00}m | M/E cooldown {memories.CooldownTicks(MemoryType.Momentum) / 60f:0.0}/{memories.CooldownTicks(MemoryType.Echo) / 60f:0.0}s", 11, muted);
-            var fallback = state.LastSelection?.Rejections.FirstOrDefault();
-            Write(new(50, 284), fallback is null ? "No rejected pattern candidates" : $"Fallback: {fallback.Reason}", 11, gold);
-            var y = 307; foreach (var line in arena.Effects.Log) { Write(new(50, y), line, 12, muted); y += 15; }
-        }
-        if (menu is not null && menu.Visible) DrawRect(new Rect2(Vector2.Zero, Size), new Color(0.015f, 0.025f, 0.04f, 0.76f));
-    }
-    private void DrawMemories(float left)
-    {
-        Write(new(left, 18), "MEMORIES", 11, muted);
-        Write(new(left + 140, 18), $"STRAIN {arena.PlayerState.Strain / 1000f:0.#} / 100", 11, gold);
-        var memories = arena.PlayerState.Memories;
-        foreach (var type in Enum.GetValues<MemoryType>())
-        {
-            var x = left + ((int)type%2)*140;
-            var y = 24+((int)type/2)*32;
-            var token = memories.Get(type);
-            var color = token is null ? muted : type == MemoryType.Momentum ? new Color("8bedd0") : new Color("c7b3ef");
-            DrawRect(new Rect2(x, y, 130, 30), new Color("223743"));
-            DrawRect(new Rect2(x, y, 3, 30), color);
-            Write(new(x + 9, y+12), type.ToString().ToUpperInvariant(), 10, color);
-            var hint=token is null?type switch { MemoryType.Momentum=>"Travel 3m",MemoryType.Echo=>"Evade a hit",MemoryType.Stillness=>"Still 0.8s + hit",_=>"Base stagger break" }:$"Stored {memories.RemainingTicks(type)/60f:0.0}s";
-            Write(new(x+9,y+24),hint,10,ink);
-            var fraction = token is not null ? memories.RemainingTicks(type) / (float)arena.Balance.Memories.LifetimeTicks
-                : type == MemoryType.Momentum ? (float)Math.Min(1, memories.MomentumDistance / arena.Balance.Memories.MomentumDistancePixels) : 0;
-            Bar(new(x + 9, y+28, 112, 2), fraction, color);
-        }
     }
 }

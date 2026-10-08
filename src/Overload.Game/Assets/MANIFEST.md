@@ -1,5 +1,13 @@
 # Overload asset provenance
 
+## Pixel presentation, 8 October 2026
+
+The current renderer uses twelve original/runtime PNG pairs in `assets/source/pixel-v2` and `Assets/Pixel`: six environments (Hearth, Court, Ash, Glass, Hollow, Crown), three Frames, one ordinary-enemy atlas, one regional-boss atlas and one prop atlas. These AI-generated bitmap assets use the built-in image_gen tool. Recorded prompts, including the new Hearth prompt, are in `assets/source/pixel-v2/generation.json`; four earlier sheets do not have a recorded prompt in that file. This is an honest provenance gap, not an assertion of hand-authored source art.
+
+Source PNGs are retained byte-for-byte. `build/import-pixel-atlases.py` measures alpha silhouettes and foot pivots rather than assuming that generated grids are exact. `build/validate-pixel-assets.py` checks every source/runtime hash, all 328 frame rectangles, alpha, pivots and animation rows. Worlds render at 640×360 logical pixels with nearest filtering and integer output scaling; the interface renders at output resolution. Animation is tied to actual action phases with distance-driven walking, anticipation, follow-through, hit recoil and death fades. The atlases remain finite generated pose sets; final artist-directed animation is not claimed.
+
+`build/generate-palimpsest-audio.py` creates the current score, ambience and combat cues from original synthesis. The percussion layer shares the 48-second musical loop and fades in during encounters; heavy tells have a rate-limited warning cue. Peak and loop metadata are in `Assets/Audio/manifest.json`. No downloaded samples or commercial music were used. Earlier SVG and sound sources are preserved below as historical provenance.
+
 The six original slice SVG illustrations and seven WAV recordings in this directory are original project assets authored for Overload on 6 October 2026. No downloaded imagery, samples, melodies, fonts or third-party asset packs were used.
 
 Editable source and reproducible generator: `build/generate-slice-assets.py` (Python standard library). SVGs use an authored limited palette and crisp edges; Godot imports them as textures. WAVs are mono 22,050 Hz signed 16-bit PCM synthesized from oscillators and seeded noise. The bell motif, ambience, attack/hit transients and UI/memory cues are representative slice assets, not final production audio mastering.

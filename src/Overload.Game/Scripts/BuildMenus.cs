@@ -23,14 +23,10 @@ public partial class ArenaHud
             var row = i;
             var id = bindingDraft[row];
             var pattern = arena.Balance.Overload.Patterns.FirstOrDefault(p => p.Id == id);
-            AddButton($"{i + 1}. {pattern?.ImplementationId.Split('.')[1] ?? "Empty"} — change", () =>
-            {
-                var choices = new string?[] { null }.Concat(arena.Balance.Overload.Patterns
-                    .Where(p=>EndgameRules.PatternAvailable(arena.Character!.State,p.Id)&&(p.RequiredMemories.Length<2||EndgameRules.BindingSlots(arena.Character.State)==3)).Select(p => (string?)p.Id).Where(p => p == id || !bindingDraft.Contains(p))).ToArray();
-                bindingDraft[row] = choices[(Array.IndexOf(choices, id) + 1) % choices.Length]; DrawBindings();
-            }, i == 0);
+            AddButton($"{i + 1}. {pattern?.ImplementationId.Split('.')[1] ?? "Empty"} — choose signature", () => ChooseBinding(row), i == 0);
             if (pattern is not null) Text($"{string.Join(" + ", pattern.RequiredMemories)} · {pattern.StrainCost} Strain"
                 + (arena.PlayerState.ElsewhereActive && pattern.Family == ActionFamily.Traverse && pattern.RequiredCapabilities.HasFlag(ActionCapabilities.PathTraversal) ? " · SUSPENDED by Elsewhere" : ""), 13, muted);
+            if (pattern is not null) Text(SignatureDescription(pattern.Id),15,ink);
         }
         Text("Discover Focused through Hollow mastery, Shatter through Crown mastery, and Cascade through the Trial of Contradiction.",14,gold);
         AddButton("Apply bindings", () =>
@@ -40,6 +36,33 @@ public partial class ArenaHud
             if (arena.UpdateCharacter(s => s with { Bindings = selected })) Title(); else DrawBindings(arena.SaveProblem);
         });
         AddButton("Cancel", Title);
+    }
+    private static string SignatureDescription(string id) => id.Split('.').Last() switch
+    {
+        "pursuit" => "Spend Momentum to advance into a committed lunging strike.",
+        "afterstrike" => "Spend Echo to repeat the attack from where you first struck.",
+        "crossing" => "Spend Momentum on a longer passage through enemies. Terrain still stops you.",
+        "shelter" => "Spend Echo to leave cover that intercepts two ordinary projectiles.",
+        "reprieve" => "Spend Echo and one flask for healing plus a temporary barrier.",
+        "convergence" => "Spend Momentum and Echo to pull a pack into a stronger cone.",
+        "focused" => "Spend Stillness on a precise attack along your stored direction.",
+        "shatter" => "Spend Rupture to exploit the enemy whose stagger you broke.",
+        "cascade" => "Spend Stillness and Rupture together on a combined attack.",
+        _ => "A different answer to the same action."
+    };
+    private void ChooseBinding(int slot)
+    {
+        ClearMenu($"OVERLOAD / SLOT {slot+1}","Choose a memory","Choose the response you want to prepare. Your changes apply together when you save the build.");
+        foreach(var pattern in arena.Balance.Overload.Patterns.Where(p=>EndgameRules.PatternAvailable(arena.Character!.State,p.Id)
+            &&(p.RequiredMemories.Length<2||EndgameRules.BindingSlots(arena.Character.State)==3)
+            &&(bindingDraft[slot]==p.Id||!bindingDraft.Contains(p.Id))))
+        {
+            var id=pattern.Id;
+            AddButton($"{pattern.ImplementationId.Split('.')[1]} / {pattern.Family} / {string.Join(" + ",pattern.RequiredMemories)}",()=>{bindingDraft[slot]=id;DrawBindings();},id==bindingDraft[slot]);
+            Text(SignatureDescription(id)+$"  {pattern.StrainCost} Strain.",14,muted);
+        }
+        AddButton("Leave this slot empty",()=>{bindingDraft[slot]=null;DrawBindings();});
+        AddButton("Back to build",()=>DrawBindings());goBack=()=>DrawBindings();
     }
     public void Oaths()
     {

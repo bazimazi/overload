@@ -45,7 +45,14 @@ public partial class Arena
         {
             var s = Character!.State;
             Character.Transact(s.Revision, $"room:{s.RunId:N}:{JourneyRoom}", c => JourneyRules.Clear(c, s.RunId, JourneyRoom));
-            SaveProblem = ""; Hud.RoomCleared();
+            var after = Character.State;
+            Spoils = new(after.TotalXp-s.TotalXp,after.Gold-s.Gold,after.Alloy-s.Alloy,s.ValidatedLevel,
+                after.Inventory.FirstOrDefault(i => !s.Inventory.Any(old => old.Id == i.Id)),s.Inventory.Length >= EquipmentRules.Capacity);
+            Audio.Play("reward", "UI");
+            SaveProblem = "";
+            if (after.CheckpointRoom < JourneyRules.Length(after))
+            { CheckpointRest=true;Paused=false;world.OpenCheckpointExit();Hud.HideMenu(); }
+            else Hud.RoomCleared();
         }
         catch (Exception e) when (e is IOException or InvalidOperationException or UnauthorizedAccessException)
         { SaveProblem = e.Message; Hud.RoomSaveFailed(); }
@@ -60,11 +67,14 @@ public partial class ArenaHud
         var end = arena.JourneyRoom == JourneyRules.Length(arena.Character!.State)-1;
         ClearMenu(end ? arena.Character!.State.RegionalCampaign?"THE FIRST PATTERN BREAKS":"THE BELL FALLS SILENT" : "CHECKPOINT SAVED", end ? arena.Character!.State.RegionalCampaign?"The Pattern unravels":"Court restored" : arena.JourneyName + " cleared",
             end ? arena.Character!.State.RegionalCampaign?"Ash cools. Glass clears. The Archive opens its sealed pages. Beyond the broken crown, the Fracture Atlas offers another path.":"Eight rooms complete. The Fracture board and shared attunement are now open at Hearth." : "Rewards banked. Life, Focus and flasks restored for the next room.");
-        Text(arena.Character!.State.Journal.Last(), 15, gold);
-        Text($"{arena.Character.State.Frame} level {arena.Character.State.ValidatedLevel} · Gold {arena.Character.State.Gold} · Alloy {arena.Character.State.Alloy}", 16, ink);
         AddButton(end ? "Exit to Hearth" : "Continue to next room", arena.ContinueJourney, true);
+        if (arena.Spoils is { } reward) SpoilsCard(reward);
+        else Text(arena.Character!.State.Journal.Last(), 15, gold);
+        Text($"{arena.EncounterSeconds:0.0}s / {arena.EncounterHitsDealt} hits landed / {arena.EncounterHitsTaken} hits taken",13,muted);
+        if (!string.IsNullOrEmpty(arena.SaveProblem)) Text(arena.SaveProblem,14,gold);
         if (!end) AddButton("Visit Hearth — retain checkpoint", arena.ReturnToTitle);
-        goBack = arena.ReturnToTitle;
+        if (arena.CheckpointRest) AddButton("Return to the restored room",arena.TogglePause);
+        goBack = arena.CheckpointRest ? arena.TogglePause : arena.ReturnToTitle;
     }
     public void RoomSaveFailed()
     {

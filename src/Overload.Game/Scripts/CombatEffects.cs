@@ -20,8 +20,8 @@ public partial class CombatEffects : Node2D
         public SkillId? Skill;
         public HashSet<int> Victims = [];
     }
-    private sealed class FloatingText(Vector2 position, string text, Color color)
-    { public Vector2 Position = position; public string Text = text; public Color Color = color; public int Ticks = 45; }
+    private sealed class FloatingText(Vector2 position, string text, Color color, int size = 11)
+    { public Vector2 Position = position; public string Text = text; public Color Color = color; public int Size = size; public int Ticks = 45; }
     private sealed record Sweep(Vector2 Origin, Vector2 Aim, float Reach, float Degrees, bool Friendly, bool Lane = false)
     { public int Ticks = 8; }
     private sealed record StrikePayload(SkillDefinition Skill, AttackRecipe Recipe, Vector2 Origin, Vector2 Aim,
@@ -48,6 +48,8 @@ public partial class CombatEffects : Node2D
     public int ShelterCharges => shelters.Sum(s => s.Charges);
     private readonly Queue<string> log = new();
     private Random combatRandom = new(42);
+    private readonly HashSet<long> criticalRoots = [];
+    private readonly Queue<long> criticalHistory = [];
     private Arena arena = null!;
     private long? lastMomentum;
     private long? lastEcho;
@@ -77,10 +79,11 @@ public partial class CombatEffects : Node2D
         => NumberLayout(text,size).Draw(GetCanvasItem(),baseline-new Vector2(0,size),color??Colors.White);
     public void Reset()
     {
-        groundCasts.Clear();commandedEcho=null;
+        groundCasts.Clear();commandedEcho=null; sparks.Clear(); ghosts.Clear(); runeFlashes.Clear(); lastJuiceAction=-1;
         projectiles.Clear(); shelters.Clear(); numbers.Clear(); sweeps.Clear(); strikes.Clear(); delayed.Clear(); events.Clear(); trails.Clear(); log.Clear(); combatRandom = new(42);
         HitsDealt = 0; HitsTaken = 0;
         CriticalRolls = 0;
+        criticalRoots.Clear(); criticalHistory.Clear();
         lastMomentum = null; lastEcho = null;lastStillness=null;lastRupture=null;
     }
     public void Record(string value) { log.Enqueue(value); while (log.Count > 6) log.Dequeue(); }
@@ -94,6 +97,8 @@ public partial class CombatEffects : Node2D
         if (memories.Echo?.Id != lastEcho)
             Record(memories.Echo is null ? "Echo spent / expired / cleared" : $"Echo from attack #{memories.Echo.HostileAttackId}");
         if (memories.Momentum is { } m && m.Id != lastMomentum || memories.Echo is { } e && e.Id != lastEcho) arena.Audio.Play("memory", "Player");
+        if (memories.Momentum is { } newMomentum && newMomentum.Id != lastMomentum) Burst(arena.Player.Position + new Vector2(0, -20), new Color("8fe3d2"), 12, 25);
+        if (memories.Echo is { } newEcho && newEcho.Id != lastEcho) Burst(arena.Player.Position + new Vector2(0, -20), new Color("c4a6ee"), 12, 25);
         if(memories.Stillness is { } still&&still.Id!=lastStillness)Record("Stillness acquired: base hit after standing");
         if(memories.Rupture is { } rupture&&rupture.Id!=lastRupture)Record("Rupture acquired: base stagger break");
         lastStillness=memories.Stillness?.Id;lastRupture=memories.Rupture?.Id;
@@ -117,10 +122,15 @@ public partial class CombatEffects : Node2D
         var aim = new Vector2(action.Aim.X, action.Aim.Y);
         action.Emitted = true;
         arena.ObserveTrialAction(skill.Id,action.Implementation,action.RootActionId);
-        arena.Audio.Play("strike", "Player");
+        arena.Audio.Play(arena.Character?.State.Frame == FrameId.Threadseer ? "cast" : "strike", "Player");
         if(skill.Damage==0) { FrameAction(action,aim,0);return; }
         var budget = arena.PlayerState.AttackBudget(skill); CriticalRolls++;
-        if (combatRandom.Next(100) < arena.Balance.Hero.CriticalPercent) budget = budget * arena.Balance.Hero.CriticalMultiplierPercent / 100;
+        if (combatRandom.Next(100) < arena.Balance.Hero.CriticalPercent)
+        {
+            budget = budget * arena.Balance.Hero.CriticalMultiplierPercent / 100;
+            criticalRoots.Add(action.RootActionId); criticalHistory.Enqueue(action.RootActionId);
+            if (criticalHistory.Count > 128) criticalRoots.Remove(criticalHistory.Dequeue());
+        }
         if(FrameAction(action,aim,budget))return;
         var damage = PatternExecution.Damage(budget, action.Implementation);
         var recipe = PatternExecution.Recipe(skill, action.Implementation);
@@ -173,11 +183,18 @@ public partial class CombatEffects : Node2D
         arena.Audio.Play("hit", "Enemy");
         RecordEvent(provenance, target.ActorId, "hit");
         target.Flash = true;
-        numbers.Add(new(target.Position + new Vector2(0, -26), CounterText.Short(damage / 1000), new Color("c8fff0")));
+        target.HitReaction(aim, broken);
+        Burst(target.Position + new Vector2(0, -18), broken ? new Color("ffe2a1") : new Color("c5e5d6"), broken ? 16 : 8);
+        arena.Impact(broken ? 1.5f : .6f);
+        var critical = criticalRoots.Contains(provenance.RootActionId);
+        numbers.Add(new(target.Position + new Vector2((target.ActorId % 3 - 1) * 6, -28), CounterText.Short(damage / 1000) + (critical ? "!" : ""), critical ? new Color("ffe3a1") : new Color("c8fff0"), critical ? 14 : 11));
+        if (broken && !state.Dead) numbers.Add(new(target.Position + new Vector2(-22,-54),"STAGGER",new Color("ffe3a1"),9));
         if (broken) Record($"#{provenance.RootActionId}/{provenance.EffectId} staggered {state.Definition.Role}");
         if (state.Dead)
         {
-            target.CollisionLayer = 0; target.CollisionMask = 0; target.Visible = false;
+            target.CollisionLayer = 0; target.CollisionMask = 0; target.Velocity = Vector2.Zero;
+            Burst(target.Position + new Vector2(0, -18), new Color("d9c49b"), 20, 70);
+            arena.Audio.Play("defeat", "Enemy");
             Record($"{state.Definition.Role} defeated");
         }
     }
@@ -197,10 +214,12 @@ public partial class CombatEffects : Node2D
         if (arena.PlayerState.ReceiveHit(damage, true, hostile: new HostileAttackEvidence(rootId, expiresAt, new(incoming.X, incoming.Y))))
         {
             HitsTaken++; arena.Player.Flash = true;
+            arena.Player.HitReaction(incoming, true); arena.Impact(2);
+            Burst(arena.Player.Position + new Vector2(0, -20), new Color("e7a68b"), 10);
             arena.Audio.Play("hit", "Player");
             numbers.Add(new(arena.Player.Position + new Vector2(0, -30), $"−{CounterText.Short((before - arena.PlayerState.Life) / 1000)}", new Color("ffa0a5")));
         }
-        else numbers.Add(new(arena.Player.Position + new Vector2(0, -30), "EVADE", new Color("8affec")));
+        else { numbers.Add(new(arena.Player.Position + new Vector2(0, -30), "EVADE", new Color("8affec"))); arena.Audio.Play("evade", "Player"); }
     }
     public void Advance()
     {
@@ -260,7 +279,7 @@ public partial class CombatEffects : Node2D
             if (wall || projectile.Remaining <= 0 || projectile.Victims.Count >= projectile.MaxVictims) projectiles.Remove(projectile);
         }
         if (arena.PlayerState.Dead) { delayed.Clear(); strikes.Clear(); projectiles.RemoveAll(p => p.Friendly); }
-        foreach (var number in numbers) { number.Position += new Vector2(0, -0.25f); number.Ticks--; }
+        foreach (var number in numbers) { number.Position += new Vector2(0, number.Ticks > 30 ? -.5f : -.18f); number.Ticks--; }
         numbers.RemoveAll(n => n.Ticks <= 0);
         foreach (var sweep in sweeps) sweep.Ticks--;
         sweeps.RemoveAll(s => s.Ticks <= 0);
@@ -272,7 +291,7 @@ public partial class CombatEffects : Node2D
     {
         if (arena is null) return;
         var qualityStart=arena.QualityTimestamp;
-        DrawFrames();
+        DrawFrames(); DrawJuice();
         foreach (var field in shelters)
         { DrawCircle(field.Origin, 64, new Color(0.4f, 0.8f, 0.9f, 0.10f)); DrawArc(field.Origin, 64, 0, Mathf.Tau, 48, new Color("70bfd1"), 1); WriteEffect(field.Origin + new Vector2(-25, -10), $"SHELTER {field.Charges}", 10); }
         if (arena.PlayerState.Barrier > 0) DrawArc(arena.Player.Position, 16, 0, Mathf.Tau, 32, new Color("c7b3ef"), 2);
@@ -292,34 +311,10 @@ public partial class CombatEffects : Node2D
             DrawCircle(echo.Origin, 4, color);
             WriteEffect(echo.Origin + new Vector2(-26, -32), "AFTERSTRIKE", 9, color);
         }
-        foreach (var enemy in arena.Enemies.Where(e => !e.Enemy!.Dead && e.AttackAge >= 0 && e.AttackAge < e.TellTicks))
-        {
-            var d = enemy.Enemy!.Definition;
-            var progress = enemy.AttackAge / (float)enemy.TellTicks;
-            var color = new Color(1, 0.61f, 0.36f, 0.12f + progress * 0.25f);
-            if (enemy.Volley)
-            {
-                var count = d.Role == EnemyRole.Bellkeeper ? arena.ActiveMutation=="mutation.split"?5:d.VolleyCount==1?7:d.VolleyCount : d.VolleyCount;
-                for (var i = 0; i < count; i++)
-                {
-                    var direction = enemy.AttackAim.Rotated((i - (count - 1) / 2f) * (arena.ActiveMutation=="mutation.split"?0.27f:0.18f));
-                    DrawLine(enemy.Position, enemy.Position + direction * 230, color.Lightened(0.2f), 1);
-                }
-            }
-            else
-            {
-                var points = WorldQueries.Sector(enemy.Position, enemy.AttackAim, d.Reach, d.ArcDegrees);
-                DrawColoredPolygon(points, color);
-                DrawPolyline([.. points, points[0]], new Color("edb575"), 1);
-            }
-            DrawArc(enemy.Position, enemy.Radius + 5, -Mathf.Pi / 2, -Mathf.Pi / 2 + Mathf.Tau * progress, 32, new Color("ffd48f"), 2);
-            WriteEffect(enemy.Position + new Vector2(-22, -43), enemy.Volley ? "VOLLEY" : "SWEEP", 9, new Color("ffe1b0"));
-        }
-        foreach (var sweep in sweeps)
-            DrawColoredPolygon(sweep.Lane ? WorldQueries.Lane(sweep.Origin, sweep.Aim, sweep.Reach, 8) : WorldQueries.Sector(sweep.Origin, sweep.Aim, sweep.Reach, sweep.Degrees),
-                sweep.Friendly ? new Color(0.5f, 1, 0.9f, sweep.Ticks / 15f) : new Color(1, 0.62f, 0.4f, sweep.Ticks / 12f));
+        foreach (var enemy in arena.Enemies.Where(e => !e.Enemy!.Dead && e.AttackAge >= 0 && e.AttackAge < e.TellTicks)) DrawEnemyTelegraph(enemy);
+        DrawAttackTrails();
         DrawProjectiles();
-        foreach (var n in numbers) WriteEffect(n.Position,n.Text,11,new Color(n.Color,Math.Min(1,n.Ticks/15f)));
+        foreach (var n in numbers) WriteEffect(n.Position.Round(),n.Text,n.Size,new Color(n.Color,Math.Min(1,n.Ticks/15f)));
         var action = arena.PlayerState.Action;
         if (action is not null && action.Phase(arena.PlayerState.Tick) == ActionPhase.Windup)
         {
