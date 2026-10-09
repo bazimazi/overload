@@ -15,5 +15,6 @@ try {
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--expansion-smoke')
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--experience-smoke')
         Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--world-smoke')
+        Invoke-Checked $Godot @('--headless', '--path', $GamePath, '--fixed-fps', '60', '--', '--identity-smoke')
     }
 } finally { Pop-Location }

@@ -137,15 +137,15 @@ public sealed class PlayerCombat
         }
         if (Action is { } action && action.Age(Tick) >= action.Definition.Duration) Action = null;
     }
-    public bool TryStart(SkillId id, Vector2 aim)
+    public bool TryStart(SkillId id, Vector2 aim, bool preserveMemories = false)
     {
-        return TryCommit(Preview(id, aim));
+        return TryCommit(Preview(id, aim, preserveMemories));
     }
-    public ActionPlan Preview(SkillId id, Vector2 aim)
+    public ActionPlan Preview(SkillId id, Vector2 aim, bool preserveMemories = false)
     {
         if (!Enum.IsDefined(id)) throw new ArgumentOutOfRangeException(nameof(id));
         var validAim = float.IsFinite(aim.X) && float.IsFinite(aim.Y) && float.IsFinite(aim.LengthSquared());
-        var intent = new ActionIntent(id, validAim && aim.LengthSquared() > 0 ? Vector2.Normalize(aim) : Vector2.UnitX);
+        var intent = new ActionIntent(id, validAim && aim.LengthSquared() > 0 ? Vector2.Normalize(aim) : Vector2.UnitX, preserveMemories);
         return new(planOwner, intent, Snapshot(intent, validAim ? null : "Invalid aim"));
     }
     private CombatSnapshot Snapshot(ActionIntent intent, string? failure = null)
@@ -161,7 +161,7 @@ public sealed class PlayerCombat
             : !RedCovenantActive && Focus < definition.FocusCost * 1000 ? "Not enough Focus"
             : intent.Skill == SkillId.Flask && (FlaskCharges == 0 || healAge < balance.Hero.FlaskTicks && healTotal > 0) ? "Flask unavailable" : null;
         var snapshot = new CombatSnapshot(revision, Memories.Revision, Tick, definition, Behavior, Focus, Strain, MaximumStrain,
-            Memories.Momentum, Memories.Echo, failure, preflight.Capture(intent, definition, Behavior),Memories.Stillness,Memories.Rupture,RedCovenantActive);
+            Memories.Momentum, Memories.Echo, failure, preflight.Capture(intent, definition, Behavior),Memories.Stillness,Memories.Rupture,RedCovenantActive,intent.PreserveMemories);
         if (intent.Skill == SkillId.Flask && Life == MaximumLife && ActionResolver.Select(snapshot).Implementation != ActionImplementation.Reprieve)
             snapshot = snapshot with { CommonFailure = "Life is full" };
         return snapshot;

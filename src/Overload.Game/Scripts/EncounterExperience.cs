@@ -55,6 +55,7 @@ public partial class Arena
     }
     private void ResetExperience()
     {
+        Hud?.ResetDispatch();
         EncounterSeconds = 0; coachingDistance = 0; coachedMotion = coachedPattern = coachedTraverse = false;
         CheckpointRest = false;
         EncounterHitsDealt = EncounterHitsTaken = 0;

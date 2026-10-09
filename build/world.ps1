@@ -11,8 +11,8 @@ try {
         $worldEngine=$Godot.Replace('_console.exe','.exe');$worldArgs=@('--path',('"'+$GamePath+'"'))
     }
     if($Review){$worldMode='review';$worldArgs+=@('--rendering-method','gl_compatibility','--resolution','1280x720','--fixed-fps','60','--','--world-review')}
-    elseif($Performance){$worldMode='performance';$worldArgs+=@('--rendering-method','gl_compatibility','--resolution','1280x720','--','--world-perf='+$Seconds)}
-    elseif($Soak){$worldMode='soak';if(!$PSBoundParameters.ContainsKey('Seconds')){$Seconds=600};$worldArgs+=@('--headless','--','--world-soak='+$Seconds)}
+    elseif($Performance){$worldMode='performance';$worldArgs+=@('--rendering-method','gl_compatibility','--resolution','1280x720','--',('--world-perf='+$Seconds))}
+    elseif($Soak){$worldMode='soak';if(!$PSBoundParameters.ContainsKey('Seconds')){$Seconds=600};$worldArgs+=@('--headless','--',('--world-soak='+$Seconds))}
     else {$worldMode='smoke';$worldArgs+=@('--headless','--fixed-fps','60','--','--world-smoke')}
     $worldLog=Join-Path $worldOutput ('world-'+$worldMode+'.log');$worldErrors=Join-Path $worldOutput ('world-'+$worldMode+'-errors.log')
     $worldProcess=Start-Process -FilePath $worldEngine -ArgumentList $worldArgs -WindowStyle Hidden -PassThru -RedirectStandardOutput $worldLog -RedirectStandardError $worldErrors

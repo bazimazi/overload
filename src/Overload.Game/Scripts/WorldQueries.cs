@@ -46,11 +46,13 @@ public static class WorldQueries
     public static Vector2 ClipProjectile(Node2D world, Vector2 from, Vector2 to, float radius, out bool blocked, uint mask = 1)
     {
         using var shape = new CircleShape2D { Radius = radius };
-        using var query = new PhysicsShapeQueryParameters2D { Shape = shape, Transform = new Transform2D(0, from), CollisionMask = mask, Motion = to - from };
+        using var query = new PhysicsShapeQueryParameters2D { Shape = shape, Transform = new Transform2D(0, from), CollisionMask = mask };
         var space = world.GetWorld2D().DirectSpaceState;
         var overlaps=space.IntersectShape(query,1);
         using var overlapOwner=(Godot.Collections.Array)overlaps;
         if (overlaps.Count > 0) { blocked = true; return from; }
+        // IntersectShape applies Motion too. Test the origin at rest before sweeping to the endpoint.
+        query.Motion=to-from;
         var fractions = space.CastMotion(query);
         var safe = fractions.Length > 0 ? fractions[0] : 1;
         blocked = safe < 1;

@@ -65,6 +65,7 @@ public partial class ArenaHud
         Surface(rect,opacity:.94f);
         var scale=Math.Min((rect.Size.X-48)/bounds.Width,(rect.Size.Y-70)/bounds.Height);
         var origin=rect.GetCenter()-new Vector2(bounds.Width,bounds.Height)*scale/2+new Vector2(0,12);
+        localMapOrigin=origin;localMapScale=scale;
         Rect2 Project(RoomBlock b)=>new(origin+new Vector2(b.X,b.Y)*scale,new Vector2(b.Width,b.Height)*scale);
         var cells=arena.WorldFog;var columns=(bounds.Width+WorldRules.FogStep-1)/WorldRules.FogStep;
         bool Known(WorldPoint p)=>cells.Contains((int)p.Y/WorldRules.FogStep*columns+(int)p.X/WorldRules.FogStep);
@@ -83,11 +84,23 @@ public partial class ArenaHud
             }
         foreach(var exit in z.Exits.Where(e=>Known(e.Position)))
         {var p=origin+new Vector2(exit.Position.X,exit.Position.Y)*scale;DrawRect(new(p-new Vector2(4,4),new(8,8)),gold);Write(p+new Vector2(8,-4),exit.Name,11,ink);}
-        foreach(var site in z.Sites.Where(s=>Known(s.Position)&&s.Kind is "waypoint" or "refuge" or "device"))
+        foreach(var site in z.Sites.Where(s=>Known(s.Position)&&s.Kind is "waypoint" or "refuge" or "device" or "cache"))
         {var p=origin+new Vector2(site.Position.X,site.Position.Y)*scale;DrawCircle(p,4,new("8ee4bd"));Write(p+new Vector2(8,4),site.Name,11,ink);}
         var player=origin+arena.Player.Position*scale;DrawCircle(player,5,Colors.White);DrawLine(player,player+arena.Player.Facing*13,Colors.White,2);
+        for(var i=1;i<arena.GuidancePath.Count;i++)
+        {
+            var a=arena.GuidancePath[i-1];var b=arena.GuidancePath[i];
+            var steps=Math.Max(1,(int)Math.Ceiling(System.Numerics.Vector2.Distance(a,b)/24));
+            for(var n=1;n<=steps;n++)
+            {
+                var from=System.Numerics.Vector2.Lerp(a,b,(n-1)/(float)steps);var to=System.Numerics.Vector2.Lerp(a,b,n/(float)steps);
+                if(Known(new(from.X,from.Y))&&Known(new(to.X,to.Y)))DrawLine(origin+new Vector2(from.X,from.Y)*scale,origin+new Vector2(to.X,to.Y)*scale,new Color("e4bf7d",.65f),2);
+            }
+        }
+        foreach(var target in arena.KnownWorldTargets())
+            if(target.Id==arena.WorldDestination?.Id)DrawArc(origin+target.Position*scale,10,0,Mathf.Tau,24,gold,2);
         Write(rect.Position+new Vector2(20,28),z.Name.ToUpperInvariant()+" / EXPLORED GEOMETRY",16,gold);
-        Write(rect.Position+new Vector2(20,rect.Size.Y-14),$"{arena.Controls.Glyph("local_map")} close · gates / gold squares · waypoints and conduits / circles",12,muted);
+        Write(rect.Position+new Vector2(20,rect.Size.Y-14),Fit($"{arena.Controls.Glyph("local_map")} close · Click a discovered landmark to track · {arena.Controls.Glyph("track")} cycle · Time is stopped",rect.Size.X-40,12),12,muted);
     }
 }
 

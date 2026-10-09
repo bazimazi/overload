@@ -26,6 +26,7 @@ public partial class WorldView : Node2D
     }
     public void Configure(Rect2[] obstacles)
     {
+        roadPaths.Clear();
         Exploration=null;
         Geometry=new(LevelGeometry.Court.Bounds,[..obstacles.Select(r=>new RoomBlock((int)r.Position.X,(int)r.Position.Y,(int)r.Size.X,(int)r.Size.Y))]);
         exitOpen=false;

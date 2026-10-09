@@ -78,5 +78,6 @@ try {
         Write-Output $output
         $errors = Get-Content $stderr -Raw
         if ($process.ExitCode -ne 0 -or $output -notmatch 'OVERLOAD_WORLD_SMOKE_OK' -or $errors -match 'ERROR:') { throw "Exported world smoke failed: $errors" }
+        & "$PSScriptRoot/identity.ps1" -Exported
     }
 } finally { Pop-Location }

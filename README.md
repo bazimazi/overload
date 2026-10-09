@@ -8,7 +8,7 @@ On this workspace, launch **`artifacts/windows/Overload.exe`**. Keep the entire 
 
 The current build uses Compatibility/OpenGL rendering. Additional hardware validation remains open.
 
-The current connected-world build and hashes are identified by **`artifacts/LATEST-WORLD.json`**. **`artifacts/LATEST-EXPERIENCE.json`** records the earlier presentation upgrade. **`artifacts/LATEST-CANDIDATE.json`** identifies the earlier R01 archive, with its source snapshot and historical quality evidence. Follow the [release review sheet](docs/RELEASE_REVIEW.md); earlier A03/P07/E05/S06 archives are preserved. Use the [S06 feedback sheet](docs/playtests/S06_FIRST_PLAYTEST.md) for the independent session. S06 and human release acceptance stay open until those sessions and fixes are recorded.
+The current gameplay and UI build is identified by **`artifacts/LATEST-IDENTITY.json`**. See [gameplay and identity](docs/GAMEPLAY_IDENTITY.md) for the Memory Chamber, memory preservation, combat deck, minimap and world improvements. **`artifacts/LATEST-WORLD.json`** identifies the earlier connected-world build; **`artifacts/LATEST-EXPERIENCE.json`** identifies the earlier presentation upgrade. **`artifacts/LATEST-CANDIDATE.json`** records the older R01 archive. Follow the [release review sheet](docs/RELEASE_REVIEW.md) and [S06 feedback sheet](docs/playtests/S06_FIRST_PLAYTEST.md); human release acceptance remains open.
 
 To build from source on Windows, install .NET SDK **10.0.401**, then run from the repository root:
 
@@ -25,6 +25,8 @@ Setup downloads and checksum-verifies Godot **4.7.2 .NET** and matching template
 | Frame basic attack | Hold left mouse | Hold RB |
 | Three equipped active skills | Q / E / R | X / Y / B |
 | Evade / flask | Space / F | A / LB |
+| Preserve memories while acting | Hold Shift | Hold left trigger |
+| Track a discovered landmark | T | D-pad Left |
 | Pause | Escape | Start |
 | Menu navigation / confirm / back | Arrows / Enter / Escape | D-pad / A / B |
 | Diagnostics | F3 | Keyboard only |

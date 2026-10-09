@@ -56,7 +56,8 @@ public partial class Arena : Node
     public override void _Notification(int what)
     {
         if (what == NotificationWMCloseRequest) QuitGame();
-        if (what == NotificationWMWindowFocusOut && !IsSmoke && (Playing || CheckpointRest) && !Paused) TogglePause();
+        if (what == NotificationWMWindowFocusOut && !IsSmoke && (Playing || CheckpointRest) && !Paused)
+        {LocalMapVisible=false;TogglePause();}
     }
 
     public override void _Ready()
@@ -71,7 +72,7 @@ public partial class Arena : Node
             try { PracticeTier=Quantity.Parse(practice.Split('=')[1]).Value; if(PracticeTier<1) throw new FormatException(); }
             catch(FormatException) { GD.PushError("Practice tier must be a positive decimal integer");GetTree().Quit(1);return; }
         }
-        IsSmoke = practice is not null || OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--quality-", StringComparison.Ordinal) || a.StartsWith("--world-perf=",StringComparison.Ordinal) || a.StartsWith("--world-soak=",StringComparison.Ordinal) || a is "--world-seed-review" or "--world-smoke" or "--world-review" or "--experience-smoke" or "--experience-review" or "--smoke-test" or "--capture-polish" or "--capture-slice" or "--endless-smoke" or "--capture-endless" or "--production-smoke" or "--capture-production" or "--expansion-smoke" or "--capture-expansion");
+        IsSmoke = practice is not null || OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--quality-", StringComparison.Ordinal) || a.StartsWith("--world-perf=",StringComparison.Ordinal) || a.StartsWith("--world-soak=",StringComparison.Ordinal) || a is "--identity-smoke" or "--identity-review" or "--world-seed-review" or "--world-smoke" or "--world-review" or "--experience-smoke" or "--experience-review" or "--smoke-test" or "--capture-polish" or "--capture-slice" or "--endless-smoke" or "--capture-endless" or "--production-smoke" or "--capture-production" or "--expansion-smoke" or "--capture-expansion");
         try { Balance = ProfileLoader.Load(FileAccess.GetFileAsString("res://Content/arena.json")); Balance = ExpansionLoader.Load(Balance, FileAccess.GetFileAsString("res://Content/expansion.json")); ReleaseContent.Load(FileAccess.GetFileAsString("res://Content/release.json")); }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); return; }
         BaseBalance = Balance;
@@ -112,6 +113,7 @@ public partial class Arena : Node
         if(OS.GetCmdlineUserArgs().Any(a=>a is "--world-smoke" or "--world-review"))CallDeferred(nameof(RunWorldSmoke));
         if(OS.GetCmdlineUserArgs().Any(a=>a.StartsWith("--world-perf=",StringComparison.Ordinal)||a.StartsWith("--world-soak=",StringComparison.Ordinal)))CallDeferred(nameof(BeginWorldQuality));
         if(OS.GetCmdlineUserArgs().Contains("--world-seed-review"))CallDeferred(nameof(ReviewWorldSeeds));
+        if(OS.GetCmdlineUserArgs().Any(a=>a is "--identity-smoke" or "--identity-review"))CallDeferred(nameof(ReviewIdentity));
         GD.Print("OVERLOAD_READY arena.v1");
     }
     public override void _Process(double delta)
@@ -127,7 +129,7 @@ public partial class Arena : Node
     {
         if (connected || !Controls.Controller) return;
         Controls.Disconnected();
-        if (!IsSmoke && Playing && !Paused) TogglePause();
+        if (!IsSmoke && Playing && !Paused) {LocalMapVisible=false;TogglePause();}
     }
     private void BeginPractice() { if(PracticeTier is { } tier) StartFracture(tier); }
     private void LayoutWorld()
@@ -161,6 +163,7 @@ public partial class Arena : Node
     }
     public void StartEncounter(int wave, bool rest = true)
     {
+        ResetWorldNavigation();
         WorldActive=false;LocalMapVisible=false;
         Effects.ZIndex=100;laws.ZIndex=90;
         FractureActive = false; EncounterTier = 1; TrialActive=false;SovereignActive=false;laws?.Clear();
@@ -192,6 +195,8 @@ public partial class Arena : Node
     }
     public void ReturnToTitle()
     {
+        EndRewriteLesson();ResetWorldNavigation();
+        Hud.ResetDispatch();
         FlushWorldFog();if(WorldActive&&!GraphFracture)WorldTransaction($"world.return:{Guid.NewGuid():N}",WorldRules.Resume);WorldActive=false;LocalMapVisible=false;
         CheckpointRest=false;
         FractureActive = false; EncounterTier = 1; TrialActive=false;SovereignActive=false;laws?.Clear();
@@ -204,6 +209,7 @@ public partial class Arena : Node
     }
     public void TogglePause()
     {
+        if(LocalMapVisible){LocalMapVisible=false;Controls.ClearBuffer();Audio.SetPaused(Paused);return;}
         if ((!Playing && !CheckpointRest) || PlayerState.Dead) return;
         if(WorldActive&&!GraphFracture&&Character!.State.World is {Ending:null} pending&&pending.Resolved.Contains(Region.Crown))
         {Paused=true;Controls.ClearBuffer();Audio.SetPaused(true);Hud.WorldEnding();return;}
@@ -217,7 +223,8 @@ public partial class Arena : Node
         if (Hud.TryCaptureKey(input)) { GetViewport().SetInputAsHandled(); return; }
         if(WorldActive&&!PlayerState.Dead&&!input.IsEcho())
         {
-            if(input.IsActionPressed("local_map")){FlushWorldFog();LocalMapVisible=!LocalMapVisible;GetViewport().SetInputAsHandled();return;}
+            if(!Paused&&input.IsActionPressed("track")){CycleWorldTarget();GetViewport().SetInputAsHandled();return;}
+            if(!Paused&&input.IsActionPressed("local_map")){FlushWorldFog();LocalMapVisible=!LocalMapVisible;Controls.ClearBuffer();Audio.SetPaused(LocalMapVisible);GetViewport().SetInputAsHandled();return;}
             if(input.IsActionPressed("region_map")){OpenRegionalMap();GetViewport().SetInputAsHandled();return;}
             if(!Paused&&input.IsActionPressed("interact")){InteractWorld();GetViewport().SetInputAsHandled();return;}
         }
@@ -234,7 +241,7 @@ public partial class Arena : Node
         smoke?.BeforeTick();
         endlessSmoke?.Tick();
         if (CheckpointRest) { AdvanceCheckpoint();smoke?.AfterTick();return; }
-        if (!Playing || Paused || PlayerState.Dead)
+        if (!Playing || Paused || LocalMapVisible || PlayerState.Dead)
         {
             if (PlayerState.Dead && !deathShown) { deathShown = true; motion.Reset(); Effects.Reset(); if(BankEndgameDeath())Hud.Death(); }
             smoke?.AfterTick(); return;
@@ -242,7 +249,7 @@ public partial class Arena : Node
         PlayerState.AdvanceClock();
         foreach (var body in Enemies.Append(Player)) body.BeginTick();
         // Every live hostile in this authored arena actively pursues or targets the Warden.
-        PlayerState.SetCombatActive(Enemies.Any(e => !e.Enemy!.Dead));
+        PlayerState.SetCombatActive(HasEngagedEnemies);
         Player.Flash = false;
         foreach (var enemy in Enemies) enemy.Flash = false;
         var mouse = (Controls.PointerPosition - worldContainer.Position) / worldContainer.Scale + CameraOrigin;
@@ -252,7 +259,7 @@ public partial class Arena : Node
         {
             id = EquippedAction(id);
             var aim = id == SkillId.Traverse && intent.Move.LengthSquared() > 0 ? intent.Move : intent.Aim;
-            if (PlayerState.TryStart(id, new(aim.X, aim.Y)))
+            if (PlayerState.TryStart(id, new(aim.X, aim.Y), intent.PreserveMemories))
             {
                 Controls.ClearBuffer();
                 if (id == SkillId.Traverse) Audio.Play("evade", "Player");
@@ -276,18 +283,20 @@ public partial class Arena : Node
         motion.Move(velocity);
         var displacement = Player.Position - beforeMovement;
         ObserveExperience(displacement);
-        foreach (var enemy in Enemies.OrderBy(e => e.ActorId)) director.Advance(enemy, Player, PlayerState.Tick, Effects,ActiveMutation,Enemies,world.Navigation);
+        foreach (var enemy in Enemies.OrderBy(e => e.ActorId))
+            if(EngagedEnemy(enemy)) director.Advance(enemy, Player, PlayerState.Tick, Effects,ActiveMutation,Enemies,world.Navigation);
         RecordQualityStage("movement/director",qualityStart);qualityStart=QualityTimestamp;
         PlayerState.Memories.ObservePosition(new(Player.Position.X,Player.Position.Y));
         Effects.PlayerAction();
         if (qualityMode == "perf") Effects.FillQualityStress();
         Effects.Advance();laws.Advance();
-        if(WorldActive)AdvanceWorld();
+        if(WorldActive){AdvanceWorld();AdvanceWorldNavigation();}
+        AdvanceRewriteLesson();
         RecordQualityStage("effects",qualityStart);qualityStart=QualityTimestamp;
         if(FractureActive && Character!.State.Fracture!.Region==Region.Ash&&PlayerState.Memories.Echo is not null)masteryEarned=true;
         if (!PlayerState.Dead)
         {
-            PlayerState.SetCombatActive(Enemies.Any(e => !e.Enemy!.Dead));
+            PlayerState.SetCombatActive(HasEngagedEnemies);
             // Zero intent or collision recovery opposite to intent cannot earn locomotion credit.
             if (velocity.LengthSquared() > 0 && displacement.Dot(velocity) > 0)
                 PlayerState.Memories.ObserveLocomotion(new(displacement.X, displacement.Y), movementKind, movementSource);
@@ -304,7 +313,7 @@ public partial class Arena : Node
         Player.AnchorHalo=Character?.State.SovereignRewards.Contains("echo.anchor")==true;
         Player.Evasion = PlayerState.Evading;
         Player.PublishPose(PlayerState);
-        if (!WorldActive && !PlayerState.Dead && Enemies.All(e => e.Enemy!.Dead) && EndgameObjectiveReady)
+        if (!WorldActive && !RewriteLessonActive && !PlayerState.Dead && Enemies.All(e => e.Enemy!.Dead) && EndgameObjectiveReady)
         {
             transitionTicks++;
             if (transitionTicks >= 100)
@@ -324,7 +333,7 @@ public partial class Arena : Node
         foreach (var skill in Balance.Skills)
         {
             var direction = skill.Id == SkillId.Traverse && move.LengthSquared() > 0 ? move : aim;
-            Predictions[skill.Id] = PlayerState.Preview(skill.Id, new(direction.X, direction.Y));
+            Predictions[skill.Id] = PlayerState.Preview(skill.Id, new(direction.X, direction.Y), Controls.PreservingMemories);
         }
     }
     public SkillId EquippedAction(SkillId input) => Character is null ? input : input switch

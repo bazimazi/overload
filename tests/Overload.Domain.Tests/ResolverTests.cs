@@ -42,6 +42,35 @@ public class ResolverTests
             p.Cooldown(SkillId.ShieldPulse), p.Memories.CooldownTicks(MemoryType.Momentum), p.LastReason);
 
     [Fact]
+    public void PreservingMemoriesUsesBaseWithNormalCostsAndKeepsBothTokens()
+    {
+        var p=Player(FastProfile);Grant(p,echo:true);
+        var momentum=p.Memories.Momentum;var echo=p.Memories.Echo;var before=State(p);
+        var plan=p.Preview(SkillId.ShieldPulse,Vector2.UnitX,preserveMemories:true);
+        Assert.Equal(before,State(p));Assert.Equal(ActionImplementation.Base,plan.Selection.Implementation);
+        Assert.True(p.TryCommit(plan));Assert.Equal(75000,p.Focus);Assert.Equal(0,p.Strain);
+        Assert.Same(momentum,p.Memories.Momentum);Assert.Same(echo,p.Memories.Echo);
+        Advance(p,1);
+        Assert.Equal(ActionImplementation.Pursuit,p.Preview(SkillId.Cleave,Vector2.UnitX).Selection.Implementation);
+        Assert.True(p.TryStart(SkillId.Cleave,Vector2.UnitX));Assert.Null(p.Memories.Momentum);
+    }
+
+    [Fact]
+    public void PreservingMemoriesCannotBypassOverrideOrBlockedBaseGeometry()
+    {
+        var world=new World();var p=new PlayerCombat(FastProfile,world);
+        Assert.True(p.TryChangeOaths(["oath.elsewhere"]));p.SetCombatActive(true);Grant(p);
+        Assert.True(p.TryStart(SkillId.Traverse,Vector2.UnitX,preserveMemories:true));
+        Assert.Equal(TraversePhase.AnchorPlace,p.Action!.Traversal);Assert.False(p.Evading);
+        Assert.NotNull(p.Memories.Momentum);
+        p.Reset();p.SetCombatActive(true);Grant(p);
+        world.Block(ActionImplementation.Base,"Base landing is blocked");var before=State(p);
+        Assert.False(p.Preview(SkillId.Traverse,Vector2.UnitX,true).Selection.Accepted);
+        Assert.Equal(before,State(p));Assert.False(p.TryStart(SkillId.Traverse,Vector2.UnitX,true));
+        Assert.NotNull(p.Memories.Momentum);Assert.Null(p.Action);
+    }
+
+    [Fact]
     public void OL01_NoMemoriesUsesExactlyOneBaseAction()
     {
         var p = Player(); var plan = p.Preview(SkillId.Cleave, Vector2.UnitX);

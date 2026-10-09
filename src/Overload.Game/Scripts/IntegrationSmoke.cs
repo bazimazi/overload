@@ -60,7 +60,8 @@ public sealed class IntegrationSmoke(Arena arena)
             case 386: Joy(JoyButton.DpadRight, false); Joy(JoyButton.A, true); break;
             case 387: Joy(JoyButton.A, false); break;
             case 390:
-                Check(arena.Playing && arena.Wave == 3, "controller navigates to boss practice");
+                Check(arena.Playing && arena.RewriteLessonActive, "controller navigates to Overload and Override practice");
+                arena.ReturnToTitle();
                 arena.StartEncounter(0); ClearEnemies();
                 targets = [arena.Spawn(EnemyRole.Caster, new(195, 190)), arena.Spawn(EnemyRole.Caster, new(230, 190)), arena.Spawn(EnemyRole.Caster, new(265, 190)), arena.Spawn(EnemyRole.Caster, new(300, 190))];
                 foreach (var target in targets) target.Enemy!.ReceiveHit(0, 40, 0);

@@ -109,7 +109,7 @@ If world geometry changes between preflight and commit, revalidate once before c
 
 HUD previews call the same pure selection routine against a read-only snapshot. They remain predictions: a token can expire or an enemy can move before input. Show the selected pattern, expiring memory rings, and a concise fallback explanation; never maintain separate handwritten rules in UI code.
 
-No “hold a modifier to choose correctly” input is required. Advanced players may enable a remappable one-use “base action” modifier, with a controller toggle equivalent, that bypasses all bindings for that input. It cannot bypass an active Override. This is optional after the slice, not part of the first tutorial.
+Automatic dispatch remains the default. Hold the remappable **Preserve memories** input (Shift / left trigger) while acting to select the base signature without consuming memories. Release it to allow normal binding selection. The authority-issued intent retains this choice through prediction and revalidation; base costs, geometry and cooldowns still apply. It cannot bypass an active Override: Elsewhere still places/returns and Red Covenant still reserves Life. The reward-free Memory Chamber at Hearth teaches this choice alongside Pursuit, Crossing and Elsewhere without granting oath ownership or changing the saved build.
 
 ## Why Override is exceptional
 

@@ -92,12 +92,12 @@ public partial class ArenaHud : Control
         HomeCard(grid, "Character", "Skills, talents & Codex", CharacterMenu);
         HomeCard(grid, "Fracture Atlas", "Endless expeditions", Fractures);
         HomeCard(grid, "Forbidden oaths", "Override & mastery", Oaths);
-        HomeCard(grid, "The Bellkeeper", "Combat practice", () => arena.StartEncounter(3));
+        HomeCard(grid, "Learn to rewrite", "Play Overload & Override", arena.StartRewriteLesson);
         var links = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; options.AddChild(links);
         HomeLink(links, "Field guide", Tutorial); HomeLink(links, "Settings", Settings); HomeLink(links, "Controls", Controls); HomeLink(links, "Quit", () => arena.QuitGame());
         HomeLink(links,"Characters",NewFrameMenu);
         goBack = null;
-        Text("Motion becomes Pursuit. A perfect evade becomes Afterstrike.", 13, muted);
+        Text($"Move → remember → change your next action. Hold {arena.Controls.Glyph("preserve")} to save a memory.", 13, muted);
         if (!string.IsNullOrEmpty(arena.Character.Notice)) Text(arena.Character.Notice, 12, gold);
     }
     public void HideMenu() { menu.Hide(); capture = null; QueueRedraw(); }
@@ -148,6 +148,7 @@ public partial class ArenaHud : Control
     public override void _Input(InputEvent input)
     {
         arena.Controls.Observe(input);
+        if(HandleWorldMapInput(input))return;
         if (TryCaptureKey(input)) GetViewport().SetInputAsHandled();
         else if (MenuVisible && input.IsActionPressed("ui_cancel"))
         { goBack?.Invoke(); arena.Controls.ClearBuffer(); GetViewport().SetInputAsHandled(); }

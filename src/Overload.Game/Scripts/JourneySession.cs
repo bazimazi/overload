@@ -38,7 +38,7 @@ public partial class Arena
         foreach (var spawn in definition.Spawns) Spawn(spawn.Role, spawn.Position);
         Effects.Record(definition.Name); Hud.HideMenu();
     }
-    public void RetryCurrentRoom() { if(WorldActive)RetryWorld();else if(TrialActive||SovereignActive) RetrySpecial();else if (FractureActive) EnterFractureGroup(); else if (JourneyActive) EnterJourneyRoom(JourneyRoom); else StartEncounter(Wave); }
+    public void RetryCurrentRoom() { if(RewriteLessonActive){ReturnToTitle();StartRewriteLesson();}else if(WorldActive)RetryWorld();else if(TrialActive||SovereignActive) RetrySpecial();else if (FractureActive) EnterFractureGroup(); else if (JourneyActive) EnterJourneyRoom(JourneyRoom); else StartEncounter(Wave); }
     private void CompleteJourneyRoom()
     {
         Playing = false; PlayerState.Reset(); Controls.ClearBuffer(); Effects.Reset();

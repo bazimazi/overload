@@ -28,14 +28,15 @@ public partial class Arena
         }
         else viewCamera.Position=new(320,180);
         var dt = (float)Math.Min(delta, .05);
-        if (!Paused) presentationTime += dt;
+        var presentationPaused=Paused||LocalMapVisible;
+        if (!presentationPaused) presentationTime += dt;
         if (RoomId != presentedRoom && Playing) { presentedRoom = RoomId; ArrivalTime = 2.6f; }
-        if (!Paused) ArrivalTime = Math.Max(0, ArrivalTime - dt);
-        if (!Paused) shakeTime = Math.Max(0, shakeTime - dt);
-        if (shakeTime <= 0 || Paused || Audio.ReducedFlash) { shakePower = 0; viewCamera.Offset = Vector2.Zero; }
+        if (!presentationPaused) ArrivalTime = Math.Max(0, ArrivalTime - dt);
+        if (!presentationPaused) shakeTime = Math.Max(0, shakeTime - dt);
+        if (shakeTime <= 0 || presentationPaused || Audio.ReducedFlash) { shakePower = 0; viewCamera.Offset = Vector2.Zero; }
         else viewCamera.Offset = new Vector2(MathF.Sin(presentationTime * 110), MathF.Cos(presentationTime * 135)).Round() * MathF.Ceiling(shakePower * shakeTime / .14f);
-        foreach (var body in Enemies.Append(Player)) body.Render(delta, Paused);
-        world.Render(delta, Paused); Effects.RenderJuice(delta, Paused);
-        Audio.SetEncounter(Playing && Enemies.Any(e=>!e.Enemy!.Dead),Enemies.Any(e=>e.Enemy is { Dead:false,Definition.Role:Overload.Domain.EnemyRole.Bellkeeper }));
+        foreach (var body in Enemies.Append(Player)) body.Render(delta, presentationPaused);
+        world.Render(delta, presentationPaused); Effects.RenderJuice(delta, presentationPaused);
+        Audio.SetEncounter(Playing && HasEngagedEnemies,Enemies.Any(e=>EngagedEnemy(e)&&e.Enemy is { Dead:false,Definition.Role:Overload.Domain.EnemyRole.Bellkeeper }));
     }
 }

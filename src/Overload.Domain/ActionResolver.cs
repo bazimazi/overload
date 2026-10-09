@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace Overload.Domain;
 
-public readonly record struct ActionIntent(SkillId Skill, Vector2 Aim);
+public readonly record struct ActionIntent(SkillId Skill, Vector2 Aim, bool PreserveMemories = false);
 public sealed record PreflightResult(bool Allowed, string Reason, Vector2? Destination = null)
 {
     public static PreflightResult Ready { get; } = new(true, "Ready");
@@ -30,7 +30,7 @@ public sealed class BaseActionPreflight : IActionPreflight
 
 public sealed record CombatSnapshot(long Revision, long MemoryRevision, long Tick, SkillDefinition Skill,
     ActorBehaviorProfile Behavior, int Focus, int Strain, int MaximumStrain, MemoryToken? Momentum, MemoryToken? Echo,
-    string? CommonFailure, ActionWorldSnapshot World, MemoryToken? Stillness=null,MemoryToken? Rupture=null, bool LifePayment=false);
+    string? CommonFailure, ActionWorldSnapshot World, MemoryToken? Stillness=null,MemoryToken? Rupture=null, bool LifePayment=false, bool PreserveMemories=false);
 public sealed record CandidateRejection(string DefinitionId, string Reason);
 public sealed record ActionSelection(bool Accepted, string DefinitionId, ActionImplementation Implementation,
     int FocusCost, int StrainCost, int CooldownTicks, ImmutableArray<MemoryToken> Tokens,
@@ -51,6 +51,7 @@ public static class ActionResolver
         if (!float.IsFinite(s.World.Origin.X) || !float.IsFinite(s.World.Origin.Y)) return Failed("Invalid world origin");
         foreach (var binding in s.Behavior.Bindings)
         {
+            if (s.PreserveMemories) break;
             var p = binding.Pattern;
             if (p.Family != s.Skill.Family) continue;
             var tokens = p.RequiredMemories.Select(m => m switch { MemoryType.Momentum=>s.Momentum,MemoryType.Echo=>s.Echo,MemoryType.Stillness=>s.Stillness,_=>s.Rupture }).ToArray();

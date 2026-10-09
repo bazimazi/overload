@@ -48,28 +48,12 @@ public partial class WorldView
                 if(z.Region==Region.Glass)DrawLine(new(x+8,y+32),new(x+36,y+29),edge.Darkened(.5f));
                 else if(z.Region==Region.Hollow)DrawRect(new(x+8,y+8,3,3),edge.Darkened(.45f));
             }
-        if(z.Kind=="wild")
-        {
-            // Continuous material cues make both sides of the fork recognizable and lead to the eastern junction.
-            foreach(var y in new[]{300,820})
-            {DrawRect(new(160,y-22,1600,44),ground.Lightened(.08f));DrawLine(new(160,y-25),new(1760,y-25),phase.Darkened(.45f),3);DrawLine(new(160,y+25),new(1760,y+25),edge.Darkened(.55f),2);}
-            if(z.Region==Region.Ash)for(var x=180;x<1730;x+=96){DrawRect(new(x,260,64,8),edge);DrawRect(new(x,268,64,4),phase.Darkened(.3f));}
-            if(z.Region==Region.Glass)for(var x=180;x<1720;x+=36)DrawLine(new(x,800),new(x+10,815),edge.Darkened(.3f),2);
-        }
+        DrawWorldRoads(z,view,ground,edge,phase);
+        DrawGroundLife(z,view,ground,edge,phase,restored);
         foreach(var block in z.Geometry.Blocks)
         {
             var rect=new Rect2(block.X,block.Y,block.Width,block.Height);if(!rect.Intersects(view))continue;
-            DrawRect(new(rect.Position+new Vector2(5,8),rect.Size),new Color(0,0,0,.35f));
-            DrawRect(rect,ground.Darkened(.5f));DrawRect(new(rect.Position+new Vector2(4,4),rect.Size-new Vector2(8,8)),edge.Darkened(.65f));
-            for(var y=Math.Max(rect.Position.Y+4,MathF.Floor(view.Position.Y/48)*48);y<Math.Min(rect.End.Y-4,view.End.Y+48);y+=48)
-                for(var x=Math.Max(rect.Position.X+4,MathF.Floor(view.Position.X/48)*48);x<Math.Min(rect.End.X-4,view.End.X+48);x+=48)
-                    DrawTextureRectRegion(floorTexture,new(x,y,Math.Min(48,rect.End.X-4-x),Math.Min(48,rect.End.Y-4-y)),floorSource,new Color(.25f,.25f,.25f));
-            DrawRect(rect,edge.Darkened(.2f),false,3);
-            for(var y=rect.Position.Y+24;y<rect.End.Y;y+=32)DrawLine(new(rect.Position.X+4,y),new(rect.End.X-4,y),ground.Darkened(.3f),2);
-            if(z.Region==Region.Ash){DrawRect(new(rect.Position+new Vector2(12,14),new(rect.Size.X-24,10)),phase.Darkened(.3f));for(var x=rect.Position.X+24;x<rect.End.X-16;x+=48)DrawRect(new(x,rect.Position.Y+36,16,32),ground.Darkened(.8f));}
-            if(z.Region==Region.Glass){DrawRect(new(rect.Position+new Vector2(14,14),rect.Size-new Vector2(28,28)),new Color("41666b"));DrawLine(rect.Position+new Vector2(20,20),rect.End-new Vector2(20,20),edge.Lightened(.2f),2);}
-            if(z.Region==Region.Hollow)for(var x=rect.Position.X+12;x<rect.End.X-8;x+=20)DrawRect(new(x,rect.Position.Y+12,8,rect.Size.Y-24),edge.Darkened(.25f));
-            if(z.Region==Region.Crown){var c=rect.GetCenter();DrawPolyline([c+new Vector2(-30,12),c+new Vector2(-28,-22),c+new Vector2(-10,-9),c+new Vector2(0,-38),c+new Vector2(12,-9),c+new Vector2(28,-22),c+new Vector2(30,12)],edge,3);}
+            DrawWorldArchitecture(rect,z.Region,view,ground,edge,phase);
         }
         if(landmarks is not null&&z.Kind=="wild")
         {
