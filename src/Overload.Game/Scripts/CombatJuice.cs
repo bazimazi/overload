@@ -32,6 +32,7 @@ public partial class CombatEffects
         if (paused) return;
         var dt = (float)Math.Min(delta, .05);
         juiceTime += dt;
+        foreach(var seal in defeatSeals)seal.Life-=dt;defeatSeals.RemoveAll(s=>s.Life<=0);
         foreach(var flash in runeFlashes)flash.Age+=dt;
         runeFlashes.RemoveAll(f=>f.Age>=.4f);
         if (arena.Playing && arena.PlayerState.Action is { } action && action.RootActionId != lastJuiceAction)

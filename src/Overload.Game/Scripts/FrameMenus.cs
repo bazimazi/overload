@@ -15,7 +15,7 @@ public partial class ArenaHud
         foreach(var frame in Enum.GetValues<FrameId>())
         {
             var card=new VBoxContainer { SizeFlagsHorizontal=SizeFlags.ExpandFill };card.AddThemeConstantOverride("separation",10);row.AddChild(card);
-            card.AddChild(new TextureRect { Texture=PixelAtlas.Load(frame.ToString().ToLowerInvariant()).Portrait(), CustomMinimumSize=new(0,130), ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize, StretchMode=TextureRect.StretchModeEnum.KeepAspectCentered, TextureFilter=TextureFilterEnum.Nearest, MouseFilter=MouseFilterEnum.Ignore });
+            card.AddChild(new FramePortrait {Frame=frame,CustomMinimumSize=new(0,175)});
             var name=new Label { Text=frame.ToString(),HorizontalAlignment=HorizontalAlignment.Center };name.AddThemeColorOverride("font_color",gold);card.AddChild(name);
             var fantasy=frame switch { FrameId.Warden=>"Steel, pressure and counterplay.\nHold the line. Break their guard.",FrameId.Threadseer=>"Spatial spells and delayed control.\nWeave a battlefield of your own.",_=>"Ranged pressure and a loyal echo.\nStrike, vanish and return." };
             var description=new Label { Text=fantasy, AutowrapMode=TextServer.AutowrapMode.WordSmart, HorizontalAlignment=HorizontalAlignment.Center };description.AddThemeFontSizeOverride("font_size",FontSize(14));description.AddThemeColorOverride("font_color",muted);card.AddChild(description);

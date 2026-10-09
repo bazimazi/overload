@@ -35,10 +35,20 @@ public partial class WorldView
             DrawLine(a,b,edge.Darkened(.55f),64);
             DrawLine(a,b,ground.Lightened(.12f),58);
             var length=a.DistanceTo(b);var tangent=a.DirectionTo(b);var side=tangent.Orthogonal();
+            // Reuse the authored material rather than stretching a flat strip across the landscape.
+            var texture=backgrounds[region?.ToString().ToLowerInvariant()??"court"];
+            var source=new Rect2(texture.GetWidth()*.36f,texture.GetHeight()*.51f,texture.GetWidth()*.13f,texture.GetHeight()*.13f);
+            for(var distance=0f;distance<length;distance+=32)
+            {
+                var point=a+tangent*distance;if(!view.Grow(70).HasPoint(point))continue;
+                DrawSetTransform(point,tangent.Angle());
+                DrawTextureRectRegion(texture,new(0,-27,Math.Min(32,length-distance),54),source,new Color(.69f,.63f,.55f));
+                DrawSetTransform(Vector2.Zero);
+            }
             for(var d=8f;d<length;d+=upper?18:28)
             {
                 var p=(a+tangent*d).Round();if(!view.Grow(35).HasPoint(p))continue;
-                DrawLine(p-side*27,p+side*27,edge.Darkened(.5f),2);
+                DrawLine(p-side*27,p+side*27,new Color(edge.Darkened(.55f),.65f),1);
                 if(upper)
                 {
                     DrawRect(new(p+side*24-new Vector2(1,1),new(2,2)),edge);
@@ -50,6 +60,17 @@ public partial class WorldView
             {
                 DrawLine(a+side*34,b+side*34,edge.Darkened(.3f),3);
                 DrawLine(a-side*34,b-side*34,phase.Darkened(.4f),2);
+                for(var distance=14f;distance<length;distance+=64)
+                {
+                    var post=a+tangent*distance;if(!view.Grow(60).HasPoint(post))continue;
+                    foreach(var sign in new[]{-1,1})
+                    {
+                        var point=post+side*(sign*33);
+                        DrawRect(new(point-new Vector2(3,8),new(6,10)),ground.Darkened(.5f));
+                        DrawRect(new(point-new Vector2(4,9),new(8,3)),edge.Darkened(.2f));
+                        DrawRect(new(point-new Vector2(1,7),new(2,2)),phase.Lightened(.25f));
+                    }
+                }
             }
         }
     }
@@ -75,11 +96,14 @@ public partial class WorldView
     private void Signpost(Vector2 p,string upper,string lower,Color wood)
     {
         if(p.DistanceTo(Viewer)>450)return;
-        DrawLine(p,p-new Vector2(0,40),wood.Darkened(.3f),4);
-        DrawColoredPolygon([p+new Vector2(-20,-38),p+new Vector2(34,-38),p+new Vector2(42,-32),p+new Vector2(34,-26),p+new Vector2(-20,-26)],wood.Darkened(.35f));
-        DrawLine(p+new Vector2(-18,-37),p+new Vector2(33,-37),wood,1);
-        DrawString(ThemeDB.FallbackFont,p+new Vector2(-30,-49),upper,fontSize:8,modulate:new("e4bf7d"));
-        DrawString(ThemeDB.FallbackFont,p+new Vector2(-30,16),lower,fontSize:8,modulate:new("9ab4b1"));
+        DrawLine(p+new Vector2(2,2),p+new Vector2(2,-32),new Color(0,0,0,.3f),3);
+        DrawLine(p,p-new Vector2(0,34),wood.Darkened(.5f),3);
+        DrawColoredPolygon([p+new Vector2(-14,-32),p+new Vector2(18,-32),p+new Vector2(24,-27),p+new Vector2(18,-22),p+new Vector2(-14,-22)],wood.Darkened(.4f));
+        DrawLine(p+new Vector2(-12,-31),p+new Vector2(17,-31),wood,1);
+        DrawLine(p+new Vector2(-10,-24),p+new Vector2(15,-24),wood.Darkened(.65f),1);
+        DrawCircle(p-new Vector2(0,27),1,wood.Lightened(.3f));
+        WorldNameplate(p-new Vector2(0,43),upper,new("e4bf7d"),p,100);
+        WorldNameplate(p+new Vector2(0,20),lower,new("9ab4b1"),p,100);
     }
     private void DrawGroundLife(ZoneDefinition z,Rect2 view,Color ground,Color edge,Color phase,bool restored)
     {
@@ -93,6 +117,7 @@ public partial class WorldView
                     DrawLine(p,p+new Vector2(12,-2),ground.Lightened(.2f),1);
                     DrawLine(p+new Vector2(3,2),p+new Vector2(17,0),ground.Darkened(.5f),2);
                 }
+                if(hash%7==0)WorldArt.Draw(this,z.Region,true,new(p-new Vector2(16,32),new(32,40)),new(.72f,.72f,.72f));
                 if(z.Region==Region.Glass)
                 {
                     for(var i=0;i<5;i++){var a=p+new Vector2(i*3,0);DrawLine(a,a+new Vector2(MathF.Sin(time+i)*2,-7-i%3*4),edge.Darkened(.45f),1);}
@@ -115,54 +140,5 @@ public partial class WorldView
                 if(active){DrawCircle(q-new Vector2(0,4),14,new Color(color,.1f));DrawRect(new(q-new Vector2(1,5),new(2,3)),color);}
             }
         }
-    }
-    private void DrawWorldArchitecture(Rect2 rect,Region region,Rect2 view,Color ground,Color edge,Color phase)
-    {
-        DrawRect(new(rect.Position+new Vector2(8,12),rect.Size),new Color(0,0,0,.45f));
-        DrawRect(rect,ground.Darkened(.6f));
-        var roof=new Rect2(rect.Position,rect.Size-new Vector2(0,24));
-        DrawRect(roof,edge.Darkened(.66f));DrawRect(roof.Grow(-5),ground.Darkened(.18f));
-        DrawLine(rect.Position,rect.Position+new Vector2(rect.Size.X,0),edge.Darkened(.1f),3);
-        var faceY=rect.End.Y-24;
-        DrawRect(new(rect.Position.X,faceY,rect.Size.X,24),edge.Darkened(.5f));
-        DrawLine(new(rect.Position.X,faceY),new(rect.End.X,faceY),edge,2);
-        for(var x=rect.Position.X+10;x<rect.End.X-10;x+=36)
-        {
-            if(!view.Grow(40).HasPoint(new(x,faceY)))continue;
-            DrawRect(new(x,faceY+6,20,12),ground.Darkened(.65f));
-            DrawLine(new(x+2,faceY+7),new(x+17,faceY+7),region==Region.Ash?phase:edge.Darkened(.1f),1);
-        }
-        for(var y=roof.Position.Y+12;y<roof.End.Y-8;y+=24)
-            if(y>=view.Position.Y-24&&y<view.End.Y+24)DrawLine(new(roof.Position.X+7,y),new(roof.End.X-7,y),edge.Darkened(.57f),1);
-        if(region==Region.Ash)
-        {
-            for(var x=roof.Position.X+20;x<roof.End.X-16;x+=70)
-            {
-                var p=new Vector2(x,roof.Position.Y+40);if(!view.Grow(60).HasPoint(p))continue;
-                DrawRect(new(p-new Vector2(9,15),new(18,30)),ground.Darkened(.7f));DrawRect(new(p-new Vector2(12,16),new(24,5)),edge.Darkened(.2f));
-                for(var i=0;i<4;i++){var rise=Mathf.PosMod(time*12+i*12+x,46);DrawCircle(p+new Vector2(MathF.Sin(time+i)*5,-22-rise),4+rise/7,new Color(phase,.06f*(1-rise/46)));}
-            }
-            DrawLine(roof.Position+new Vector2(8,10),new(roof.End.X-8,roof.Position.Y+10),phase.Darkened(.4f),5);
-        }
-        else if(region==Region.Glass)
-        {
-            DrawRect(roof.Grow(-12),new Color("315453"));
-            for(var y=Math.Max(roof.Position.Y+16,view.Position.Y);y<Math.Min(roof.End.Y-12,view.End.Y);y+=20)
-                DrawLine(new(roof.Position.X+15,y),new(roof.End.X-15,y-4),new Color("87b7ac",.22f),1);
-        }
-        else if(region==Region.Hollow)
-        {
-            for(var x=roof.Position.X+12;x<roof.End.X-8;x+=24)
-            {DrawRect(new(x,roof.Position.Y+14,12,Math.Max(1,roof.Size.Y-26)),edge.Darkened(.3f));DrawLine(new(x+3,roof.Position.Y+17),new(x+3,roof.End.Y-12),edge.Darkened(.08f),1);}
-        }
-        else
-        {
-            var c=roof.GetCenter();DrawPolyline([c+new Vector2(-30,12),c+new Vector2(-28,-22),c+new Vector2(-10,-9),c+new Vector2(0,-38),c+new Vector2(12,-9),c+new Vector2(28,-22),c+new Vector2(30,12)],edge,3);
-            DrawLine(roof.Position+new Vector2(15,10),roof.End-new Vector2(17,15),ground.Darkened(.7f),3);
-        }
-        var props=PixelAtlas.Load("props");
-        var column=region switch{Region.Ash=>1,Region.Glass=>2,Region.Hollow=>3,_=>0};
-        for(var x=rect.Position.X+20;x<rect.End.X-20;x+=80)
-        {var p=new Vector2(x,rect.End.Y-2);if(view.Grow(40).HasPoint(p))props.Draw(this,column,0,p,Colors.White,.8f);}
     }
 }

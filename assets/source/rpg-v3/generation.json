@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "version": "rpg-v3",
+  "date": "2026-10-09",
+  "tool": "Built-in image_gen.imagegen",
+  "assets": [
+    {
+      "file": "relic-icons.png",
+      "runtime": "src/Overload.Game/Assets/UI/relic-icons.png",
+      "transparent": false,
+      "layout": {
+        "columns": 6,
+        "rows": 4
+      },
+      "notes": "The resulting square image has rectangular atlas cells. UI artwork is sampled by normalized cell coordinates and displayed in square sockets. No image editing or resampling was applied.",
+      "prompt": "Use case: stylized-concept. Asset type: a production dark fantasy action RPG UI icon ATLAS for an original game called Overload. Generate a single square 1536x1536 image as an EXACT 6-column by 4-row uniform grid, 24 square icons, no gutters or borders. Every tile is exactly one sixth image width and one fourth image height. Hand painted premium PC RPG skill and equipment icons, dramatic chiaroscuro, textured painterly detail, clear bold silhouettes readable at 56px. Each object centered with generous 18 percent dark empty margin; backgrounds all near black charcoal #10100f with subtle colored magical glow; rich aged bronze, pale steel, crimson, jade, amethyst. Absolutely no text, numbers, letters, logos or UI frames. Row 1 left to right: diagonal steel sword swinging with amber slash; ornate guardian shield with golden shockwave; fork of teal chain lightning; obsidian rock splitting with orange fissure; spectral jade boot moving rapidly with trailing wisps; glass crimson healing flask with bronze cap. Row 2: slender needle piercing purple mist; three floating blue crystal shards; violet tether connecting two glowing nodes; burning orange cinder orb; teal storm vortex; purple veil swirling around hood. Row 3: three ivory bone spears; shadow scythe arc; spectral amethyst echo warrior; open ancient book with a spectral recall thread; jade arrow of motion; twin amethyst echo rings. Row 4: ornate dark steel sword; large bronze kite shield; aged crusader helmet; dark plated chest armor; pair of steel gauntlets; pair of armored leather boots. Quality: commercially polished fantasy inventory illustrations, original art, consistent lighting and materials, only requested grid, fully fill the canvas.",
+      "sha256": "bae4ce791877b2d55ef15468bc147fcb08fc3cbc346f46d73a24b4e3c0e810c6"
+    },
+    {
+      "file": "palimpsest-atlas.png",
+      "runtime": "src/Overload.Game/Assets/UI/palimpsest-atlas.png",
+      "transparent": false,
+      "prompt": "Use case: stylized-concept. Asset type: original fantasy action RPG world map background, landscape 1536x1024. A beautifully painted ancient cartographer's atlas on distressed charcoal parchment, overhead illustrated terrain, restrained amber, bronze and umber with muted sage and amethyst. Four coherent regions surrounding a small central sanctuary and winding mountain passes. Lower left: Ash Foundry, soot-black volcanic mountains and enormous ruined brass furnaces with tiny lava channels. Lower right: Glass Marsh, jade wetlands and shattered crystal islands in dark emerald water. Upper left: Hollow Archive, purple-grey cliffs with a forgotten library citadel, ruined towers, scroll-like terraces. Upper right: Crown Scar, bleak burgundy mountains and a fractured royal fortress at a great impact crater. Center: circular ivory stone refuge with four branching roads. Borders very dark, center visible; dramatic shading with delicate ink contour detail, weathered patina and hand etched topography, sophisticated illustrated world map designed as a subtle backdrop behind functional game map markers. NO text, letters, names, symbols, compass, markers, grids, legends, logos or UI. Geography only. Original dark fantasy game art, premium handcrafted atmosphere.",
+      "sha256": "0a9544516007aacaf6e108be1c41777d8255dcb368c227c8d55695544a2a8f73"
+    },
+    {
+      "file": "world-structures.png",
+      "runtime": "src/Overload.Game/Assets/Pixel/world-structures.png",
+      "transparent": true,
+      "layout": {
+        "columns": 4,
+        "rows": 2,
+        "rowSplitAt1024": 540
+      },
+      "notes": "Inspection found the upper sprites extend below the requested y=512 boundary. The runtime uses y=540 as the two-row split. The source and runtime PNGs are byte-for-byte copies; alpha is preserved.",
+      "prompt": "Use case: stylized-concept. Asset type: ONE transparent PNG environment architecture sprite atlas for original dark fantasy action RPG Overload. Canvas landscape 1536x1024 with exact FOUR COLUMNS and TWO ROWS, each cell 384x512. Eight independent separate building / environment props, centered within their cells, all on true transparent background with no opaque square backdrops, no text, no grid lines, no labels, no interface. Detailed painterly pixel art at game-sprite resolution, restrained ochre/jade/violet/crimson palette, weathered stone, metal, broken roofs, mysterious warm windows, emphatic highlights and deep shadows. Camera orthographic looking down from 45 degrees at the FRONT, front facade perfectly horizontal, sides aligned horizontally/vertically, NO diagonal isometric diamond foundations. Each sprite's ground contact at bottom center of its cell, include complete building and generous transparent margin. Consistent lighting upper left. Row 1 left to right: Ash foundry industrial gothic furnace building with huge smoking chimneys, black stone walls, amber furnace grilles, rusty pipes; Glass marsh ruined greenstone observatory with moss, shattered crystal dome and turquoise stained glass, water-stained arches; Hollow archive dense gothic library with purple slate roof, narrow glowing violet windows, books and leaning belfry; Crown scar broken regal stone fortress with gold trims, torn burgundy banners, fractured crown sculpture and crumbling battlements. Row 2 left to right: smaller ornate amber-burning brazier mounted on dark iron pedestal; cluster of crystalline jade reeds and angular teal rocks; crumbled archive column with torn scrolls and floating purple sparks; ruined bronze crowned statue on cracked burgundy masonry plinth. Premium gothic game architecture, playable environment assets rather than illustration of a whole scene. Transparent alpha outside all eight props.",
+      "sha256": "6cfe04e026ecac306fac9dba2ec422f35afc7b036df96de6fc0b2e3a5aa70e3b"
+    }
+  ],
+  "fonts": [
+    {
+      "file": "src/Overload.Game/Assets/Fonts/Cinzel.ttf",
+      "source": "https://github.com/google/fonts/tree/main/ofl/cinzel",
+      "download": "https://raw.githubusercontent.com/google/fonts/main/ofl/cinzel/Cinzel%5Bwght%5D.ttf",
+      "license": "SIL Open Font License 1.1",
+      "licenseFile": "src/Overload.Game/Assets/Fonts/OFL-Cinzel.txt"
+    }
+  ]
+}

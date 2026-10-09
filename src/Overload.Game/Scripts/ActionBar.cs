@@ -8,8 +8,8 @@ public partial class ArenaHud
     private readonly List<Control> slotHints = [];
     private Rect2 ActionSlotRect(int index)
     {
-        var tile=Math.Min(106,(Size.X-240)/6);
-        return new((Size.X-tile*6)/2+tile*index,Size.Y-94,tile-6,78);
+        var tile=Math.Min(100,(Size.X-300)/6);
+        return new((Size.X-tile*6)/2+tile*index,Size.Y-115,tile-6,98);
     }
     private SkillId[] ActionSlots() => [arena.EquippedAction(SkillId.Cleave),arena.EquippedAction(SkillId.ShieldPulse),arena.EquippedAction(SkillId.ChainLance),arena.EquippedAction(SkillId.Faultline),SkillId.Traverse,SkillId.Flask];
     private void InitializeSlotHints()
@@ -24,7 +24,7 @@ public partial class ArenaHud
         {
             var hint=slotHints[i];var rect=ActionSlotRect(i);hint.Position=rect.Position;hint.Size=rect.Size;hint.Visible=arena.Playing&&!MenuVisible&&!arena.LocalMapVisible;
             var skill=arena.Balance.Skills.Single(s=>s.Id==slots[i]);
-            var description=slots[i]==SkillId.Traverse ? "Evade along movement or aim. Only the opening window evades contact." : slots[i]==SkillId.Flask ? "Heal over one second. Charges refill at checkpoints." : FrameRules.SkillDescription(slots[i]);
+            var description=slots[i]==SkillId.Traverse ? "Evade along movement or aim. Only the opening window evades contact." : slots[i]==SkillId.Flask ? "Heal over one second. Charges refill at checkpoints." : DescribeSkill(slots[i]);
             var pattern=arena.Predictions.GetValueOrDefault(slots[i])?.Selection;
             hint.TooltipText=$"{SkillName(slots[i])}\n{description}\n{skill.FocusCost} Focus / {skill.Cooldown/60f:0.#}s cooldown" + (pattern?.Accepted==true&&pattern.Implementation!=ActionImplementation.Base?$"\nNext: {pattern.Implementation}":"")+$"\nHold {arena.Controls.Glyph("preserve")} to use the base action and preserve memories.";
             if(pattern is {Rejections.Length:>0})hint.TooltipText+="\nFallback: "+string.Join("; ",pattern.Rejections.Select(r=>r.Reason));

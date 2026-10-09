@@ -10,11 +10,9 @@ public partial class WorldView
     public Func<string,bool>? MapClaimed { get; set; }
     public Func<string,bool>? MapRequired { get; set; }
     public Vector2 Viewer { get; set; }
-    private Texture2D? landmarks;
     public void Configure(ZoneDefinition zone)
     {
         Configure([]);Exploration=zone;Geometry=zone.Geometry;region=zone.Region;
-        landmarks??=GD.Load<Texture2D>("res://Assets/Pixel/world-landmarks.png");
         foreach(var body in GetChildren().OfType<StaticBody2D>()){body.CollisionLayer=0;body.QueueFree();}
         CurrentWalls=[..Geometry.Collision.Select(b=>new Rect2(b.X,b.Y,b.Width,b.Height))];Navigation=Geometry.Navigation();
         foreach(var rect in CurrentWalls)
@@ -22,6 +20,7 @@ public partial class WorldView
             var body=new StaticBody2D {Position=rect.GetCenter(),CollisionLayer=1,CollisionMask=0};
             body.AddChild(new CollisionShape2D {Shape=new RectangleShape2D {Size=rect.Size}});AddChild(body);
         }
+        foreach(var block in Geometry.Blocks)AddChild(new WorldStructure {Footprint=new(block.X,block.Y,block.Width,block.Height),Region=zone.Region,ZIndex=(block.Y+block.Height)/4});
         QueueRedraw();
     }
     private bool Claimed(string id)=>MapClaimed?.Invoke(id)??Progress?.Claims.Contains(id)==true;
@@ -53,25 +52,19 @@ public partial class WorldView
         foreach(var block in z.Geometry.Blocks)
         {
             var rect=new Rect2(block.X,block.Y,block.Width,block.Height);if(!rect.Intersects(view))continue;
-            DrawWorldArchitecture(rect,z.Region,view,ground,edge,phase);
-        }
-        if(landmarks is not null&&z.Kind=="wild")
-        {
-            var block=z.Geometry.Blocks[0];var width=landmarks.GetWidth()/2;var height=landmarks.GetHeight()/2;var n=(int)z.Region;
-            var side=Math.Min(block.Width-20,block.Height-12);
-            DrawTextureRectRegion(landmarks,new(block.X+(block.Width-side)/2,block.Y+block.Height-side,side,side),new(n%2*width,n/2*height,width,height),restored?new Color(.82f,1,.95f):Colors.White);
+            DrawRect(new(rect.Position+new Vector2(7,12),rect.Size),new Color(0,0,0,.38f));
         }
         foreach(var exit in z.Exits)
         {
             var p=new Vector2(exit.Position.X,exit.Position.Y);if(!view.HasPoint(p))continue;
             var open=Progress is null||WorldRules.ExitOpen(Progress,exit);var color=open?new Color("b8dccb"):new("bd826c");
             DrawArc(p,25,0,Mathf.Tau,32,new Color(color,.6f),2);DrawPolyline([p+new Vector2(-12,0),p+new Vector2(-12,-35),p+new Vector2(12,-35),p+new Vector2(12,0)],color,3);
-            DrawString(ThemeDB.FallbackFont,p+new Vector2(-45,-44),exit.Name,fontSize:10,modulate:color);
+            WorldNameplate(p-new Vector2(0,47),exit.Name,color,p);
         }
         foreach(var e in z.Encounters.Where(e=>!Claimed(e.Id)&&(e.Boss>=0||MapRequired?.Invoke(e.Id)==true)))
         {
             var p=new Vector2(e.Position.X,e.Position.Y);if(!view.HasPoint(p))continue;
-            DrawArc(p,36,0,Mathf.Tau,32,new Color("cda171",.6f),2);DrawString(ThemeDB.FallbackFont,p+new Vector2(-30,-48),e.Boss>=0?"RULER":"MARKED ELITE",fontSize:10,modulate:new("e4bf7d"));
+            DrawArc(p,36,0,Mathf.Tau,32,new Color("cda171",.6f),2);WorldNameplate(p-new Vector2(0,48),e.Boss>=0?"RULER":"MARKED ELITE",new("e4bf7d"),p,180);
         }
         foreach(var site in z.Sites)
         {
@@ -80,11 +73,20 @@ public partial class WorldView
             if(site.Kind=="npc")
             {if(Progress is not null&&!WorldRules.Satisfied(Progress,site.Requires))continue;var sprite=PixelAtlas.Load(site.Id.Contains("iven")?"revenant":site.Id.Contains("sen")?"threadseer":"warden");sprite.Draw(this,2,sprite.Idle,p,new Color(.85f,.85f,.8f),.85f);}
             else if(site.Kind is "waypoint" or "refuge")
-            {DrawArc(p,20,0,Mathf.Tau,32,color,2);DrawRect(new(p-new Vector2(5,27),new(10,27)),edge);DrawCircle(p-new Vector2(0,27),4,color);
+            {DrawSetTransform(p,0,new(1,.4f));DrawArc(Vector2.Zero,20,0,Mathf.Tau,32,new Color(color,.65f),2);DrawSetTransform(Vector2.Zero);WorldArt.Draw(this,z.Region,true,new(p-new Vector2(20,43),new(40,48)),active?Colors.White:new(.75f,.75f,.7f));
                 if(active)for(var i=0;i<4;i++){var q=p+new Vector2(28+i*18,14+(i%2)*14);var survivor=PixelAtlas.Load("threadseer");survivor.Draw(this,2,survivor.Idle,q,new Color(.9f,.78f,.6f),.5f);}}
             else {DrawRect(new(p-new Vector2(12,16),new(24,16)),edge.Darkened(.35f));DrawLine(p-new Vector2(8,18),p+new Vector2(8,-18),color,2);}
-            DrawString(ThemeDB.FallbackFont,p+new Vector2(-50,-38),site.Name,fontSize:10,modulate:color);
+            WorldNameplate(p-new Vector2(0,50),site.Name,color,p);
         }
         for(var i=0;i<16;i++){var x=Viewer.X-320+(i*137%640);var y=Viewer.Y-180+Mathf.PosMod(i*61-time*6,360);DrawRect(new(new Vector2(x,y).Round(),Vector2.One),new Color(phase,.22f));}
+    }
+    private void WorldNameplate(Vector2 position,string caption,Color color,Vector2 landmark,float range=120)
+    {
+        if(Viewer.DistanceTo(landmark)>range)return;
+        var font=ThemeDB.FallbackFont;const int size=8;
+        var width=font.GetStringSize(caption,fontSize:size).X;
+        var rect=new Rect2(position-new Vector2(width/2+5,10),new(width+10,15));
+        DrawRect(rect,new Color("151410",.88f));DrawLine(rect.Position+new Vector2(2,14),rect.End-new Vector2(2,1),new Color(color,.55f));
+        DrawString(font,position-new Vector2(width/2,0),caption,fontSize:size,modulate:color);
     }
 }

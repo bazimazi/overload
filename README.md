@@ -1,5 +1,7 @@
 # Overload
 
+The 9 October ARPG presentation overhaul adds painted skill/item art, an ornate orb HUD, equipment and progression panels, an interactive world atlas, regional architecture, and right-click path movement. **C / I** inspect your character/equipment during play. See [changes and validation](docs/RPG_PRESENTATION.md). Launch the updated Windows build at `artifacts/windows/Overload.exe`; keep the complete folder together.
+
 Overload is a Godot C# action RPG prototype about learning new ways to act and earning the right to rewrite one character rule. New characters explore seventeen connected zones across Hearth and four regions, reclaim refuges, restore infrastructure, and face eight bosses before the First Pattern finale. Fractures add seeded physical branches and Hunt/Breach/Vault objectives. Three Frames, 24 skills, nine signatures and two earned oaths retain their combat rules. Earlier room-based saves remain resumable. Human playtest and release-quality gates remain open.
 
 ## Play the prototype

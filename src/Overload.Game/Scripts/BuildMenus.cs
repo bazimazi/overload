@@ -23,7 +23,8 @@ public partial class ArenaHud
             var row = i;
             var id = bindingDraft[row];
             var pattern = arena.Balance.Overload.Patterns.FirstOrDefault(p => p.Id == id);
-            AddButton($"{i + 1}. {pattern?.ImplementationId.Split('.')[1] ?? "Empty"} — choose signature", () => ChooseBinding(row), i == 0);
+            var socket=ArtButton(options,pattern?.RequiredMemories.Contains(MemoryType.Echo)==true?17:16,$"Socket {i + 1} • {pattern?.ImplementationId.Split('.')[1] ?? "Empty"}",pattern is null?"Choose a memory signature":SignatureDescription(pattern.Id),()=>ChooseBinding(row),pattern is not null);
+            if(i==0)socket.GrabFocus();
             if (pattern is not null) Text($"{string.Join(" + ", pattern.RequiredMemories)} · {pattern.StrainCost} Strain"
                 + (arena.PlayerState.ElsewhereActive && pattern.Family == ActionFamily.Traverse && pattern.RequiredCapabilities.HasFlag(ActionCapabilities.PathTraversal) ? " · SUSPENDED by Elsewhere" : ""), 13, muted);
             if (pattern is not null) Text(SignatureDescription(pattern.Id),15,ink);
@@ -58,7 +59,8 @@ public partial class ArenaHud
             &&(bindingDraft[slot]==p.Id||!bindingDraft.Contains(p.Id))))
         {
             var id=pattern.Id;
-            AddButton($"{pattern.ImplementationId.Split('.')[1]} / {pattern.Family} / {string.Join(" + ",pattern.RequiredMemories)}",()=>{bindingDraft[slot]=id;DrawBindings();},id==bindingDraft[slot]);
+            var choice=ArtButton(options,pattern.RequiredMemories.Contains(MemoryType.Echo)?17:16,pattern.ImplementationId.Split('.')[1],$"{pattern.Family} • {string.Join(" + ",pattern.RequiredMemories)} • {pattern.StrainCost} Strain",()=>{bindingDraft[slot]=id;DrawBindings();},id==bindingDraft[slot]);
+            if(id==bindingDraft[slot])choice.GrabFocus();
             Text(SignatureDescription(id)+$"  {pattern.StrainCost} Strain.",14,muted);
         }
         AddButton("Leave this slot empty",()=>{bindingDraft[slot]=null;DrawBindings();});
@@ -69,6 +71,9 @@ public partial class ArenaHud
         if(arena.Playing||arena.Character is null)return;
         var state=arena.Character.State;
         ClearMenu("HEARTH / EARNED CONTRACT","Elsewhere","Replace evade with an anchor. Placement grants no evasion.");
+        var contracts=CardGrid();
+        ArtButton(contracts,4,"Elsewhere","Mark your departure. Return through a law of your own.",()=>{},state.ElsewhereSelected,true);
+        ArtButton(contracts,5,"Red Covenant","Spend Life capacity in place of Focus. Let the debt expire.",()=>{},state.RedCovenantSelected,true);
         Text("Mark your feet, wait 0.25s, return within 4s and 8m. Crossing is suspended; Shelter can wrap the anchor.",15,muted);
         AddButton("Practice Elsewhere (no ownership or rewards)",arena.StartOathPractice,true);
         Text("Trial: separate level-100 power, 20 Might/Resolve, grade 10, standardized Rare gear. Your legal build choices stay; Override is disabled. No XP, loot or frontier reward. Failure costs time only.",15,gold);

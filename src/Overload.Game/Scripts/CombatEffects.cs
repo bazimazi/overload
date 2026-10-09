@@ -80,6 +80,7 @@ public partial class CombatEffects : Node2D
     public void Reset()
     {
         groundCasts.Clear();commandedEcho=null; sparks.Clear(); ghosts.Clear(); runeFlashes.Clear(); lastJuiceAction=-1;
+        defeatSeals.Clear();
         projectiles.Clear(); shelters.Clear(); numbers.Clear(); sweeps.Clear(); strikes.Clear(); delayed.Clear(); events.Clear(); trails.Clear(); log.Clear(); combatRandom = new(42);
         HitsDealt = 0; HitsTaken = 0;
         CriticalRolls = 0;
@@ -192,6 +193,7 @@ public partial class CombatEffects : Node2D
         if (broken) Record($"#{provenance.RootActionId}/{provenance.EffectId} staggered {state.Definition.Role}");
         if (state.Dead)
         {
+            MarkDefeat(target);
             target.CollisionLayer = 0; target.CollisionMask = 0; target.Velocity = Vector2.Zero;
             Burst(target.Position + new Vector2(0, -18), new Color("d9c49b"), 20, 70);
             arena.Audio.Play("defeat", "Enemy");
@@ -291,7 +293,7 @@ public partial class CombatEffects : Node2D
     {
         if (arena is null) return;
         var qualityStart=arena.QualityTimestamp;
-        DrawFrames(); DrawJuice();
+        DrawPresentationCues(); DrawFrames(); DrawJuice();
         foreach (var field in shelters)
         { DrawCircle(field.Origin, 64, new Color(0.4f, 0.8f, 0.9f, 0.10f)); DrawArc(field.Origin, 64, 0, Mathf.Tau, 48, new Color("70bfd1"), 1); WriteEffect(field.Origin + new Vector2(-25, -10), $"SHELTER {field.Charges}", 10); }
         if (arena.PlayerState.Barrier > 0) DrawArc(arena.Player.Position, 16, 0, Mathf.Tau, 32, new Color("c7b3ef"), 2);

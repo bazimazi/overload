@@ -21,6 +21,7 @@ try {
     }
     Invoke-ExportEditor @('--headless', '--path', ('"' + $GamePath + '"'), '--editor', '--import') 'export-import'
     Invoke-ExportEditor @('--headless', '--path', ('"' + $GamePath + '"'), '--export-release', '"Windows Desktop"') 'export-engine'
+    Copy-Item -LiteralPath (Join-Path $GamePath 'Assets/Fonts/OFL-Cinzel.txt') -Destination (Join-Path $RepoRoot 'artifacts/windows/OFL-Cinzel.txt')
     if ($SmokeTest) {
         $stdout = Join-Path $RepoRoot 'artifacts/export-smoke.log'
         $stderr = Join-Path $RepoRoot 'artifacts/export-smoke-errors.log'

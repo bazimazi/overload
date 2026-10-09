@@ -32,6 +32,7 @@ public partial class WorldView : Node2D
         exitOpen=false;
         foreach (var body in GetChildren().OfType<StaticBody2D>()) { body.CollisionLayer = 0; body.QueueFree(); }
         foreach (var prop in GetChildren().OfType<CourtProp>()) prop.QueueFree();
+        foreach (var structure in GetChildren().OfType<WorldStructure>()) structure.QueueFree();
         CurrentWalls = [.. Walls.Take(4), .. obstacles];
         Navigation = new(obstacles.Select(r => new RoomBlock((int)r.Position.X, (int)r.Position.Y, (int)r.Size.X, (int)r.Size.Y)));
         foreach (var rect in CurrentWalls)

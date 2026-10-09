@@ -39,6 +39,7 @@ public partial class ArenaHud
             Write(new(w-164,40),$"{arena.Controls.Glyph("pause")}  PAUSE",11,muted);
             Write(new(w-164,62),$"{arena.Enemies.Count(e=>!e.Enemy!.Dead)} HOSTILES",12,gold);
         }
+        DrawTargetPlate();
         if(s.ElsewhereActive||s.RedCovenantActive)
         {
             var text=s.ElsewhereActive?s.Anchor is {} anchor?$"RETURN ANCHOR · {(anchor.ExpiresAt-s.Tick)/60f:0.0}s":"ELSEWHERE · EVADE → PLACE / RETURN":$"RED COVENANT · FOCUS → LIFE · {s.ReservedPermille/10f:0.#}% RESERVED";
@@ -94,7 +95,7 @@ public partial class ArenaHud
         var s=arena.PlayerState;var w=Size.X;var h=Size.Y;
         var first=ActionSlotRect(0);var last=ActionSlotRect(5);
         var left=first.Position.X;var right=last.End.X;
-        Surface(new(left-13,h-102,right-left+26,94),new Color("6e614d"),.87f);
+        Surface(new(left-15,h-125,right-left+30,119),new Color("8a704a"),.87f);
         var memoryTypes=s.Behavior.Bindings.SelectMany(b=>b.Pattern.RequiredMemories).Concat(new[]{MemoryType.Momentum,MemoryType.Echo}).Distinct().Order().ToArray();
         var total=memoryTypes.Length*104f;var ml=w/2-total/2;
         for(var i=0;i<memoryTypes.Length;i++)
@@ -122,33 +123,65 @@ public partial class ArenaHud
             Surface(rect,color,.93f);
             if(overloaded)DrawRect(rect.Grow(-2),new Color(teal,.07f));
             var center=rect.GetCenter();
-            DrawActionGlyph(new(center.X,rect.Position.Y+22),id,i,cd>0?muted.Darkened(.45f):overloaded?teal:gold);
-            Write(new(rect.Position.X+6,rect.Position.Y+13),Fit(arena.Controls.Glyph(names[i]),rect.Size.X-10,9),9,gold);
+            var iconSize=Math.Min(64,rect.Size.X-8);
+            var artRect=new Rect2(center.X-iconSize/2,rect.Position.Y+5,iconSize,64);
+            DrawTextureRect(RpgTheme.Artwork(RpgTheme.Icon(id)),artRect,false,cd>0?new Color(.42f,.42f,.42f):Colors.White);
+            if(cd>0)
+            {
+                var skillCooldown=arena.Balance.Skills.Single(k=>k.Id==id).Cooldown;
+                var remaining=Math.Clamp(cd/(float)Math.Max(1,skillCooldown),0,1);
+                var clock=Enumerable.Range(0,33).Select(n=>artRect.GetCenter()+Vector2.FromAngle(-Mathf.Pi/2+n/32f*remaining*Mathf.Tau)*30).ToList();clock.Insert(0,artRect.GetCenter());
+                if(remaining>.995f)DrawCircle(artRect.GetCenter(),30,new Color(0,0,0,.55f));
+                else if(remaining>.005f)DrawColoredPolygon(clock.ToArray(),new Color(0,0,0,.55f));
+                CenterWrite(new(center.X,rect.Position.Y+44),$"{cd/60f:0.0}",19,ink);
+            }
+            DrawRect(new(rect.Position.X+3,rect.Position.Y+3,Math.Min(42,rect.Size.X-6),17),new Color("080705",.92f));
+            Write(new(rect.Position.X+6,rect.Position.Y+15),Fit(arena.Controls.Glyph(names[i]),38,9),9,gold);
             var label=overloaded?prediction!.Implementation.ToString():id==SkillId.Traverse&&s.ElsewhereActive?s.Anchor is null?"Place anchor":"Return":SkillName(id);
-            CenterWrite(new(center.X,rect.Position.Y+48),Fit(label,rect.Size.X-10,10),10,overloaded?teal:ink);
+            CenterWrite(new(center.X,rect.Position.Y+79),Fit(label,rect.Size.X-8,10),10,overloaded?teal:ink);
             var skill=arena.Balance.Skills.Single(k=>k.Id==id);
             var cost=cd>0?$"{cd/60f:0.0}s":id==SkillId.Flask?$"{s.FlaskCharges} flasks":overloaded?$"+{prediction!.StrainCost/1000} strain":s.RedCovenantActive&&skill.FocusCost>0?$"{skill.FocusCost*.4f:0.#}% Life":skill.FocusCost==0?"Ready":$"{skill.FocusCost} Focus";
-            CenterWrite(new(center.X,rect.Position.Y+66),Fit(cost,rect.Size.X-10,9),9,muted);
+            CenterWrite(new(center.X,rect.Position.Y+93),Fit(cost,rect.Size.X-8,9),9,muted);
             if(cd>0&&skill.Cooldown>0)Bar(new(rect.Position.X+5,rect.End.Y-4,rect.Size.X-10,2),1-Math.Min(1,cd/(float)skill.Cooldown),gold);
         }
-        DrawReservoir(new(left-69,h-57),shownLife,new("bd5f62"),"LIFE",CombatMath.BarBasisPoints(s.Life,s.MaximumLife)/100+"%");
-        DrawReservoir(new(right+68,h-57),s.RedCovenantActive?1-s.ReservedPermille/1000f:shownFocus,s.RedCovenantActive?violet:new("65aaba"),s.RedCovenantActive?"CAPACITY":"FOCUS",s.RedCovenantActive?$"{s.ReservedPermille/10f:0}%":$"{s.Focus/1000}");
+        DrawReservoir(new(left-73,h-68),shownLife,new("b52332"),"LIFE",CombatMath.BarBasisPoints(s.Life,s.MaximumLife)/100+"%");
+        DrawReservoir(new(right+72,h-68),s.RedCovenantActive?1-s.ReservedPermille/1000f:shownFocus,s.RedCovenantActive?violet:new("286ab5"),s.RedCovenantActive?"CAPACITY":"FOCUS",s.RedCovenantActive?$"{s.ReservedPermille/10f:0}%":$"{s.Focus/1000}");
+        if(arena.Character?.State is {} character)
+        {
+            var floor=Progression.TotalXp(character.ValidatedLevel);var ceiling=Progression.TotalXp(character.ValidatedLevel+1);
+            var fraction=(float)((character.TotalXp-floor)*10000/System.Numerics.BigInteger.Max(1,ceiling-floor))/10000f;
+            Bar(new(left,h-9,right-left,3),fraction,new("a79768"));
+        }
         if(arena.Controls.PreservingMemories)CenterWrite(new(w/2,h-160),"MEMORIES HELD / BASE ACTION",11,gold);
     }
     private void DrawReservoir(Vector2 p,float fraction,Color color,string name,string value)
     {
-        const float radius=32;
-        DrawCircle(p,radius+5,new("0a1217"));DrawArc(p,radius+5,0,Mathf.Tau,64,gold.Darkened(.25f),1);
-        DrawCircle(p,radius,new("1b2229"));
-        if(fraction>=.999f)DrawCircle(p,radius,color.Darkened(.28f));
-        else if(fraction>.001f)
+        const float radius=44;
+        fraction=Math.Clamp(fraction,0,1);
+        DrawCircle(p,radius+10,new("080706"));DrawArc(p,radius+8,0,Mathf.Tau,96,gold.Darkened(.45f),5);
+        DrawArc(p,radius+8,-Mathf.Pi*.9f,-Mathf.Pi*.1f,48,gold,2);
+        DrawArc(p,radius+3,0,Mathf.Tau,96,new("655c48"),2);
+        DrawCircle(p,radius,new("131018"));
+        var top=radius-2*radius*fraction;
+        for(var y=Math.Max(-radius+1,top);y<radius-1;y+=1)
         {
-            var start=MathF.Asin(1-2*Math.Clamp(fraction,0,1));var end=Mathf.Pi-start;
-            var points=Enumerable.Range(0,49).Select(i=>p+Vector2.FromAngle(Mathf.Lerp(start,end,i/48f))*radius).ToArray();
-            DrawColoredPolygon(points,color.Darkened(.28f));
+            var chord=MathF.Sqrt(radius*radius-y*y)-1;
+            if(chord<=0)continue;
+            var tone=.18f+.25f*(y+radius)/(radius*2);
+            DrawLine(p+new Vector2(-chord,y),p+new Vector2(chord,y),color.Darkened(tone),1.5f);
+            DrawLine(p+new Vector2(-chord*.58f,y),p+new Vector2(chord*.3f,y),new Color(color.Lightened(.25f),.13f),1);
         }
-        DrawArc(p,radius-3,.1f,Mathf.Pi*.8f,32,new Color(color,.35f),2);
-        CenterWrite(p+new Vector2(0,5),value,15,ink);CenterWrite(p+new Vector2(0,48),name,9,gold);
+        if(fraction>.03f&&fraction<.97f)
+        {
+            var chord=MathF.Sqrt(radius*radius-top*top)-2;
+            var wave=Enumerable.Range(0,25).Select(i=>{var x=Mathf.Lerp(-chord,chord,i/24f);return p+new Vector2(x,top+MathF.Sin(x*.12f+hudTime*2)*1.2f);}).ToArray();
+            DrawPolyline(wave,color.Lightened(.45f),1);
+        }
+        DrawArc(p-new Vector2(3,1),radius-5,-Mathf.Pi*.88f,-Mathf.Pi*.53f,24,new Color(1,1,1,.24f),2);
+        DrawArc(p,radius-2,.2f,Mathf.Pi*.75f,24,new Color(color,.28f),2);
+        for(var i=0;i<4;i++)
+        {var a=Mathf.Pi/4+i*Mathf.Pi/2;var q=p+Vector2.FromAngle(a)*(radius+8);DrawCircle(q,3,gold);}
+        CenterWrite(p+new Vector2(0,6),value,18,ink);CenterWrite(p+new Vector2(0,65),name,10,gold);
     }
     private void DrawRune(Vector2 c,MemoryType type,Color color)
     {

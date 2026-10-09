@@ -61,6 +61,29 @@
       "author": "Codex for Overload, 2026-10-06",
       "source": "Authored geometry and palettes in this repository; no external art",
       "status": "Gameplay-readable prototype silhouettes; final animation art remains a release gate"
+    },
+    {
+      "id": "original.rpg.v3",
+      "paths": [
+        "src/Overload.Game/Assets/UI/relic-icons.png",
+        "src/Overload.Game/Assets/UI/palimpsest-atlas.png",
+        "src/Overload.Game/Assets/Pixel/world-structures.png"
+      ],
+      "type": "Original AI-generated bitmap UI, world map and environment atlas",
+      "author": "Built-in image_gen tool, directed by Codex for Overload on 2026-10-09",
+      "source": "Unmodified originals and exact prompts retained in assets/source/rpg-v3",
+      "status": "Integrated and visually reviewed in the running game"
+    },
+    {
+      "id": "font.cinzel",
+      "paths": [
+        "src/Overload.Game/Assets/Fonts/Cinzel.ttf",
+        "src/Overload.Game/Assets/Fonts/OFL-Cinzel.txt"
+      ],
+      "author": "Natanael Gama",
+      "source": "https://github.com/google/fonts/tree/main/ofl/cinzel",
+      "license": "SIL Open Font License 1.1",
+      "status": "Heading font; license copied alongside Windows export"
     }
   ]
 }

@@ -72,7 +72,7 @@ public partial class Arena : Node
             try { PracticeTier=Quantity.Parse(practice.Split('=')[1]).Value; if(PracticeTier<1) throw new FormatException(); }
             catch(FormatException) { GD.PushError("Practice tier must be a positive decimal integer");GetTree().Quit(1);return; }
         }
-        IsSmoke = practice is not null || OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--quality-", StringComparison.Ordinal) || a.StartsWith("--world-perf=",StringComparison.Ordinal) || a.StartsWith("--world-soak=",StringComparison.Ordinal) || a is "--identity-smoke" or "--identity-review" or "--world-seed-review" or "--world-smoke" or "--world-review" or "--experience-smoke" or "--experience-review" or "--smoke-test" or "--capture-polish" or "--capture-slice" or "--endless-smoke" or "--capture-endless" or "--production-smoke" or "--capture-production" or "--expansion-smoke" or "--capture-expansion");
+        IsSmoke = practice is not null || OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--quality-", StringComparison.Ordinal) || a.StartsWith("--world-perf=",StringComparison.Ordinal) || a.StartsWith("--world-soak=",StringComparison.Ordinal) || a is "--rpg-smoke" or "--rpg-review" or "--identity-smoke" or "--identity-review" or "--world-seed-review" or "--world-smoke" or "--world-review" or "--experience-smoke" or "--experience-review" or "--smoke-test" or "--capture-polish" or "--capture-slice" or "--endless-smoke" or "--capture-endless" or "--production-smoke" or "--capture-production" or "--expansion-smoke" or "--capture-expansion");
         try { Balance = ProfileLoader.Load(FileAccess.GetFileAsString("res://Content/arena.json")); Balance = ExpansionLoader.Load(Balance, FileAccess.GetFileAsString("res://Content/expansion.json")); ReleaseContent.Load(FileAccess.GetFileAsString("res://Content/release.json")); }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); return; }
         BaseBalance = Balance;
@@ -114,6 +114,7 @@ public partial class Arena : Node
         if(OS.GetCmdlineUserArgs().Any(a=>a.StartsWith("--world-perf=",StringComparison.Ordinal)||a.StartsWith("--world-soak=",StringComparison.Ordinal)))CallDeferred(nameof(BeginWorldQuality));
         if(OS.GetCmdlineUserArgs().Contains("--world-seed-review"))CallDeferred(nameof(ReviewWorldSeeds));
         if(OS.GetCmdlineUserArgs().Any(a=>a is "--identity-smoke" or "--identity-review"))CallDeferred(nameof(ReviewIdentity));
+        if(OS.GetCmdlineUserArgs().Any(a=>a is "--rpg-smoke" or "--rpg-review"))CallDeferred(nameof(ReviewRpg));
         GD.Print("OVERLOAD_READY arena.v1");
     }
     public override void _Process(double delta)
@@ -163,6 +164,7 @@ public partial class Arena : Node
     }
     public void StartEncounter(int wave, bool rest = true)
     {
+        ResetPointerTravel();
         ResetWorldNavigation();
         WorldActive=false;LocalMapVisible=false;
         Effects.ZIndex=100;laws.ZIndex=90;
@@ -195,6 +197,7 @@ public partial class Arena : Node
     }
     public void ReturnToTitle()
     {
+        ResetPointerTravel();
         EndRewriteLesson();ResetWorldNavigation();
         Hud.ResetDispatch();
         FlushWorldFog();if(WorldActive&&!GraphFracture)WorldTransaction($"world.return:{Guid.NewGuid():N}",WorldRules.Resume);WorldActive=false;LocalMapVisible=false;
@@ -209,6 +212,7 @@ public partial class Arena : Node
     }
     public void TogglePause()
     {
+        ResetPointerTravel();
         if(LocalMapVisible){LocalMapVisible=false;Controls.ClearBuffer();Audio.SetPaused(Paused);return;}
         if ((!Playing && !CheckpointRest) || PlayerState.Dead) return;
         if(WorldActive&&!GraphFracture&&Character!.State.World is {Ending:null} pending&&pending.Resolved.Contains(Region.Crown))
@@ -221,6 +225,7 @@ public partial class Arena : Node
     {
         Controls.Observe(input);
         if (Hud.TryCaptureKey(input)) { GetViewport().SetInputAsHandled(); return; }
+        if(input.IsActionPressed("move_to")){BeginPointerTravel();GetViewport().SetInputAsHandled();return;}
         if(WorldActive&&!PlayerState.Dead&&!input.IsEcho())
         {
             if(!Paused&&input.IsActionPressed("track")){CycleWorldTarget();GetViewport().SetInputAsHandled();return;}
@@ -253,7 +258,7 @@ public partial class Arena : Node
         Player.Flash = false;
         foreach (var enemy in Enemies) enemy.Flash = false;
         var mouse = (Controls.PointerPosition - worldContainer.Position) / worldContainer.Scale + CameraOrigin;
-        var intent = Controls.Read(PlayerState.Tick, Player.Position, mouse);
+        var intent = PointerIntent(Controls.Read(PlayerState.Tick, Player.Position, mouse));
         if (intent.Move.LengthSquared() > 0) PlayerState.CancelRecoveryByMovement();
         if (intent.Action is { } id)
         {

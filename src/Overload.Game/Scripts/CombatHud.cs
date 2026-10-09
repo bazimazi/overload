@@ -7,41 +7,45 @@ namespace Overload.Game;
 public partial class ArenaHud
 {
     private float shownLife = 1, shownFocus = 1;
+    private float hudTime;
     public override void _Process(double delta)
     {
         if (arena.PlayerState is null) return;
         var state = arena.PlayerState;
+        if(!arena.Paused&&!arena.LocalMapVisible)hudTime+=(float)Math.Min(delta,.05);
         var ease = 1 - MathF.Exp(-(float)delta * 12);
         shownLife = Mathf.Lerp(shownLife, CombatMath.BarBasisPoints(state.Life, state.MaximumLife) / 10000f, ease);
         shownFocus = Mathf.Lerp(shownFocus, state.Focus / (float)state.MaximumFocus, ease);
         UpdateSlotHints();
         UpdateCheckpointButtons();
+        UpdateGameDock();
+        closeMenu.Visible=MenuVisible&&!home&&goBack is not null;
         ObserveDispatch(delta);
         QueueRedraw();
     }
     private void CenterWrite(Vector2 baseline, string text, int size, Color color)
     {
-        var width = ThemeDB.FallbackFont.GetStringSize(text, fontSize: FontSize(size)).X;
+        var width = DisplayFont(size).GetStringSize(text, fontSize: FontSize(size)).X;
         Write(baseline - new Vector2(width / 2, 0), text, size, color);
     }
     private string Fit(string text, float width, int size)
     {
-        if (ThemeDB.FallbackFont.GetStringSize(text, fontSize: FontSize(size)).X <= width) return text;
-        while (text.Length > 1 && ThemeDB.FallbackFont.GetStringSize(text + "…", fontSize: FontSize(size)).X > width) text = text[..^1];
+        if (DisplayFont(size).GetStringSize(text, fontSize: FontSize(size)).X <= width) return text;
+        while (text.Length > 1 && DisplayFont(size).GetStringSize(text + "…", fontSize: FontSize(size)).X > width) text = text[..^1];
         return text + "…";
     }
     private void Surface(Rect2 rect, Color? border = null, float opacity = .96f)
     {
-        DrawRect(rect, new Color("101a20", opacity));
-        DrawRect(rect, border ?? new Color("48534b"), false, 1);
-        DrawLine(rect.Position + new Vector2(1, 1), rect.Position + new Vector2(rect.Size.X - 1, 1), new Color("a38b61", .45f));
+        RpgTheme.Frame(this, rect, border ?? gold, rect.Size.X > 200);
     }
     private static string SkillName(SkillId id) => System.Text.RegularExpressions.Regex.Replace(id.ToString(), "([a-z])([A-Z])", "$1 $2");
     public override void _Draw()
     {
         if (arena.PlayerState is null) return;
+        DrawWorldVignette();
         if (home && MenuVisible) DrawHearth();
-        else { if (arena.CheckpointRest) DrawCheckpointHud(); else DrawFightHud(); if(arena.WorldActive&&!MenuVisible&&arena.LocalMapVisible)DrawLocalWorldMap(); if (MenuVisible) DrawRect(new(Vector2.Zero, Size), new Color("050b10", .72f)); }
+        else if(MenuVisible&&!arena.Playing&&!arena.CheckpointRest)DrawRect(new(Vector2.Zero,Size),new Color("050403",.68f));
+        else { if (arena.CheckpointRest) DrawCheckpointHud(); else DrawFightHud(); if(arena.WorldActive&&!MenuVisible&&arena.LocalMapVisible)DrawLocalWorldMap(); if (MenuVisible) DrawRect(new(Vector2.Zero, Size), new Color("050403", .78f)); }
     }
     private void DrawHearth()
     {

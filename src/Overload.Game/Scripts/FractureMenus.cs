@@ -11,6 +11,8 @@ public partial class ArenaHud
         var s = arena.Character!.State;
         if(s.Chain is { Closed:false } chain) { selectedTier=chain.Tier;selectedRegion=chain.Regions[chain.CompletedLegs]; }
         ClearMenu("FRACTURE BOARD / SAVED EXPEDITIONS", "Beyond the court", $"Cleared {CounterText.Short(s.HighestClearedTier)} · Frontier {CounterText.Short(s.HighestUnlockedTier)} · Attunement {CounterText.Short(s.AttunementGrade)}");
+        PanelTabs("Atlas");
+        options.AddChild(new WorldAtlasCanvas {SelectedRegion=selectedRegion,SelectRegion=r=>{selectedRegion=r;Fractures();},TextPercent=arena.Audio.TextPercent,SizeFlagsHorizontal=SizeFlags.ExpandFill});
         if (!s.FractureUnlocked)
         { Text("Complete your campaign to open Fractures and shared attunement.", 18, ink); AddButton("Back", Title, true); return; }
         if (!s.ChapterOffers.IsEmpty)
@@ -43,8 +45,9 @@ public partial class ArenaHud
                 var knownRoute=EndlessRules.Routes.Single(r=>r.Id==known);
                 AddButton($"Use known {knownRoute.Region} route ({knownRoute.Target})",()=> { arena.UpdateCharacter(c=>EndlessRules.SelectKnownRoute(c,known));Fractures(); });
             }
+            var tiers=new HBoxContainer();options.AddChild(tiers);
             foreach (var offset in new[] { -1000, -10, -1, 1, 10, 1000 })
-                AddButton($"Tier {(offset > 0 ? "+" : "")}{offset}", () => { selectedTier = BigInteger.Clamp(selectedTier + offset, 1, s.HighestUnlockedTier); Fractures(); });
+                PanelButton(tiers,$"{(offset > 0 ? "+" : "")}{offset}", () => { selectedTier = BigInteger.Clamp(selectedTier + offset, 1, s.HighestUnlockedTier); Fractures(); });
             ExactInput("Enter exact unlocked tier", selectedTier.ToString(), value =>
             {
                 if (value < 1 || value > s.HighestUnlockedTier) { Text("That tier is not unlocked.", 16, gold); return; }

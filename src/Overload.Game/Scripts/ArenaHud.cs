@@ -6,15 +6,17 @@ namespace Overload.Game;
 public partial class ArenaHud : Control
 {
     private Arena arena = null!;
-    private CenterContainer menu = null!;
+    private Control menu = null!;
     private VBoxContainer options = null!;
     private PanelContainer panel = null!;
     private ScrollContainer scroll = null!;
+    private Button closeMenu=null!;
     private string? capture;
     private Label? captureLabel;
-    private readonly Color ink = new("dae4e8"), gold = new("e4bf7d");
+    private readonly Color ink = RpgTheme.Ink, gold = RpgTheme.Gold;
     private bool home;
-    private Color muted => arena.Audio.HighContrast ? new("d2e3ea") : new("8eabb6");
+    private Tween? panelEntrance;
+    private Color muted => arena.Audio.HighContrast ? new("eee4d3") : RpgTheme.Muted;
     public bool MenuVisible => menu.Visible;
     public void Initialize(Arena owner) => arena = owner;
     public override void _Ready()
@@ -22,17 +24,19 @@ public partial class ArenaHud : Control
         MouseFilter = MouseFilterEnum.Ignore;
         InitializeSlotHints();
         InitializeCheckpointButtons();
-        menu = new CenterContainer { MouseFilter = MouseFilterEnum.Stop };
+        InitializeGameDock();
+        menu = new Control { MouseFilter = MouseFilterEnum.Stop };
         AddChild(menu); menu.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        panel = new PanelContainer();
-        panel.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color("101a20", .97f), BorderColor = new Color("756449"),
-            BorderWidthLeft = 1, BorderWidthRight = 1, BorderWidthTop = 2, BorderWidthBottom = 1,
-            ContentMarginLeft = 28, ContentMarginRight = 28, ContentMarginTop = 24, ContentMarginBottom = 24,
-            ShadowColor = new Color(0,0,0,.45f), ShadowSize = 12 });
+        panel = new RelicPanel();
+        panel.AddThemeStyleboxOverride("panel", RpgTheme.Box(margin: 24));
         menu.AddChild(panel);
         scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled, FollowFocus = true };
         panel.AddChild(scroll);
         options = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill }; options.AddThemeConstantOverride("separation", 10); scroll.AddChild(options);
+        closeMenu=new Button {Text="×",Size=new(28,28),TooltipText="Back [Esc / B]",AccessibilityName="Back to previous screen"};menu.AddChild(closeMenu);
+        closeMenu.AddThemeFontSizeOverride("font_size",16);
+        closeMenu.AddThemeStyleboxOverride("normal",RpgTheme.Box(gold,margin:0));closeMenu.AddThemeStyleboxOverride("hover",RpgTheme.Box(ink,margin:0));
+        closeMenu.Pressed+=()=>goBack?.Invoke();
         Resized += LayoutMenu; LayoutMenu();
     }
     private void LayoutMenu()
@@ -40,8 +44,12 @@ public partial class ArenaHud : Control
         if (scroll is null) return;
         var wideHome = home && Size.X >= 1100;
         menu.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        if (wideHome) { menu.OffsetLeft = 44; menu.OffsetRight = -(Size.X - Math.Min(570, Size.X * .46f)); menu.OffsetTop = 40; menu.OffsetBottom = -40; }
-        scroll.CustomMinimumSize = new Vector2(wideHome ? Math.Min(470, Size.X * .4f) : Math.Clamp(Size.X - 116, 300, 760), Math.Clamp(Size.Y - 132, 180, 570));
+        var contentWidth=wideHome?Math.Min(470,Size.X*.4f):Math.Clamp(Size.X-116,300,1040);
+        var contentHeight=Math.Clamp(Size.Y-(home?132:100),180,800);
+        scroll.CustomMinimumSize=new(contentWidth,contentHeight);
+        panel.Size=new(contentWidth+48,contentHeight+48);
+        panel.Position=wideHome?new Vector2(44,(Size.Y-panel.Size.Y)/2):(Size-panel.Size)/2;
+        closeMenu.Position=panel.Position+new Vector2(panel.Size.X-38,10);
     }
     private int FontSize(int size) => (int)Math.Round(size * arena.Audio.TextPercent / 100f);
     private void ClearMenu(string eyebrow, string title, string subtitle)
@@ -52,25 +60,29 @@ public partial class ArenaHud : Control
         LayoutMenu(); menu.Theme = MakeTheme();
         Theme=menu.Theme;
         goBack = () => { if (arena.Playing) Pause(); else Title(); };
-        Text(eyebrow, 14, gold); Text(title, 38, ink); Text(subtitle, 17, muted);
+        Text(eyebrow, 11, gold); Text(title, 30, ink); Text(subtitle, 14, muted);
         options.AddChild(new Control { CustomMinimumSize = new Vector2(0, 8) }); QueueRedraw();
+        panelEntrance?.Kill();panel.Modulate=arena.Audio.ReducedFlash?Colors.White:new Color(1,1,1,.35f);
+        if(!arena.Audio.ReducedFlash){panelEntrance=CreateTween();panelEntrance.TweenProperty(panel,"modulate",Colors.White,.16);}
     }
     private Label Text(string text, int size, Color color)
     {
         var label = new Label { Text = text, HorizontalAlignment = HorizontalAlignment.Center, AutowrapMode = TextServer.AutowrapMode.WordSmart, SizeFlagsHorizontal = SizeFlags.ExpandFill };
-        label.AddThemeFontSizeOverride("font_size", FontSize(size)); label.AddThemeColorOverride("font_color", color); options.AddChild(label); return label;
+        label.AddThemeFontSizeOverride("font_size", FontSize(size)); label.AddThemeColorOverride("font_color", color);
+        if (size >= 21) label.AddThemeFontOverride("font", RpgTheme.Heading);
+        options.AddChild(label); return label;
     }
     private void AddButton(string label, Action action, bool focus = false)
     {
         var button = new Button { CustomMinimumSize = new Vector2(0, 44), TooltipText = label, AccessibilityName=label, FocusMode = FocusModeEnum.All };
         var caption = new Label { Text = label, MouseFilter = MouseFilterEnum.Ignore, AutowrapMode = TextServer.AutowrapMode.WordSmart,
             HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-        caption.AddThemeFontSizeOverride("font_size", FontSize(19));
+        caption.AddThemeFontSizeOverride("font_size", FontSize(16));
         button.AddChild(caption); caption.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); caption.OffsetLeft=16;caption.OffsetRight=-16;
         button.Resized += () => button.CustomMinimumSize = new Vector2(0, Math.Max(44, caption.GetMinimumSize().Y + 12));
-        button.AddThemeStyleboxOverride("normal", ButtonStyle(new Color("1e2d33"), new Color("3d4c4e")));
-        button.AddThemeStyleboxOverride("hover", ButtonStyle(new Color("2a4147"), gold));
-        button.AddThemeStyleboxOverride("pressed", ButtonStyle(new Color("365450"), gold));
+        button.AddThemeStyleboxOverride("normal", ButtonStyle(new Color("25211b"), new Color("67543a")));
+        button.AddThemeStyleboxOverride("hover", ButtonStyle(new Color("3c3021"), gold));
+        button.AddThemeStyleboxOverride("pressed", ButtonStyle(new Color("4b3925"), gold));
         button.AddThemeStyleboxOverride("focus", new StyleBoxFlat { BgColor = new Color(0, 0, 0, 0), BorderColor = gold,
             BorderWidthLeft = 2, BorderWidthRight = 2, BorderWidthTop = 2, BorderWidthBottom = 2 });
         button.Pressed += () => { arena.Audio.Play("ui", "UI"); action(); }; options.AddChild(button); if (focus) button.GrabFocus();
@@ -79,7 +91,7 @@ public partial class ArenaHud : Control
     {
         if (arena.Character is null) { SaveRecovery(); return; }
         arena.PresentHearth();
-        ClearMenu("THE PALIMPSEST / HEARTH", "O V E R L O A D", "Fight to remember. Change how you fight.");
+        ClearMenu("THE PALIMPSEST / HEARTH", "OVERLOAD", "Fight to remember. Change how you fight.");
         home = true; LayoutMenu();
         var s = arena.Character.State;
         if(s.World is not null)AddButton($"Explore the world · {s.World.ActiveZone.Name}",arena.StartWorld,true);
@@ -148,12 +160,18 @@ public partial class ArenaHud : Control
     public override void _Input(InputEvent input)
     {
         arena.Controls.Observe(input);
+        if(HandleFieldPanelInput(input))return;
         if(HandleWorldMapInput(input))return;
         if (TryCaptureKey(input)) GetViewport().SetInputAsHandled();
         else if (MenuVisible && input.IsActionPressed("ui_cancel"))
         { goBack?.Invoke(); arena.Controls.ClearBuffer(); GetViewport().SetInputAsHandled(); }
     }
-    private void Write(Vector2 position, string text, int size, Color color) => DrawString(ThemeDB.FallbackFont, position, text, fontSize: FontSize(size), modulate: color);
+    private Font DisplayFont(int size) => size >= 21 ? RpgTheme.Heading : ThemeDB.FallbackFont;
+    private void Write(Vector2 position, string text, int size, Color color)
+    {
+        DrawString(DisplayFont(size), position + new Vector2(1, 1), text, fontSize: FontSize(size), modulate: new Color(0, 0, 0, .8f));
+        DrawString(DisplayFont(size), position, text, fontSize: FontSize(size), modulate: color);
+    }
     private void Bar(Rect2 rect, float fraction, Color color)
     {
         DrawRect(rect, new Color("283842")); DrawRect(new Rect2(rect.Position, new Vector2(rect.Size.X * fraction, rect.Size.Y)), color);

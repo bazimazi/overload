@@ -19,10 +19,10 @@ public partial class ArenaHud
         }
         else
         {
-            foreach(var region in Enum.GetValues<Region>()) AddButton($"Region: {region}{(selectedRegion==region?" / selected":"")}",()=>{selectedRegion=region;Fractures();});
             AddButton("Start three-leg regional chain",()=>{arena.UpdateCharacter(s=>EndgameRules.StartChain(s,selectedTier,selectedRegion));Fractures();});
         }
-        foreach(var family in Enum.GetValues<ActivityFamily>())AddButton($"{family}{(selectedActivity==family?" / selected":"")}",()=>{selectedActivity=family;Fractures();});
+        var activities=CardGrid(3);
+        foreach(var family in Enum.GetValues<ActivityFamily>())ArtButton(activities,family==ActivityFamily.Hunt?13:family==ActivityFamily.Breach?3:15,family.ToString(),family==ActivityFamily.Hunt?"Elite & regional ruler":family==ActivityFamily.Breach?"Restore defended conduits":"Unlock the guardian seals",()=>{selectedActivity=family;Fractures();},selectedActivity==family);
         Text("Hunt: marked elite and regional boss. Breach: restore two defended conduits, then defeat the boss. Vault: open guardian seals and claim the boss keystone. Optional supply caches hold 20% of XP; all families share the tier budget.",15,muted);
         var rules=WorldLaws.ForRoute(s.SelectedRoute,EndlessRules.ChapterAt(selectedTier));
         foreach(var id in rules){var rule=WorldLaws.Rules.Single(r=>r.Id==id);Text(rule.Name+": "+rule.Description,15,gold);}

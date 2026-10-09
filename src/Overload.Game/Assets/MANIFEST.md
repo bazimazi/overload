@@ -1,5 +1,11 @@
 # Overload asset provenance
 
+## ARPG presentation, 9 October 2026
+
+Assets/UI/relic-icons.png, Assets/UI/palimpsest-atlas.png and Assets/Pixel/world-structures.png are original generated assets made with the built-in imagegen tool. Their unmodified source PNGs, exact prompts, layout notes and SHA-256 hashes are retained in assets/source/rpg-v3/generation.json. The scenery PNG preserves transparent alpha; its measured row division is y=540 rather than the requested y=512. UI icons are sampled by normalized 6×4 cells. The atlas is decorative geography behind real discovered zone controls and graph connections; it does not grant travel permissions.
+
+Assets/Fonts/Cinzel.ttf comes from Google Fonts' official repository and is licensed under the SIL Open Font License 1.1. The full license is in Assets/Fonts/OFL-Cinzel.txt and is copied beside the exported game. The earlier “no downloaded fonts” statement describes the 6 October asset set only.
+
 ## Connected world, 8 October 2026
 
 `Assets/Pixel/world-landmarks.png` is an original AI-generated transparent 2×2 atlas: the Great Kiln, leaning mirrored observatory, suspended page vault and fractured crown. The built-in image_gen tool produced it; the complete prompt and unchanged source PNG are in `assets/source/world-v1/generation.json` and `landmarks.png`. It is copied byte-for-byte into the project and sampled inside authoritative terrain footprints. Existing regional floor images supply quiet modular floor crops; code draws material edges and masonry from the same geometry as collision.

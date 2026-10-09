@@ -1,49 +1,102 @@
-using Godot;
+﻿using Godot;
 using Overload.Domain;
 
 namespace Overload.Game;
 public partial class ArenaHud
 {
+    private GearSlot? inventoryFilter;
     private void Inventory()
     {
         if (arena.Playing || arena.Character is null) return;
         var state = arena.Character.State;
-        ClearMenu("HEARTH / EQUIPMENT", "Arsenal", $"{CounterText.Short(state.Gold)} gold · {CounterText.Short(state.Alloy)} Alloy · {state.Inventory.Length}/{EquipmentRules.Capacity} items");
-        foreach (var item in state.Inventory)
-            AddButton($"{(state.Equipment.ContainsValue(item.Id) ? "Equipped" : "Bag")} · {item.Name} +{item.Quality}{(item.Locked ? " [locked]" : "")}", () => InspectItem(item.Id), item == state.Inventory[0]);
-        AddButton("Back to Hearth", Title);
+        ClearMenu("HEARTH / EQUIPMENT & FORGE", "Arsenal", $"{CounterText.Short(state.Gold)} gold  •  {CounterText.Short(state.Alloy)} Alloy  •  {state.Inventory.Length}/{EquipmentRules.Capacity} items");
+        PanelTabs("Arsenal");
+        var columns = new HBoxContainer(); columns.AddThemeConstantOverride("separation", 18); options.AddChild(columns);
+        var equipped = Section(columns, state.Frame.ToString()); equipped.SizeFlagsHorizontal = SizeFlags.ShrinkBegin;
+        equipped.GetParent<Control>().SizeFlagsHorizontal=SizeFlags.ShrinkBegin;
+        equipped.AddChild(new EquippedFigure { State = state, Inspect = InspectItem });
+        StatLine(equipped, "Attunement", CounterText.Short(state.AttunementGrade));
+        StatLine(equipped, "Attack power", EquipmentRules.Stat(state, AffixKind.Attack).ToString());
+        StatLine(equipped, "Armor", EquipmentRules.Stat(state, AffixKind.Armor).ToString());
+        var bag = Section(columns, "Satchel");
+        var filters = new HBoxContainer(); bag.AddChild(filters);
+        PanelButton(filters, "All", () => { inventoryFilter = null; Inventory(); });
+        var filter = new OptionButton { SizeFlagsHorizontal = SizeFlags.ExpandFill };
+        filter.AddItem("Every equipment slot");
+        foreach (var slot in Enum.GetValues<GearSlot>()) filter.AddItem(slot.ToString());
+        filter.Selected = inventoryFilter is {} selected ? (int)selected + 1 : 0;
+        filter.ItemSelected += index => { inventoryFilter = index == 0 ? null : (GearSlot)(index - 1); Inventory(); }; filters.AddChild(filter);
+        var grid = new GridContainer { Columns = Size.X>=1200?10:6, SizeFlagsHorizontal = SizeFlags.ExpandFill }; grid.AddThemeConstantOverride("h_separation", 4); grid.AddThemeConstantOverride("v_separation", 4); bag.AddChild(grid);
+        var items = state.Inventory.Where(i => inventoryFilter is null || i.Slot == inventoryFilter).ToArray();
+        Button? first = null;
+        for (var i = 0; i < EquipmentRules.Capacity; i++)
+        {
+            var item = i < items.Length ? items[i] : null;
+            var b = new Button { CustomMinimumSize = new(56, 56), SizeFlagsHorizontal = SizeFlags.ExpandFill, Disabled = item is null, TooltipText = item is null ? "Empty slot" : $"{item.Name}\n{item.Slot} • Band {item.Band} • Quality {item.Quality}/3\n{item.BaseKind} +{item.BaseValue}\n" + string.Join("\n", item.Affixes.Select(a => $"{a.Kind} +{a.Value}")), AccessibilityName = item?.Name ?? "Empty slot" };
+            grid.AddChild(b);
+            if (item is null) continue;
+            var worn = state.Equipment.ContainsValue(item.Id);
+            var art = new RelicIcon { Index = 18 + (int)item.Slot, Accent = worn ? teal : item.Band >= 3 ? violet : gold }; b.AddChild(art); art.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); art.OffsetLeft = 4; art.OffsetTop = 4; art.OffsetRight = -4; art.OffsetBottom = -4;
+            if (worn || item.Locked) { var marker = new Label { Text = item.Locked ? "◆" : "E", Position = new(6, 4), MouseFilter = MouseFilterEnum.Ignore }; marker.AddThemeColorOverride("font_color", teal); b.AddChild(marker); }
+            b.Pressed += () => InspectItem(item.Id); first ??= b;
+        }
+        BodyLabel(bag, "E  Equipped     ◆  Locked\nSelect an item to compare, equip, improve or salvage.", 12, muted);
+        first?.GrabFocus(); AddButton("Back to Hearth", Title, first is null); goBack = Title;
     }
     public void InspectItem(Guid id)
     {
         var state = arena.Character!.State; var item = EquipmentRules.Find(state, id);
-        ClearMenu("GEAR / COMPARE / FORGE", item.Name, $"{item.Slot} · Band {item.Band} · Quality {item.Quality}/3");
-        var equipped = EquipmentRules.Equip(state, id);
-        var beforeProfile = FoundationRules.Build(arena.BaseBalance,state); var afterProfile=FoundationRules.Build(arena.BaseBalance,equipped);
-        var beforeActor=new PlayerCombat(beforeProfile,character:state); var afterActor=new PlayerCombat(afterProfile,character:equipped);
-        Text($"Shared attunement {CounterText.Short(state.AttunementGrade)} (applied once)\nFinal Life: {CounterText.Short(beforeActor.MaximumLife/1000)} → {CounterText.Short(afterActor.MaximumLife/1000)}\nFinal basic attack: {CounterText.Short(beforeActor.AttackBudget(beforeProfile.Skills.Single(s=>s.Id==FrameRules.Basic(state.Frame)))/1000)} → {CounterText.Short(afterActor.AttackBudget(afterProfile.Skills.Single(s=>s.Id==FrameRules.Basic(state.Frame)))/1000)}",14,ink);
-        foreach (var stat in Enum.GetValues<AffixKind>()) Text($"{stat}: {EquipmentRules.Stat(state, stat)} → {EquipmentRules.Stat(equipped, stat)}{(state.RedCovenantSelected&&stat==AffixKind.FocusRegeneration?" INACTIVE (Red Covenant)":"")}", 14, muted);
-        Text(string.Join(" · ", item.Affixes.Select((a, i) => $"{i + 1}: {a.Kind} +{a.Value}")), 14, gold);
-        AddButton("Equip", () => { arena.UpdateCharacter(s => EquipmentRules.Equip(s, id)); InspectItem(id); }, true);
-        AddButton(item.Locked ? "Unlock inventory item" : "Lock inventory item", () => { arena.UpdateCharacter(s => EquipmentRules.ToggleLock(s, id)); InspectItem(id); });
-        if (item.Quality < 3) AddButton($"Quality +4% base: {100 * (item.Quality + 1)} gold, {10 * (item.Quality + 1)} Alloy", () => { arena.UpdateCharacter(s => EquipmentRules.Upgrade(s, id)); InspectItem(id); });
-        AddButton("Choose a replacement affix (75 gold / 15 Alloy)", () => Affixes(id));
-        if (!item.Locked && !state.Equipment.ContainsValue(id)) AddButton("Salvage: +25 gold / +5 Alloy", () => { arena.UpdateCharacter(s => EquipmentRules.Salvage(s, id)); Inventory(); });
-        if (!string.IsNullOrEmpty(arena.SaveProblem)) Text(arena.SaveProblem, 14, gold);
-        AddButton("Back to inventory", Inventory);
-        goBack = Inventory;
+        ClearMenu("ARSENAL / COMPARE & FORGE", item.Name, $"{item.Slot}  •  Band {item.Band}  •  Quality {item.Quality}/3");
+        PanelTabs("Arsenal");
+        var worn = state.Equipment.TryGetValue(item.Slot, out var existing) ? EquipmentRules.Find(state, existing) : null;
+        var columns = new HBoxContainer(); columns.AddThemeConstantOverride("separation", 18); options.AddChild(columns);
+        ItemComparisonCard(columns, worn, "EQUIPPED"); ItemComparisonCard(columns, item, "SELECTED", true);
+        var after = EquipmentRules.Equip(state, id);
+        var stats = Section(options, "When equipped");
+        var beforeProfile=FoundationRules.Build(arena.BaseBalance,state);var afterProfile=FoundationRules.Build(arena.BaseBalance,after);
+        var beforeActor=new PlayerCombat(beforeProfile,character:state);var afterActor=new PlayerCombat(afterProfile,character:after);
+        StatLine(stats,"Maximum Life",CounterText.Short(beforeActor.MaximumLife/1000)+" → "+CounterText.Short(afterActor.MaximumLife/1000),afterActor.MaximumLife>beforeActor.MaximumLife?teal:ink);
+        var basic=FrameRules.Basic(state.Frame);var beforeDamage=beforeActor.AttackBudget(beforeProfile.Skills.Single(s=>s.Id==basic));var afterDamage=afterActor.AttackBudget(afterProfile.Skills.Single(s=>s.Id==basic));
+        StatLine(stats,"Basic attack",CounterText.Short(beforeDamage/1000)+" → "+CounterText.Short(afterDamage/1000),afterDamage>beforeDamage?teal:ink);
+        var statsGrid = new GridContainer { Columns = 3, SizeFlagsHorizontal = SizeFlags.ExpandFill }; stats.AddChild(statsGrid);
+        foreach (var stat in Enum.GetValues<AffixKind>())
+        {
+            var before = EquipmentRules.Stat(state, stat); var next = EquipmentRules.Stat(after, stat); var delta = next - before;
+            BodyLabel(statsGrid, $"{SkillNameText(stat.ToString())}\n{before} → {next}  ({delta:+0;-0;0})", 14, delta > 0 ? teal : delta < 0 ? ember : muted);
+        }
+        var actions = new GridContainer { Columns = 2, SizeFlagsHorizontal = SizeFlags.ExpandFill }; options.AddChild(actions);
+        var equip = PanelButton(actions, state.Equipment.ContainsValue(id) ? "Equipped" : "Equip item", () => { arena.UpdateCharacter(s => EquipmentRules.Equip(s, id)); InspectItem(id); }, state.Equipment.ContainsValue(id));
+        var lockButton = PanelButton(actions, item.Locked ? "Unlock item" : "Lock item", () => { arena.UpdateCharacter(s => EquipmentRules.ToggleLock(s, id)); InspectItem(id); });
+        (equip.Disabled ? lockButton : equip).GrabFocus();
+        PanelButton(actions, item.Quality < 3 ? $"Improve • {100 * (item.Quality + 1)} gold / {10 * (item.Quality + 1)} Alloy" : "Quality mastered", () => { arena.UpdateCharacter(s => EquipmentRules.Upgrade(s, id)); InspectItem(id); }, item.Quality >= 3 || state.Gold < 100 * (item.Quality + 1) || state.Alloy < 10 * (item.Quality + 1));
+        PanelButton(actions, "Replace affix • 75 gold / 15 Alloy", () => Affixes(id), state.Gold < 75 || state.Alloy < 15);
+        PanelButton(actions, "Salvage • +25 gold / +5 Alloy", () => { arena.UpdateCharacter(s => EquipmentRules.Salvage(s, id)); Inventory(); }, item.Locked || state.Equipment.ContainsValue(id));
+        Issue(); AddButton("Back to Arsenal", Inventory); goBack = Inventory;
+    }
+    private static string SkillNameText(string value) => System.Text.RegularExpressions.Regex.Replace(value, "([a-z])([A-Z])", "$1 $2");
+    private void ItemComparisonCard(Node parent, GearItem? item, string label, bool selected = false)
+    {
+        var box = Section(parent, label);
+        if (item is null) { BodyLabel(box, "Empty equipment slot", 16, muted); return; }
+        var row = new HBoxContainer(); box.AddChild(row); row.AddChild(new RelicIcon { Index = 18 + (int)item.Slot, CustomMinimumSize = new(86, 86), Accent = selected ? gold : teal });
+        var detail = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill }; row.AddChild(detail);
+        BodyLabel(detail, item.Name, 20, item.Band >= 3 ? violet : gold, true);
+        BodyLabel(detail, $"{item.Slot} • Band {item.Band}\nQuality {item.Quality}/3 • +{item.Quality * 4}% base", 13, muted);
+        box.AddChild(new HSeparator()); StatLine(box, SkillNameText(item.BaseKind.ToString()), "+" + item.BaseValue);
+        foreach (var affix in item.Affixes) StatLine(box, SkillNameText(affix.Kind.ToString()), "+" + affix.Value, teal);
+        BodyLabel(box, item.Locked ? "Locked against salvage" : "A remnant of a life worth keeping.", 12, muted);
     }
     private void Affixes(Guid id)
     {
         var item = EquipmentRules.Find(arena.Character!.State, id);
-        ClearMenu("DETERMINISTIC CRAFT / NO RANDOM FAILURE", "Replace affix", "After replacement, only that affix slot can change again.");
+        ClearMenu("FORGE / 75 GOLD & 15 ALLOY", "Reforge an inscription", "Choose a replacement. After reforging, only that affix slot can change again.");
+        var grid = CardGrid();
         for (var i = 0; i < 2; i++)
         {
-            var slot = i;
-            if (item.ReplaceableSlot is { } locked && locked != slot) continue;
+            var slot = i; if (item.ReplaceableSlot is { } locked && locked != slot) continue;
             foreach (var kind in Enum.GetValues<AffixKind>().Where(k => EquipmentRules.LegalAffix(item.Slot, k) && item.Affixes[1 - slot].Kind != k))
-                AddButton($"Slot {slot + 1} → {kind}: 75 gold + 15 Alloy", () => { arena.UpdateCharacter(s => EquipmentRules.ReplaceAffix(s, id, slot, kind)); InspectItem(id); });
+                ArtButton(grid, 18 + (int)item.Slot, SkillNameText(kind.ToString()), $"Replace affix {slot + 1} • 75 gold / 15 Alloy", () => { arena.UpdateCharacter(s => EquipmentRules.ReplaceAffix(s, id, slot, kind)); InspectItem(id); });
         }
-        AddButton("Cancel", () => InspectItem(id), true);
-        goBack = () => InspectItem(id);
+        AddButton("Cancel", () => InspectItem(id), true); goBack = () => InspectItem(id);
     }
 }

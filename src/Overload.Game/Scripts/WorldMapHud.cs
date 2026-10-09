@@ -5,6 +5,7 @@ namespace Overload.Game;
 
 public partial class ArenaHud
 {
+    private string selectedAtlasZone="hearth";
     public void MapFractureStatus()
     {
         var run=arena.Character!.State.Fracture!;var map=run.Map!;
@@ -33,15 +34,11 @@ public partial class ArenaHud
     {
         var w=arena.Character!.State.World!;
         ClearMenu("THE PALIMPSEST / REGIONAL WORLD","Roads that remain",$"{arena.WorldZone.Name} · {w.Resolved.Count}/4 regions restored. Activated safe waypoints permit travel.");
-        options.AddChild(new RegionalWorldCanvas {Progress=w,TextScale=arena.Audio.TextPercent/100f,CustomMinimumSize=new(0,250),SizeFlagsHorizontal=SizeFlags.ExpandFill});
-        foreach(var r in Enum.GetValues<Region>())
-        {
-            var known=w.Discovered.Contains(WorldContent.Id(r,0));var gate=r==Region.Ash?"":r==Region.Crown?"crown.open":"ash.resolved";
-            Text($"{WorldContent.RegionNames[(int)r]} · {(w.Resolved.Contains(r)?"RESTORED":w.Visited.Contains(WorldContent.Id(r,0))?"VISITED":known?"DISCOVERED":"RUMORED")}",18,gold);
-            Text(WorldRules.Satisfied(w,gate)?WorldContent.Problems[(int)r]:WorldRules.GateReason(gate),14,muted);
-            if(known)foreach(var z in WorldContent.Zones.Values.Where(z=>z.Id!="hearth"&&z.Region==r).OrderBy(z=>z.Id))
-                Text($"{z.Name} · {(w.Visited.Contains(z.Id)?"visited":w.Discovered.Contains(z.Id)?"discovered":"unexplored")}",14,ink);
-        }
+        options.AddChild(new WorldAtlasCanvas {Progress=w,SelectedZone=selectedAtlasZone,TextPercent=arena.Audio.TextPercent,SelectZone=id=>{selectedAtlasZone=id;RegionalMap();},SizeFlagsHorizontal=SizeFlags.ExpandFill});
+        var selected=WorldContent.Zone(selectedAtlasZone);
+        var detail=Section(options,selected.Name);
+        BodyLabel(detail,selected.Objective,14,ink);
+        BodyLabel(detail,w.Visited.Contains(selected.Id)?"Visited • Select an activated waypoint below to travel safely.":"Select a discovered road on the atlas to inspect its destination.",12,muted);
         Text("Safe waypoints",18,gold);
         foreach(var id in w.Waypoints.Order())
         {
@@ -99,22 +96,7 @@ public partial class ArenaHud
         }
         foreach(var target in arena.KnownWorldTargets())
             if(target.Id==arena.WorldDestination?.Id)DrawArc(origin+target.Position*scale,10,0,Mathf.Tau,24,gold,2);
-        Write(rect.Position+new Vector2(20,28),z.Name.ToUpperInvariant()+" / EXPLORED GEOMETRY",16,gold);
+        Write(rect.Position+new Vector2(20,28),z.Name.ToUpperInvariant()+" / KNOWN PATHS",16,gold);
         Write(rect.Position+new Vector2(20,rect.Size.Y-14),Fit($"{arena.Controls.Glyph("local_map")} close · Click a discovered landmark to track · {arena.Controls.Glyph("track")} cycle · Time is stopped",rect.Size.X-40,12),12,muted);
-    }
-}
-
-public partial class RegionalWorldCanvas : Control
-{
-    public WorldProgress Progress { get; init; }=new();
-    public float TextScale { get; init; }=1;
-    public override void _Draw()
-    {
-        var center=Size/2;var span=Math.Clamp((Size.X-150)/2,70,210);var positions=new Vector2[]{center+new Vector2(-span,0),center+new Vector2(0,85),center+new Vector2(span,0),center-new Vector2(0,85)};
-        foreach(var p in positions)DrawLine(center,p,new("586969"),2);
-        DrawCircle(center,9,new("e4bf7d"));DrawString(ThemeDB.FallbackFont,center+new Vector2(-26,27),"HEARTH",fontSize:(int)(12*TextScale));
-        for(var i=0;i<4;i++)
-        {var r=(Region)i;var known=Progress.Discovered.Contains(WorldContent.Id(r,0));DrawCircle(positions[i],8,Progress.Resolved.Contains(r)?new("8ee4bd"):known?new("e4bf7d"):new("718080"));
-            DrawString(ThemeDB.FallbackFont,positions[i]+new Vector2(-65,-18),WorldContent.RegionNames[i],fontSize:(int)(14*TextScale),modulate:known?Colors.White:new("8eabb6"));}
     }
 }
