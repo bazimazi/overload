@@ -7,7 +7,7 @@ public readonly record struct PlayerIntent(Vector2 Move, Vector2 Aim, SkillId? A
 
 public sealed class InputRouter
 {
-    public static readonly string[] Names = ["move_left", "move_right", "move_up", "move_down", "cleave", "pulse", "lance", "special", "evade", "flask", "pause", "interact", "local_map", "region_map", "preserve", "track", "move_to", "character", "inventory"];
+    public static readonly string[] Names = ["move_left", "move_right", "move_up", "move_down", "cleave", "pulse", "lance", "special", "evade", "flask", "pause", "interact", "local_map", "region_map", "preserve", "track", "move_to", "character", "inventory", "skills", "journal", "town_portal", "stand_ground"];
     private readonly string settingsPath;
     private SkillId? buffered;
     private SkillId? pressed;
@@ -15,13 +15,17 @@ public sealed class InputRouter
     private Vector2 lastAim = Vector2.Right;
     private Vector2 lastMouse;
     private bool pointerObserved;
+    private bool suppressPrimary;
+    private bool suppressSkills;
+    private SkillId? heldSkill;
     public bool Controller { get; private set; }
+    public bool AimingWithStick { get; private set; }
     public Vector2 PointerPosition { get; private set; }
     public bool PreservingMemories => Input.IsActionPressed("preserve");
     public InputRouter(bool smoke)
     {
         settingsPath = smoke ? "user://tests/controls.cfg" : "user://controls.cfg";
-        Key[] keys = [Key.A, Key.D, Key.W, Key.S, Key.None, Key.Q, Key.E, Key.R, Key.Space, Key.F, Key.Escape, Key.G, Key.Tab, Key.M, Key.Shift, Key.T, Key.None, Key.C, Key.I];
+        Key[] keys = [Key.A, Key.D, Key.W, Key.S, Key.None, Key.Q, Key.E, Key.R, Key.Space, Key.F, Key.Escape, Key.G, Key.Tab, Key.M, Key.Shift, Key.T, Key.None, Key.C, Key.I, Key.K, Key.J, Key.P, Key.Alt];
         for (var i = 0; i < Names.Length; i++)
         {
             if (!InputMap.HasAction(Names[i])) InputMap.AddAction(Names[i], 0.2f);
@@ -53,11 +57,13 @@ public sealed class InputRouter
         if (input is InputEventJoypadButton || input is InputEventJoypadMotion motion && Mathf.Abs(motion.AxisValue) > 0.25f) Controller = true;
         if (input is InputEventKey or InputEventMouseButton) Controller = false;
         if (input.IsEcho()) return;
+        if(input.IsActionPressed("cleave")||input.IsActionReleased("cleave"))suppressPrimary=false;
         if (input.IsActionPressed("evade")) pressed = SkillId.Traverse;
         else if (input.IsActionPressed("flask")) pressed = SkillId.Flask;
         else if (input.IsActionPressed("pulse")) pressed = SkillId.ShieldPulse;
         else if (input.IsActionPressed("lance")) pressed = SkillId.ChainLance;
         else if (input.IsActionPressed("special")) pressed = SkillId.Faultline;
+        if(pressed is SkillId.ShieldPulse or SkillId.ChainLance or SkillId.Faultline)heldSkill=pressed;
     }
     public PlayerIntent Read(long tick, Vector2 player, Vector2 mouse)
     {
@@ -65,22 +71,28 @@ public sealed class InputRouter
         var devices = Input.GetConnectedJoypads();
         Vector2 stick = Vector2.Zero;
         if (devices.Count > 0) stick = new(Input.GetJoyAxis(devices[0], JoyAxis.RightX), Input.GetJoyAxis(devices[0], JoyAxis.RightY));
-        if (stick.Length() > 0.22f) { lastAim = stick.Normalized(); Controller = true; }
-        else if (pointerObserved && mouse.DistanceSquaredTo(lastMouse) > 1) { lastAim = (mouse - player).Normalized(); Controller = false; }
+        AimingWithStick = stick.Length() > .22f;
+        if (AimingWithStick) { lastAim = stick.Normalized(); Controller = true; }
+        else if (pointerObserved && PointerPosition.DistanceSquaredTo(lastMouse) > 1 && mouse.DistanceSquaredTo(player) > 1) { lastAim = (mouse - player).Normalized(); Controller = false; }
         else if (Controller && move.LengthSquared() > 0.01f) lastAim = move.Normalized();
         else if (pointerObserved && !Controller && mouse.DistanceSquaredTo(player) > 1) lastAim = (mouse - player).Normalized();
-        lastMouse = mouse;
+        lastMouse = PointerPosition;
         // Higher-priority deliberate presses supersede a held basic attack.
-        SkillId? requested = pressed ?? (Input.IsActionPressed("cleave") ? SkillId.Cleave : null);
+        if(!Input.IsActionPressed("cleave"))suppressPrimary=false;
+        var held = heldSkill switch {SkillId.ShieldPulse=>"pulse",SkillId.ChainLance=>"lance",SkillId.Faultline=>"special",_=>""};
+        if(held.Length==0||!Input.IsActionPressed(held))heldSkill=null;
+        if(!Input.IsActionPressed("pulse")&&!Input.IsActionPressed("lance")&&!Input.IsActionPressed("special"))suppressSkills=false;
+        SkillId? requested = pressed ?? (!suppressSkills?heldSkill:null) ?? (!suppressPrimary&&Input.IsActionPressed("cleave") ? SkillId.Cleave : null);
         pressed = null;
-        if (requested is { } id && (buffered is null || id != SkillId.Cleave)) { buffered = id; expires = tick + 6; }
+        if (requested is { } id && (buffered is null || id != SkillId.Cleave)) { buffered = id; expires = tick + 10; }
         if (tick >= expires) buffered = null;
         return new(move, lastAim, buffered, PreservingMemories);
     }
     public void ClearBuffer() { buffered = null; pressed = null; }
+    public void SuppressPrimaryUntilRelease(bool skills=true){suppressPrimary=true;if(skills){suppressSkills=true;heldSkill=null;}ClearBuffer();}
     public void Disconnected()
     {
-        Controller = false; ClearBuffer();
+        Controller = false; AimingWithStick = false; heldSkill=null; ClearBuffer();
         // A removed device must not leave held movement or a basic attack active after resuming.
         foreach(var name in Names) Input.ActionRelease(name);
     }

@@ -6,6 +6,7 @@ public static class WorldQueries
 {
     public static bool SectorOverlaps(Vector2 origin, Vector2 aim, float reach, float arc, Vector2 point, float radius)
     {
+        if(arc>=360)return origin.DistanceSquaredTo(point)<=(reach+radius)*(reach+radius);
         var polygon = Sector(origin, aim, reach, arc);
         if (Geometry2D.IsPointInPolygon(point, polygon)) return true;
         for (var i = 0; i < polygon.Length; i++)
@@ -94,6 +95,7 @@ public static class WorldQueries
 
     public static Vector2[] Sector(Vector2 origin, Vector2 aim, float radius, float degrees)
     {
+        if(degrees>=360)return Enumerable.Range(0,32).Select(i=>origin+Vector2.FromAngle(i*Mathf.Tau/32)*radius).ToArray();
         var half = Mathf.DegToRad(degrees) / 2;
         var angle = aim.Angle();
         var vertices = new Vector2[18];
@@ -107,7 +109,7 @@ public static class WorldQueries
         var points=Sector(Vector2.Zero,aim,radius,degrees);
         // At 180 degrees the origin is collinear with the end vertices; floating-point sin/cos can make it a concave seam.
         if(degrees>=180)points=points[1..];
-        using var shape = new ConvexPolygonShape2D { Points = points };
+        using Shape2D shape = degrees>=360 ? new CircleShape2D {Radius=radius} : new ConvexPolygonShape2D { Points = points };
         using var query = new PhysicsShapeQueryParameters2D { Shape = shape, Transform = new Transform2D(0, origin), CollisionMask = mask };
         var overlaps=world.GetWorld2D().DirectSpaceState.IntersectShape(query,64);
         using var overlapOwner=(Godot.Collections.Array)overlaps;

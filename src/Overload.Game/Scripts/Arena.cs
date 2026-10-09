@@ -7,6 +7,7 @@ namespace Overload.Game;
 
 public partial class Arena : Node
 {
+    public const string BuildId="graphics.2026-10-09";
     public BalanceProfile Balance { get; private set; } = null!;
     public BalanceProfile BaseBalance { get; private set; } = null!;
     public PlayerCombat PlayerState { get; private set; } = null!;
@@ -35,6 +36,8 @@ public partial class Arena : Node
     public string Objective => WorldActive ? WorldObjective : FractureActive ? $"FRACTURE {CounterText.Short(EncounterTier)} / GROUP {FractureGroup + 1}/7" : JourneyActive ? $"{JourneyRoom + 1}/{JourneyRules.Length(Character!.State)} / {JourneyName.ToUpperInvariant()}" : Wave == 3 ? $"{EncounterBossName.ToUpperInvariant()} / Watch the tell. Take the opening." : $"THE BROKEN COURT  /  Encounter {Wave + 1} of 3";
     private WorldView world = null!;
     private SubViewportContainer worldContainer = null!;
+    private const int WorldRasterScale=2;
+    private Vector2 WorldScale=>worldContainer.Scale*WorldRasterScale;
     private readonly EnemyDirector director = new();
     private IntegrationSmoke? smoke;
     private EndlessSmoke? endlessSmoke;
@@ -48,6 +51,7 @@ public partial class Arena : Node
     public async void QuitGame(int exitCode = 0)
     {
         if (quitting) return;
+        ParkWorld();
         quitting = true; Playing = false; Paused = true; Controls?.ClearBuffer(); Audio?.StopAll();
         // Audio commands are mixed on another thread. Let stopped playback references retire before engine teardown.
         await Task.Delay(150);
@@ -72,24 +76,27 @@ public partial class Arena : Node
             try { PracticeTier=Quantity.Parse(practice.Split('=')[1]).Value; if(PracticeTier<1) throw new FormatException(); }
             catch(FormatException) { GD.PushError("Practice tier must be a positive decimal integer");GetTree().Quit(1);return; }
         }
-        IsSmoke = practice is not null || OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--quality-", StringComparison.Ordinal) || a.StartsWith("--world-perf=",StringComparison.Ordinal) || a.StartsWith("--world-soak=",StringComparison.Ordinal) || a is "--rpg-smoke" or "--rpg-review" or "--identity-smoke" or "--identity-review" or "--world-seed-review" or "--world-smoke" or "--world-review" or "--experience-smoke" or "--experience-review" or "--smoke-test" or "--capture-polish" or "--capture-slice" or "--endless-smoke" or "--capture-endless" or "--production-smoke" or "--capture-production" or "--expansion-smoke" or "--capture-expansion");
+        IsSmoke = practice is not null || OS.GetCmdlineUserArgs().Any(a => a.StartsWith("--quality-", StringComparison.Ordinal) || a.StartsWith("--world-perf=",StringComparison.Ordinal) || a.StartsWith("--world-soak=",StringComparison.Ordinal) || a is "--open-world-smoke" or "--open-world-review" or "--rpg-smoke" or "--rpg-review" or "--identity-smoke" or "--identity-review" or "--world-seed-review" or "--world-smoke" or "--world-review" or "--experience-smoke" or "--experience-review" or "--smoke-test" or "--capture-polish" or "--capture-slice" or "--endless-smoke" or "--capture-endless" or "--production-smoke" or "--capture-production" or "--expansion-smoke" or "--capture-expansion");
         try { Balance = ProfileLoader.Load(FileAccess.GetFileAsString("res://Content/arena.json")); Balance = ExpansionLoader.Load(Balance, FileAccess.GetFileAsString("res://Content/expansion.json")); ReleaseContent.Load(FileAccess.GetFileAsString("res://Content/release.json")); }
         catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); return; }
         BaseBalance = Balance;
+        IsSmoke |= OS.GetCmdlineUserArgs().Any(a=>a is "--motion-smoke" or "--motion-review");
+        IsSmoke |= OS.GetCmdlineUserArgs().Any(a=>a is "--adventure-smoke" or "--adventure-review" or "--campaign-smoke" or "--campaign-review");
+        IsSmoke |= OS.GetCmdlineUserArgs().Any(a=>a is "--graphics-smoke" or "--graphics-review");
         PlayerState = new(Balance, new ArenaActionPreflight(this));
         OpenCharacter();
         Controls = new(IsSmoke);
         Input.JoyConnectionChanged += ControllerConnectionChanged;
         Audio = new SliceAudio(); AddChild(Audio); Audio.Initialize(IsSmoke);
         Input.UseAccumulatedInput = false;
-        worldContainer = new SubViewportContainer { Stretch = false, Size = new Vector2(640, 360), MouseFilter = Control.MouseFilterEnum.Ignore };
+        worldContainer = new SubViewportContainer { Stretch = false, Size = new Vector2(1280, 720), MouseFilter = Control.MouseFilterEnum.Ignore,TextureFilter=CanvasItem.TextureFilterEnum.Linear };
         AddChild(worldContainer);
-        var viewport = new SubViewport { Size = new Vector2I(640, 360), RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
+        var viewport = new SubViewport { Size = new Vector2I(1280, 720), RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
             CanvasItemDefaultTextureFilter = Viewport.DefaultCanvasItemTextureFilter.Nearest, HandleInputLocally = false };
         worldContainer.AddChild(viewport);
         LayoutWorld();
-        world = new WorldView(); viewport.AddChild(world);
-        viewCamera = new Camera2D { Position = new Vector2(320, 180), PositionSmoothingEnabled = false }; world.AddChild(viewCamera);
+        world = new WorldView {PerformanceOwner=this}; viewport.AddChild(world);
+        viewCamera = new Camera2D { Position = new Vector2(320, 180), Zoom=Vector2.One*WorldRasterScale,PositionSmoothingEnabled = false }; world.AddChild(viewCamera);
         Player = new ActorBody { ActorId = 0, Position = new Vector2(140, 190) }; world.AddChild(Player);
         motion = new(this);
         Effects = new CombatEffects { ZIndex = 100 }; Effects.Initialize(this); world.AddChild(Effects);
@@ -114,13 +121,19 @@ public partial class Arena : Node
         if(OS.GetCmdlineUserArgs().Any(a=>a.StartsWith("--world-perf=",StringComparison.Ordinal)||a.StartsWith("--world-soak=",StringComparison.Ordinal)))CallDeferred(nameof(BeginWorldQuality));
         if(OS.GetCmdlineUserArgs().Contains("--world-seed-review"))CallDeferred(nameof(ReviewWorldSeeds));
         if(OS.GetCmdlineUserArgs().Any(a=>a is "--identity-smoke" or "--identity-review"))CallDeferred(nameof(ReviewIdentity));
+        if(OS.GetCmdlineUserArgs().Any(a=>a is "--graphics-smoke" or "--graphics-review"))CallDeferred(nameof(ReviewGraphics));
         if(OS.GetCmdlineUserArgs().Any(a=>a is "--rpg-smoke" or "--rpg-review"))CallDeferred(nameof(ReviewRpg));
-        GD.Print("OVERLOAD_READY arena.v1");
+        if(OS.GetCmdlineUserArgs().Any(a=>a is "--open-world-smoke" or "--open-world-review"))CallDeferred(nameof(ReviewOpenWorld));
+        if(OS.GetCmdlineUserArgs().Any(a=>a is "--motion-smoke" or "--motion-review"))CallDeferred(nameof(ReviewMotion));
+        if(OS.GetCmdlineUserArgs().Any(a=>a is "--adventure-smoke" or "--adventure-review" or "--campaign-smoke" or "--campaign-review"))CallDeferred(nameof(ReviewAdventure));
+        if(!IsSmoke&&Character?.State.World is not null)CallDeferred(nameof(StartWorld));
+        GD.Print("OVERLOAD_READY "+BuildId);
     }
     public override void _Process(double delta)
     {
         LayoutWorld(); MeasureQualityFrame();MeasureWorldQuality();
         if (Player is not null) RenderPresentation(delta);
+        RecordMotionFrame();
         var frame=Engine.GetPhysicsFrames();
         if(Player is null||frame==lastRedrawPhysicsFrame)return;
         lastRedrawPhysicsFrame=frame;
@@ -140,11 +153,11 @@ public partial class Arena : Node
         var available = root.GetVisibleRect().Size;
         var outputScale = DisplayServer.GetName() == "headless" ? 1 : root.GetScreenTransform().Scale.X;
         var integerScale = Math.Max(1, Mathf.Floor(Math.Min(available.X / 640, available.Y / 360) * outputScale));
-        worldContainer.Scale = Vector2.One * integerScale / outputScale;
-        worldContainer.Position = (available - new Vector2(640, 360) * worldContainer.Scale) / 2;
+        worldContainer.Scale = Vector2.One * integerScale / outputScale / WorldRasterScale;
+        worldContainer.Position = (available - new Vector2(640, 360) * WorldScale) / 2;
     }
-    public Vector2 WorldToWindow(Vector2 point) => GetViewport().GetScreenTransform() * (worldContainer.Position + (point-CameraOrigin) * worldContainer.Scale);
-    public Vector2 CameraOrigin => viewCamera is null?Vector2.Zero:viewCamera.Position-new Vector2(320,180);
+    public Vector2 WorldToWindow(Vector2 point) => GetViewport().GetScreenTransform() * (worldContainer.Position + (point-CameraOrigin) * WorldScale);
+    public Vector2 CameraOrigin => viewCamera is null?Vector2.Zero:viewCamera.Position+viewCamera.Offset-new Vector2(320,180);
     private async void CapturePreview()
     {
         if (DisplayServer.GetName() == "headless") { GD.PushError("Capture requires a renderer"); GetTree().Quit(1); return; }
@@ -200,7 +213,7 @@ public partial class Arena : Node
         ResetPointerTravel();
         EndRewriteLesson();ResetWorldNavigation();
         Hud.ResetDispatch();
-        FlushWorldFog();if(WorldActive&&!GraphFracture)WorldTransaction($"world.return:{Guid.NewGuid():N}",WorldRules.Resume);WorldActive=false;LocalMapVisible=false;
+        ParkWorld();WorldActive=false;LocalMapVisible=false;
         CheckpointRest=false;
         FractureActive = false; EncounterTier = 1; TrialActive=false;SovereignActive=false;laws?.Clear();
         covenantChallenge=false; JourneyActive = false; Playing = false; Paused = false; Controls.ClearBuffer(); motion.Reset(); PlayerState.Reset();
@@ -218,6 +231,7 @@ public partial class Arena : Node
         if(WorldActive&&!GraphFracture&&Character!.State.World is {Ending:null} pending&&pending.Resolved.Contains(Region.Crown))
         {Paused=true;Controls.ClearBuffer();Audio.SetPaused(true);Hud.WorldEnding();return;}
         Paused = !Paused; Controls.ClearBuffer();
+        if(!Paused)Controls.SuppressPrimaryUntilRelease();
         Audio.SetPaused(Paused);
         if (Paused) Hud.Pause(); else Hud.HideMenu();
     }
@@ -226,11 +240,21 @@ public partial class Arena : Node
         Controls.Observe(input);
         if (Hud.TryCaptureKey(input)) { GetViewport().SetInputAsHandled(); return; }
         if(input.IsActionPressed("move_to")){BeginPointerTravel();GetViewport().SetInputAsHandled();return;}
+        if(input.IsActionReleased("move_to")){pointerSteering=false;GetViewport().SetInputAsHandled();return;}
         if(WorldActive&&!PlayerState.Dead&&!input.IsEcho())
         {
+            if(!Paused&&!LocalMapVisible&&input is InputEventMouseButton {ButtonIndex:MouseButton.Left}&&!Input.IsActionPressed("stand_ground")&&input.IsActionPressed("cleave")&&TryClickLoot()){GetViewport().SetInputAsHandled();return;}
+            if(input is InputEventMouseButton {ButtonIndex:MouseButton.Left})
+            {
+                if(input.IsActionReleased("cleave"))primaryWalkHeld=false;
+                if(input.IsActionPressed("cleave")&&TryPrimaryMouse()){GetViewport().SetInputAsHandled();return;}
+            }
+            if(!Paused&&input.IsActionPressed("town_portal")){BeginTownPortal();GetViewport().SetInputAsHandled();return;}
+            if(!Paused&&input.IsActionPressed("interact")&&TryPickUpNearby()){GetViewport().SetInputAsHandled();return;}
             if(!Paused&&input.IsActionPressed("track")){CycleWorldTarget();GetViewport().SetInputAsHandled();return;}
-            if(!Paused&&input.IsActionPressed("local_map")){FlushWorldFog();LocalMapVisible=!LocalMapVisible;Controls.ClearBuffer();Audio.SetPaused(LocalMapVisible);GetViewport().SetInputAsHandled();return;}
-            if(input.IsActionPressed("region_map")){OpenRegionalMap();GetViewport().SetInputAsHandled();return;}
+            if(!Paused&&input.IsActionPressed("local_map")){ToggleLocalMap();GetViewport().SetInputAsHandled();return;}
+            if(input.IsActionPressed("region_map")){if(Paused&&Hud.WorldAtlasVisible)CloseWorldMenu();else OpenRegionalMap();GetViewport().SetInputAsHandled();return;}
+            if(LocalMapVisible&&input.IsActionPressed("ui_cancel")){ToggleLocalMap();GetViewport().SetInputAsHandled();return;}
             if(!Paused&&input.IsActionPressed("interact")){InteractWorld();GetViewport().SetInputAsHandled();return;}
         }
         if (input.IsActionPressed("pause") && (Playing || CheckpointRest)) { TogglePause(); GetViewport().SetInputAsHandled(); }
@@ -257,8 +281,9 @@ public partial class Arena : Node
         PlayerState.SetCombatActive(HasEngagedEnemies);
         Player.Flash = false;
         foreach (var enemy in Enemies) enemy.Flash = false;
-        var mouse = (Controls.PointerPosition - worldContainer.Position) / worldContainer.Scale + CameraOrigin;
-        var intent = PointerIntent(Controls.Read(PlayerState.Tick, Player.Position, mouse));
+        var mouse = (Controls.PointerPosition - worldContainer.Position) / WorldScale + CameraOrigin;
+        var intent = PointerIntent(PrimaryIntent(Controls.Read(PlayerState.Tick, Player.Position, mouse)));
+        if(Paused){smoke?.AfterTick();return;}
         if (intent.Move.LengthSquared() > 0) PlayerState.CancelRecoveryByMovement();
         if (intent.Action is { } id)
         {
@@ -266,6 +291,7 @@ public partial class Arena : Node
             var aim = id == SkillId.Traverse && intent.Move.LengthSquared() > 0 ? intent.Move : intent.Aim;
             if (PlayerState.TryStart(id, new(aim.X, aim.Y), intent.PreserveMemories))
             {
+                PrimaryActionStarted(id);
                 Controls.ClearBuffer();
                 if (id == SkillId.Traverse) Audio.Play("evade", "Player");
                 else if (id == SkillId.Flask) Audio.Play("heal", "Player");
@@ -273,45 +299,45 @@ public partial class Arena : Node
             }
             else if (id != FrameRules.Basic(Character?.State.Frame ?? FrameId.Warden)) NoticeRejectedAction();
         }
-        Player.Facing = intent.Aim;
-        var velocity = intent.Move * Balance.Hero.Speed;
-        if (PlayerState.Action is { } action)
-        {
-            if (action.Definition.Id == SkillId.Traverse)
-                velocity = new Vector2(action.Aim.X, action.Aim.Y) * (Balance.Hero.EvadeDistance * 60 / Balance.Hero.EvadeTicks);
-            else if (action.Phase(PlayerState.Tick) != ActionPhase.Recovery) velocity *= 0.35f;
-        }
+        FacePlayer(intent.Move, intent.Aim);
+        var velocity = ResolvePlayerMovement(intent.Move, delta);
         var beforeMovement = Player.Position;
         qualityStart=QualityTimestamp;
         var movementSource = PlayerState.Action?.Source ?? SourceKind.BasePlayerAction;
         var movementKind = PlayerState.Action?.Definition.Id == SkillId.Traverse ? LocomotionKind.StandardEvade : LocomotionKind.Walk;
         motion.Move(velocity);
+        FinishPlayerMovement();
         var displacement = Player.Position - beforeMovement;
         ObserveExperience(displacement);
         foreach (var enemy in Enemies.OrderBy(e => e.ActorId))
             if(EngagedEnemy(enemy)) director.Advance(enemy, Player, PlayerState.Tick, Effects,ActiveMutation,Enemies,world.Navigation);
+        AdvanceElites();
         RecordQualityStage("movement/director",qualityStart);qualityStart=QualityTimestamp;
         PlayerState.Memories.ObservePosition(new(Player.Position.X,Player.Position.Y));
         Effects.PlayerAction();
         if (qualityMode == "perf") Effects.FillQualityStress();
         Effects.Advance();laws.Advance();
-        if(WorldActive){AdvanceWorld();AdvanceWorldNavigation();}
+        if(WorldActive){AdvanceWorld();AdvanceWorldNavigation();AdvanceAdventure();}
         AdvanceRewriteLesson();
         RecordQualityStage("effects",qualityStart);qualityStart=QualityTimestamp;
         if(FractureActive && Character!.State.Fracture!.Region==Region.Ash&&PlayerState.Memories.Echo is not null)masteryEarned=true;
         if (!PlayerState.Dead)
         {
             PlayerState.SetCombatActive(HasEngagedEnemies);
-            // Zero intent or collision recovery opposite to intent cannot earn locomotion credit.
+            // Only actual travel along the resolved movement can earn locomotion credit.
             if (velocity.LengthSquared() > 0 && displacement.Dot(velocity) > 0)
                 PlayerState.Memories.ObserveLocomotion(new(displacement.X, displacement.Y), movementKind, movementSource);
         }
         Effects.RecordMemories();
         PublishPredictions(intent.Aim, intent.Move);
         RecordQualityStage("predictions",qualityStart);
+        var highlighted=HighlightedEnemy;
         foreach (var body in Enemies.Append(Player))
         {
+            body.EndTick();
             body.ReducedFlash = Audio.ReducedFlash;
+            body.HighContrast=Audio.HighContrast;
+            body.ThreatVisible=body==highlighted||body.Enemy is not null&&EngagedEnemy(body)&&body.Position.DistanceTo(Player.Position)<230;
             body.ZIndex = (int)body.Position.Y / 4;
             body.DebugFootprint = Debug;
         }

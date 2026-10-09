@@ -60,6 +60,7 @@ public sealed class TacticalNavigation(IEnumerable<RoomBlock> obstacles, RoomBlo
         if (radius <= 0 || !float.IsFinite(radius)) throw new ArgumentOutOfRangeException(nameof(radius));
         if (Clear(from, to, radius)) return [to];
         if (!Clear(from, from, radius) || !Clear(to, to, radius)) return [];
+        if (floor.Width > 3000 || floor.Height > 3000) return FindLandscapePath(from, to, radius);
         if (!grids.TryGetValue(radius, out var grid))
         {
             if (grids.Count >= 8) grids.Clear();
@@ -101,5 +102,50 @@ public sealed class TacticalNavigation(IEnumerable<RoomBlock> obstacles, RoomBlo
             }
         }
         return [];
+    }
+
+    // Outdoor navigation scales with the number of structures, rather than the area of the map.
+    // Inflated rectangle corners form a visibility graph and retain the same swept collision rule.
+    private Vector2[] FindLandscapePath(Vector2 from, Vector2 to, float radius)
+    {
+        if (!grids.TryGetValue(radius, out var graph))
+        {
+            var margin = radius + .2f;
+            var points = blocks.SelectMany(b => new Vector2[] {
+                new(b.X-margin,b.Y-margin), new(b.X+b.Width+margin,b.Y-margin),
+                new(b.X-margin,b.Y+b.Height+margin), new(b.X+b.Width+margin,b.Y+b.Height+margin)
+            }).Where(p => Clear(p,p,radius)).Distinct().ToArray();
+            var edges = points.Select((p,i) => Enumerable.Range(0,points.Length)
+                .Where(j => j != i && Clear(p,points[j],radius)).ToArray()).ToArray();
+            if (grids.Count >= 8) grids.Clear();
+            grids[radius] = graph = new(points,edges);
+        }
+        var costs = Enumerable.Repeat(float.PositiveInfinity,graph.Points.Length).ToArray();
+        var parents = Enumerable.Repeat(-1,graph.Points.Length).ToArray();
+        var closed = new bool[graph.Points.Length];
+        var queue = new PriorityQueue<int,float>();
+        for(var i=0;i<graph.Points.Length;i++)
+            if(Clear(from,graph.Points[i],radius))
+            {costs[i]=Vector2.Distance(from,graph.Points[i]);queue.Enqueue(i,costs[i]+Vector2.Distance(graph.Points[i],to));}
+        var best = float.PositiveInfinity; var goal = -1;
+        while(queue.TryDequeue(out var current,out var estimate))
+        {
+            if(estimate>=best)break;
+            if(closed[current])continue;
+            closed[current]=true;
+            if(Clear(graph.Points[current],to,radius))
+            {best=costs[current]+Vector2.Distance(graph.Points[current],to);goal=current;}
+            foreach(var next in graph.Edges[current])
+            {
+                var cost=costs[current]+Vector2.Distance(graph.Points[current],graph.Points[next]);
+                if(cost>=costs[next])continue;
+                costs[next]=cost;parents[next]=current;
+                queue.Enqueue(next,cost+Vector2.Distance(graph.Points[next],to));
+            }
+        }
+        if(goal<0)return [];
+        var route=new List<Vector2>{to};
+        for(var i=goal;i>=0;i=parents[i])route.Add(graph.Points[i]);
+        route.Reverse();return [..route];
     }
 }

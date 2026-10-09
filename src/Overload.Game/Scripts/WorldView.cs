@@ -6,6 +6,11 @@ namespace Overload.Game;
 /// <summary>Atmosphere is independent of the collision kit and every gameplay RNG stream.</summary>
 public partial class WorldView : Node2D
 {
+    public Arena? PerformanceOwner {get;init;}
+    private bool terrainOnly,terrainDirty=true;
+    private WorldView? terrainCanvas;
+    private LandscapeGround surface=null!;
+    private Vector2? terrainAnchor;
     private Region? region;
     private readonly Dictionary<string, Texture2D> backgrounds = [];
     private float time;
@@ -21,13 +26,21 @@ public partial class WorldView : Node2D
     public LevelGeometry Geometry { get; private set; } = LevelGeometry.Court;
     public override void _Ready()
     {
+        if(terrainOnly)return;
         foreach (var name in new[] { "court", "ash", "glass", "hollow", "crown", "hearth" }) backgrounds[name] = GD.Load<Texture2D>($"res://Assets/Pixel/{name}.png");
+        surface=new LandscapeGround {ZIndex=-2};AddChild(surface);
+        terrainCanvas=new WorldView {terrainOnly=true,ZIndex=-1,roadPaths=roadPaths,PerformanceOwner=PerformanceOwner,TextureRepeat=TextureRepeatEnum.Mirror,TextureFilter=TextureFilterEnum.Linear};
+        foreach(var entry in backgrounds)terrainCanvas.backgrounds.Add(entry.Key,entry.Value);
+        AddChild(terrainCanvas);
         Configure(Walls.Skip(4).ToArray());
     }
     public void Configure(Rect2[] obstacles)
     {
         roadPaths.Clear();
         Exploration=null;
+        surface.Configure(null);
+        terrainAnchor=null;terrainDirty=true;
+        if(terrainCanvas is not null){terrainCanvas.Exploration=null;terrainCanvas.QueueRedraw();}
         Geometry=new(LevelGeometry.Court.Bounds,[..obstacles.Select(r=>new RoomBlock((int)r.Position.X,(int)r.Position.Y,(int)r.Size.X,(int)r.Size.Y))]);
         exitOpen=false;
         foreach (var body in GetChildren().OfType<StaticBody2D>()) { body.CollisionLayer = 0; body.QueueFree(); }
@@ -43,10 +56,37 @@ public partial class WorldView : Node2D
         foreach (var rect in obstacles) AddChild(new CourtProp { Footprint = rect, Region = region, ZIndex = (int)rect.End.Y / 4 });
         QueueRedraw();
     }
-    public void Render(double delta, bool paused) { if (!paused) time += (float)Math.Min(delta, .05); QueueRedraw(); }
+    public void Render(double delta, bool paused)
+    {
+        if (!paused) time += (float)Math.Min(delta, .05);
+        if(Exploration is not null&&terrainCanvas is not null)
+        {
+            surface.ObservePlayer(PerformanceOwner?.Player.VisualPosition??Viewer);
+            foreach(var structure in GetChildren().OfType<WorldStructure>())structure.Observe(Viewer,PerformanceOwner?.Player.VisualPosition??Viewer,delta,paused);
+            // Retain native draw commands between camera cells. The 80px overscan covers
+            // the maximum 32px displacement from this anchor in both camera axes.
+            var anchor=(Viewer/64).Round()*64;
+            if(terrainDirty||terrainAnchor!=anchor)
+            {
+                terrainAnchor=anchor;terrainDirty=false;
+                terrainCanvas.Exploration=Exploration;terrainCanvas.Navigation=Navigation;
+                terrainCanvas.region=region;terrainCanvas.progress=Progress;
+                terrainCanvas.MapClaimed=MapClaimed;terrainCanvas.MapRequired=MapRequired;
+                terrainCanvas.Viewer=anchor;terrainCanvas.time=time;
+                terrainCanvas.QueueRedraw();
+            }
+        }
+        QueueRedraw();
+    }
     public override void _Draw()
     {
-        if(Exploration is not null) { DrawExploration();return; }
+        if(terrainOnly)
+        {
+            var began=PerformanceOwner?.QualityTimestamp??0;
+            if(Exploration is not null)DrawExplorationGround();
+            PerformanceOwner?.RecordQualityStage("retained ground refresh",began);return;
+        }
+        if(Exploration is not null) { var began=PerformanceOwner?.QualityTimestamp??0;DrawExploration();PerformanceOwner?.RecordQualityStage("world draw",began);return; }
         var name = hearth ? "hearth" : region?.ToString().ToLowerInvariant() ?? "court";
         // Overscan aligns the clear authored floor with the existing 28..612 / 56..314 collision field.
         DrawTextureRect(backgrounds[name], new(-28, -32, 696, 424), false);

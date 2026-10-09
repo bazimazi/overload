@@ -25,6 +25,7 @@ public partial class ArenaHud
             var hint=slotHints[i];var rect=ActionSlotRect(i);hint.Position=rect.Position;hint.Size=rect.Size;hint.Visible=arena.Playing&&!MenuVisible&&!arena.LocalMapVisible;
             var skill=arena.Balance.Skills.Single(s=>s.Id==slots[i]);
             var description=slots[i]==SkillId.Traverse ? "Evade along movement or aim. Only the opening window evades contact." : slots[i]==SkillId.Flask ? "Heal over one second. Charges refill at checkpoints." : DescribeSkill(slots[i]);
+            if(arena.PlayerState.CombatRhythmEnabled&&i<4)description+=i==0?"\nEach landed basic attack restores 8 Focus and one Surge charge (once per attack). Three charges empower your next damaging skill by 50%. Charges expire after 6s without a basic hit.":"\nHold the skill key to repeat when ready. Three basic hits empower a damaging skill by 50%.";
             var pattern=arena.Predictions.GetValueOrDefault(slots[i])?.Selection;
             hint.TooltipText=$"{SkillName(slots[i])}\n{description}\n{skill.FocusCost} Focus / {skill.Cooldown/60f:0.#}s cooldown" + (pattern?.Accepted==true&&pattern.Implementation!=ActionImplementation.Base?$"\nNext: {pattern.Implementation}":"")+$"\nHold {arena.Controls.Glyph("preserve")} to use the base action and preserve memories.";
             if(pattern is {Rejections.Length:>0})hint.TooltipText+="\nFallback: "+string.Join("; ",pattern.Rejections.Select(r=>r.Reason));

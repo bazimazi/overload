@@ -73,10 +73,11 @@ public static class FoundationRules
         var lifePercent = 100 + Has("ward.1") * 5 + Has("ward.4") * 20 - Has("force.4") * 10 - Has("flow.4") * 5;
         var hero = basis.Hero with
         {
-            Life = (basis.Hero.Life + EquipmentRules.Stat(s, AffixKind.Life)) * lifePercent / 100,
+            Life = (basis.Hero.Life + EquipmentRules.Stat(s, AffixKind.Life)) * lifePercent / 100 * (AdventureRules.HasPower(s,"guard") ? 112 : 100) / 100,
             Armor = basis.Hero.Armor + EquipmentRules.Stat(s, AffixKind.Armor) + Has("ward.2") * 10,
             Resistance = basis.Hero.Resistance + EquipmentRules.Stat(s, AffixKind.Resistance) + Has("ward.3") * 5,
-            FocusPerSecond = basis.Hero.FocusPerSecond + EquipmentRules.Stat(s, AffixKind.FocusRegeneration) + Has("flow.1") * 2 + Has("flow.4") * 3,
+            FocusPerSecond = basis.Hero.FocusPerSecond + EquipmentRules.Stat(s, AffixKind.FocusRegeneration) + Has("flow.1") * 2 + Has("flow.4") * 3 + (AdventureRules.HasPower(s,"flow") ? 4 : 0),
+            Speed = basis.Hero.Speed * (AdventureRules.HasPower(s,"fleet") ? 1.06f : 1f),
             Focus = basis.Hero.Focus + Has("flow.3") * 5,
             CriticalPercent = Math.Min(40, basis.Hero.CriticalPercent + EquipmentRules.Stat(s, AffixKind.CriticalChance)),
             FlaskPercent = basis.Hero.FlaskPercent + (s.Inscriptions.Contains("long-sip") ? 2 : 0)
@@ -95,6 +96,8 @@ public static class FoundationRules
                 : result with { ArcDegrees = Math.Min(180, result.ArcDegrees + 20), ProjectileRadius = result.ProjectileRadius + 2,EffectRadius=result.EffectRadius>0?result.EffectRadius+8:0 };
             return result;
         }).ToArray();
+        if(AdventureRules.HasPower(s,"tempo"))skills=skills.Select(k=>k.Family==ActionFamily.Assault && k.Id!=FrameRules.Basic(s.Frame) ? k with {Cooldown=Math.Max(1,k.Cooldown*90/100)} : k).ToArray();
+        if(AdventureRules.HasPower(s,"reaving"))skills=skills.Select(k=>k.Id==FrameRules.Basic(s.Frame)?k.ProjectileSpeed>0?k with {MaxVictims=k.MaxVictims+2,ProjectileRadius=k.ProjectileRadius+3}:k with {Reach=k.Reach+18,ArcDegrees=Math.Min(180,k.ArcDegrees+60)}:k).ToArray();
         return basis with { Hero = hero, Skills = skills,Overload=basis.Overload with { BindingSlots=EndgameRules.BindingSlots(s),Bindings=s.Bindings } };
     }
 }

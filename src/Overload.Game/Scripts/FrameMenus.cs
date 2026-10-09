@@ -10,16 +10,17 @@ public partial class ArenaHud
     }
     public void NewFrameMenu()
     {
-        ClearMenu("NEW CHARACTER", "Choose a Frame", "Each character has its own progression, equipment and earned oaths.");
+        ClearMenu("NEW CHARACTER", "Choose your class", "Begin at level 1 in safe Hearth. Every class can complete the whole adventure.");
         var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 16); options.AddChild(row);
         foreach(var frame in Enum.GetValues<FrameId>())
         {
             var card=new VBoxContainer { SizeFlagsHorizontal=SizeFlags.ExpandFill };card.AddThemeConstantOverride("separation",10);row.AddChild(card);
-            card.AddChild(new FramePortrait {Frame=frame,CustomMinimumSize=new(0,175)});
+            card.AddChild(new FramePortrait {Frame=frame,CustomMinimumSize=new(0,Size.Y<650?80:175)});
             var name=new Label { Text=frame.ToString(),HorizontalAlignment=HorizontalAlignment.Center };name.AddThemeColorOverride("font_color",gold);card.AddChild(name);
-            var fantasy=frame switch { FrameId.Warden=>"Steel, pressure and counterplay.\nHold the line. Break their guard.",FrameId.Threadseer=>"Spatial spells and delayed control.\nWeave a battlefield of your own.",_=>"Ranged pressure and a loyal echo.\nStrike, vanish and return." };
+            var fantasy=frame switch { FrameId.Warden=>"Melee fighter · close range\nSweep groups and break guards.\nGood first choice.",FrameId.Threadseer=>"Spellcaster · ranged control\nPlace fire and storm zones.\nKeep enemies at a distance.",_=>"Ranged fighter · spirit companion\nFire shards and command echoes.\nMove between volleys." };
+            if(Size.Y<650)fantasy=frame switch{FrameId.Warden=>"Melee · close range\nSweep and stagger groups.",FrameId.Threadseer=>"Spellcaster · ranged\nPlace fire and storm zones.",_=>"Ranged · companion\nShoot and command echoes."};
             var description=new Label { Text=fantasy, AutowrapMode=TextServer.AutowrapMode.WordSmart, HorizontalAlignment=HorizontalAlignment.Center };description.AddThemeFontSizeOverride("font_size",FontSize(14));description.AddThemeColorOverride("font_color",muted);card.AddChild(description);
-            var button=new Button { Text="Begin "+frame,CustomMinimumSize=new(0,44) };button.AddThemeFontSizeOverride("font_size",FontSize(16));button.Pressed+=()=>{arena.OpenCharacter(true,true,frame);Title();};card.AddChild(button);if(frame==FrameId.Warden)button.GrabFocus();
+            var button=new Button { Text="Begin "+frame,CustomMinimumSize=new(0,44) };button.AddThemeFontSizeOverride("font_size",FontSize(16));button.Pressed+=()=>{arena.OpenCharacter(true,true,frame);if(arena.Character is not null)arena.StartWorld();else Title();};card.AddChild(button);if(frame==FrameId.Warden)FocusAfterLayout(button);
         }
         AddButton("Continue an existing character",SavedFrames);
         AddButton("Compare accelerated training builds",TrainingFrames);

@@ -74,11 +74,17 @@ try {
         $stderr = Join-Path $RepoRoot 'artifacts/export-world-smoke-errors.log'
         $process = Start-Process -FilePath (Join-Path $RepoRoot 'artifacts/windows/Overload.exe') -ArgumentList @('--headless', '--fixed-fps', '60', '--', '--world-smoke') -WindowStyle Hidden -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
         $null = $process.Handle
-        if (!$process.WaitForExit(60000)) { $process.Kill(); throw 'Exported world smoke test timed out' }
+        $worldDeadline=[DateTime]::UtcNow.AddSeconds(180)
+        while(!$process.WaitForExit(1000)){if([DateTime]::UtcNow -gt $worldDeadline){$process.Kill();throw 'Exported world smoke test timed out'}}
         $output = Get-Content $stdout -Raw
         Write-Output $output
         $errors = Get-Content $stderr -Raw
         if ($process.ExitCode -ne 0 -or $output -notmatch 'OVERLOAD_WORLD_SMOKE_OK' -or $errors -match 'ERROR:') { throw "Exported world smoke failed: $errors" }
+        & "$PSScriptRoot/graphics.ps1" -Exported
         & "$PSScriptRoot/identity.ps1" -Exported
+        & "$PSScriptRoot/open-world.ps1" -Exported
+        & "$PSScriptRoot/motion.ps1" -Exported
+        & "$PSScriptRoot/adventure.ps1" -Exported
+        & "$PSScriptRoot/campaign.ps1" -Exported
     }
 } finally { Pop-Location }

@@ -15,7 +15,7 @@ public sealed class ReleaseCompatibilityTests : IDisposable
         return EndlessFixtures.Reference(tier) with { Gold=BigInteger.Pow(10,90),Alloy=BigInteger.Pow(10,80),Seals=[1,2,3,BigInteger.Pow(10,70)],ElsewhereOwned=true,ElsewhereSelected=true };
     }
     [Theory]
-    [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)] [InlineData(5)]
+    [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)] [InlineData(5)] [InlineData(6)] [InlineData(7)]
     public void OldHighLevelSnapshotsKeepExactProgressionAndEquipment(int schema)
     {
         var before=Huge() with { SchemaVersion=schema };
@@ -23,7 +23,7 @@ public sealed class ReleaseCompatibilityTests : IDisposable
         Assert.Equal(before.CharacterId,after.CharacterId);Assert.Equal(before.TotalXp,after.TotalXp);Assert.Equal(before.ValidatedLevel,after.ValidatedLevel);
         Assert.Equal(before.AttunementGrade,after.AttunementGrade);Assert.Equal(before.HighestClearedTier,after.HighestClearedTier);Assert.Equal(before.HighestUnlockedTier,after.HighestUnlockedTier);
         Assert.Equal(before.Gold,after.Gold);Assert.Equal(before.Alloy,after.Alloy);Assert.True(before.Seals.SequenceEqual(after.Seals));Assert.Equal(before.Might,after.Might);Assert.Equal(before.Resolve,after.Resolve);
-        Assert.Equal(CharacterStore.Encode(before with { SchemaVersion=6 }),CharacterStore.Encode(after with { Journal=before.Journal }));
+        Assert.Equal(CharacterStore.Encode(before with { SchemaVersion=8 }),CharacterStore.Encode(after with { Journal=before.Journal }));
     }
     [Theory]
     [InlineData(1)] [InlineData(2)] [InlineData(3)]
@@ -50,7 +50,7 @@ public sealed class ReleaseCompatibilityTests : IDisposable
         var s=Huge();if(kind is "expedition-content" or "generator")s=EndgameRules.Begin(s,s.HighestUnlockedTier,Guid.NewGuid(),Region.Ash,ActivityFamily.Hunt);
         var store=new CharacterStore(directory,()=>s);store.Transact(0,"backup",c=>c with { Gold=c.Gold+1 });
         var future=kind switch {
-            "schema"=>store.State with { SchemaVersion=7 },
+            "schema"=>store.State with { SchemaVersion=9 },
             "character-content"=>store.State with { ContentVersion="release.future" },
             "expedition-content"=>store.State with { Fracture=store.State.Fracture! with { ContentVersion="fracture.future" } },
             _=>store.State with { Fracture=store.State.Fracture! with { Layout=store.State.Fracture.Layout! with { Version="rooms.future" } } }

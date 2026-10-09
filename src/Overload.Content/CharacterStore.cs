@@ -81,7 +81,7 @@ public sealed class CharacterStore
         if (envelope.Payload is null || envelope.Sha256 != Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(envelope.Payload)))) throw new InvalidDataException("Save checksum mismatch");
         using var document = JsonDocument.Parse(envelope.Payload);
         if (!document.RootElement.TryGetProperty("SchemaVersion", out var schema) || !schema.TryGetInt32(out var version)) throw new InvalidDataException("Missing save schema");
-        if (version > 6) throw new FutureSaveException();
+        if (version > 8) throw new FutureSaveException();
         if (version < 1) throw new InvalidDataException("Unknown save version");
         if (document.RootElement.TryGetProperty("ContentVersion", out var content))
         {
@@ -105,7 +105,12 @@ public sealed class CharacterStore
         if (version <= 4) state = state with { SchemaVersion = 5, Frame = FrameId.Warden, RegionalCampaign = false,
             RedCovenantOwned = false, RedCovenantSelected = false, CovenantMastery = false };
         if(version<=5) state=state with { SchemaVersion=6, World=null };
+        if(version<=6) state=state with { SchemaVersion=7 };
+        if(version<=7) state=state with { SchemaVersion=8 };
         if(state.World is { Version:not WorldContent.Version })throw new FutureSaveException();
+        if(state.World?.Frontier is {Version:not "frontier.v1"})throw new FutureSaveException();
+        if(state.World is {GeographyVersion:>2})throw new FutureSaveException();
+        if(state.World?.Adventure is {Version:not "adventure.v1"})throw new FutureSaveException();
         CharacterRules.Validate(state); return state;
     }
     public bool Transact(long expectedRevision, string receipt, Func<CharacterState, CharacterState> update)

@@ -76,7 +76,25 @@ public static class WorldContent
                  new($"{dungeonId}.device.1",n switch{0=>"Cooling valve",1=>"Flood sluice",2=>"Unwritten register",_=>"Bridge stabilizer"},new(1250,850),"device","Restore the second conduit. The ruler's gate also requires the regional enforcer's defeat.",$"{dungeonId}.guard.1",new(800+n*400,75+n*50,4,n*4+2)),
                  new($"{dungeonId}.waypoint","Ruler approach",new(1320,520),"waypoint","A safe approach. Rest before crossing the marked boss gate.")],"Restore both conduits and defeat the regional enforcer to open the ruler's gate."));
         }
-        return zones.ToImmutableDictionary(z=>z.Id);
+        // Outdoor geography now spans 86 camera screens. Combat interiors retain their authored scale.
+        var expanded=zones.Select(z=>z.Kind=="wild"?ExpandLandscape(z):z).ToArray();
+        WorldPoint Arrival(string destination,WorldPoint p)=>destination.EndsWith(".0",StringComparison.Ordinal)?new(p.X*3,p.Y*3):p;
+        return expanded.Select(z=>z with {Exits=[..z.Exits.Select(e=>e with {Arrival=Arrival(e.Destination,e.Arrival)})]})
+            .Select(z=>z.Id=="hearth"?z with {Exits=z.Exits.Add(new("frontier","Endless Frontier",new(640,700),FrontierWorld.Id(0),new(180,1920)))}:z)
+            .ToImmutableDictionary(z=>z.Id);
+    }
+    private static ZoneDefinition ExpandLandscape(ZoneDefinition z)
+    {
+        WorldPoint P(WorldPoint p)=>new(p.X*3,p.Y*3);
+        RoomBlock B(RoomBlock b)=>new(b.X*3,b.Y*3,b.Width*3,b.Height*3);
+        var packs=z.Encounters.Select(e=>e with {Position=P(e.Position)}).ToList();
+        // Place additional optional defenders along both connecting trails, keeping campaign rewards intact.
+        var points=new WorldPoint[]{new(280,460),new(420,410),new(780,290),new(1020,290),new(1430,420),new(1680,450),
+            new(210,700),new(710,1000),new(1100,1000),new(1350,1000),new(1600,870),new(1760,720)};
+        foreach(var p in points)
+            packs.Add(new($"{z.Id}.roam.{packs.Count}",P(p),[packs.Count%6,(packs.Count+2)%6],new(90,8,1),Optional:true));
+        return z with {Geometry=new(B(z.Geometry.Bounds),[..z.Geometry.Blocks.Select(B)]),Arrival=P(z.Arrival),
+            Exits=[..z.Exits.Select(e=>e with {Position=P(e.Position)})],Encounters=[..packs],Sites=[..z.Sites.Select(s=>s with {Position=P(s.Position)})]};
     }
     private static ZoneDefinition Boss(Region r,int n,int boss)
     {
@@ -100,7 +118,7 @@ public static class WorldContent
     public static void ValidateStructure(ZoneDefinition z)
     {
         if(z is null||z.Geometry is null||string.IsNullOrWhiteSpace(z.Id)||z.Id.Length>64||string.IsNullOrWhiteSpace(z.Name)||z.Name.Length>128
-            ||z.Objective is null||z.Objective.Length>600||!Enum.IsDefined(z.Region)||z.Kind is not ("hearth" or "wild" or "dungeon" or "boss" or "fracture")
+            ||z.Objective is null||z.Objective.Length>600||!Enum.IsDefined(z.Region)||z.Kind is not ("hearth" or "wild" or "dungeon" or "boss" or "fracture" or "frontier")
             ||z.Encounters.IsDefault||z.Encounters.Length>24||z.Sites.IsDefault||z.Sites.Length>24||z.Exits.IsDefault||z.Exits.Length>8
             ||z.Encounters.Any(e=>e is null||string.IsNullOrWhiteSpace(e.Id)||e.Id.Length>64||e.Enemies.IsDefault||e.Enemies.Length>3||e.Enemies.Any(i=>i is <0 or >5)||e.Boss is <-1 or >1||e.Reward is null||e.Reward.Xp<0||e.Reward.Gold<0||e.Reward.Alloy<0||e.Reward.Item is <-1 or >19)
             ||z.Sites.Any(p=>p is null||string.IsNullOrWhiteSpace(p.Id)||p.Name is null||p.Text is null||p.Requires is null||p.Kind is not ("npc" or "lore" or "refuge" or "shortcut" or "device" or "waypoint" or "cache"))

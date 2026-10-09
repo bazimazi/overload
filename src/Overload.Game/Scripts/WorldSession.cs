@@ -10,7 +10,9 @@ public partial class Arena
     public ZoneDefinition WorldZone => world.Exploration!;
     public TacticalNavigation WorldNavigation=>world.Navigation;
     public bool GraphFracture=>WorldActive&&FractureActive&&Character?.State.Fracture?.Map is not null;
-    public System.Collections.Immutable.ImmutableHashSet<string> WorldClaims=>GraphFracture?Character!.State.Fracture!.Map!.Claims:Character!.State.World!.Claims;
+    public bool FrontierActive=>WorldActive&&!GraphFracture&&WorldZone.Kind=="frontier";
+    public System.Collections.Immutable.ImmutableHashSet<string> WorldClaims=>GraphFracture?Character!.State.Fracture!.Map!.Claims:FrontierWorld.Claims(Character!.State.World!);
+    public IReadOnlyCollection<Vector2[]> WorldRoads=>world.PavedRoads;
     public System.Collections.Immutable.ImmutableHashSet<int> WorldFog=>liveWorldFog;
     private System.Collections.Immutable.ImmutableHashSet<int> liveWorldFog=[];
     private (int X,int Y) lastFogCell=(-1,-1);
@@ -20,6 +22,7 @@ public partial class Arena
         {
             if(GraphFracture)return WorldZone.Name+" / "+WorldZone.Objective;
             var w=Character!.State.World!;var z=WorldZone;
+            if(FrontierActive)return z.Name+" / "+z.Objective;
             if(z.Kind=="hearth")return "Hearth / "+(!w.Resolved.Contains(Region.Ash)?"Follow the west conduit to Ash Foundry.":!w.Resolved.Contains(Region.Glass)||!w.Resolved.Contains(Region.Hollow)?"Restore Glass Marsh and Hollow Archive, in either order.":!w.Resolved.Contains(Region.Crown)?"Take the north procession road to Crown Scar.":"All roads restored. Fractures continue at the Atlas.");
             if(w.Resolved.Contains(z.Region))return z.Name+" / Region restored · explore remaining shelters or return to Hearth.";
             if(z.Kind=="dungeon")
@@ -42,11 +45,14 @@ public partial class Arena
         {
             if(!WorldActive)return "";
             if(worldMessageUntil>PlayerState.Tick)return worldMessage;
-            var p=Player.Position;var site=WorldZone.Sites.OrderBy(s=>p.DistanceSquaredTo(V(s.Position))).FirstOrDefault();
+            var p=Player.Position;
+            var drop=NearbyLoot.FirstOrDefault(d=>p.DistanceTo(V(d.Position))<=84);
+            if(drop is not null)return Controls.Glyph("interact")+" - Pick up "+drop.Item.Name+" / I - inventory";
+            var site=WorldZone.Sites.OrderBy(s=>p.DistanceSquaredTo(V(s.Position))).FirstOrDefault();
             if(site is not null&&p.DistanceTo(V(site.Position))<64)return $"{Controls.Glyph("interact")} · {site.Name}";
             var exit=WorldZone.Exits.OrderBy(e=>p.DistanceSquaredTo(V(e.Position))).FirstOrDefault();
             if(exit is not null&&p.DistanceTo(V(exit.Position))<64)return $"{Controls.Glyph("interact")} · {exit.Name}";
-            return $"{Controls.Glyph("local_map")} local map · {Controls.Glyph("region_map")} regional map · {Controls.Glyph("interact")} interact";
+            return $"{Controls.Glyph("local_map")} local map · {Controls.Glyph("region_map")} world map · {Controls.Glyph("interact")} interact";
         }
     }
     private static Vector2 V(WorldPoint p)=>new(p.X,p.Y);
@@ -54,20 +60,23 @@ public partial class Arena
     {
         if(Character is null)return;
         if(Character.State.World is null&&!UpdateCharacter(WorldRules.Enroll)){Hud.Title();return;}
-        if(!WorldTransaction($"world.resume:{Guid.NewGuid():N}",WorldRules.Resume))return;
+        if(Character.State.World!.GeographyVersion<2&&!WorldTransaction($"world.geography:{Guid.NewGuid():N}",WorldRules.UpgradeGeography))return;
+        if(Character.State.World.Adventure is null&&!WorldTransaction($"world.adventure:{Guid.NewGuid():N}",AdventureRules.Enable))return;
         EnterWorldZone(true);
     }
     private void EnterWorldZone(bool rest)
     {
+        portalEnds=0;pendingLootPickup=null;adventureToastUntil=0;
         var w=Character!.State.World!;
         if(rest)ApplyCharacterBuild(true);
         StartEncounter(0,rest);ClearEncounterEnemies();WorldActive=true;worldPacks.Clear();lastFogTick=-120;
+        if(FrontierWorld.TryDepth(w.ActiveZone.Id,out var depth)){EncounterTier=1+new System.Numerics.BigInteger(depth)/3;ApplyCharacterBuild(true);}
         Effects.ZIndex=1000;laws.ZIndex=4;
         world.Configure(w.ActiveZone);world.Progress=w;world.MapClaimed=null;world.MapRequired=null;
-        liveWorldFog=w.Fog.GetValueOrDefault(w.ActiveZone.Id,[]);lastFogCell=(-1,-1);
+        liveWorldFog=WorldRules.ZoneFog(w);lastFogCell=(-1,-1);
         Player.Position=V(w.Arrival);Player.TeleportVisual();world.Viewer=Player.Position;Audio.SetRegion(w.ActiveZone.Region,w.Resolved.Contains(w.ActiveZone.Region));
         Hud.HideMenu();Effects.Record(w.ActiveZone.Name);AdvanceWorld();AdvanceWorldNavigation();
-        if(w.ActiveZone.Kind=="hearth"&&w.Resolved.Contains(Region.Crown)&&w.Ending is null){Paused=true;Audio.SetPaused(true);Hud.WorldEnding();}
+        if(w.Resolved.Contains(Region.Crown)&&w.Ending is null){Paused=true;Audio.SetPaused(true);Hud.WorldEnding();}
     }
     private void EnterFractureMap()
     {
@@ -81,7 +90,17 @@ public partial class Arena
     }
     private bool WorldTransaction(string receipt,Func<CharacterState,CharacterState> change)
     {
-        try {Character!.Transact(Character.State.Revision,receipt,change);world.Progress=Character.State.World;SaveProblem="";return true;}
+        try
+        {
+            var before=Character!.State;
+            Character.Transact(before.Revision,receipt,change);world.Progress=Character.State.World;SaveProblem="";
+            if(Playing&&Character.State.TotalXp!=before.TotalXp)
+            {
+                RefreshAdventureBuild();
+                if(Character.State.ValidatedLevel>before.ValidatedLevel)AdventureToast($"LEVEL {CounterText.Short(Character.State.ValidatedLevel)}", "New skill and talent points · open Skills [K]");
+            }
+            return true;
+        }
         catch(Exception e)when(e is IOException or InvalidOperationException or UnauthorizedAccessException)
         {SaveProblem=e.Message;WorldNotice(e.Message);return false;}
     }
@@ -97,13 +116,15 @@ public partial class Arena
             return;
         }
         if(Character?.State.World is null)return;
-        if(Character.State.World.Fog.GetValueOrDefault(WorldZone.Id,[]).Count!=liveWorldFog.Count)WorldTransaction($"fog:{Guid.NewGuid():N}",s=>s with {World=s.World! with {Fog=s.World.Fog.SetItem(WorldZone.Id,liveWorldFog)}});
+        if(WorldRules.ZoneFog(Character.State.World).Count!=liveWorldFog.Count)WorldTransaction($"fog:{Guid.NewGuid():N}",s=>WorldRules.SaveFog(s,liveWorldFog));
     }
     private void RevealWorldFog()
     {
         var b=WorldZone.Geometry.Bounds;var x=(int)Player.Position.X/96;var y=(int)Player.Position.Y/96;
         if(lastFogCell==(x,y))return;lastFogCell=(x,y);
         var columns=(b.Width+95)/96;var rows=(b.Height+95)/96;
+        if(WorldZone.Kind=="hearth")
+        {liveWorldFog=[..Enumerable.Range(0,columns*rows)];return;}
         for(var dy=-2;dy<=2;dy++)for(var dx=-2;dx<=2;dx++)if(x+dx>=0&&x+dx<columns&&y+dy>=0&&y+dy<rows)liveWorldFog=liveWorldFog.Add((y+dy)*columns+x+dx);
     }
     private void AdvanceWorld()
@@ -118,13 +139,16 @@ public partial class Arena
             {
                 if(pack.All(a=>a.Enemy!.Dead))
                 {
+                    var xpBefore=Character!.State.TotalXp;var goldBefore=Character.State.Gold;
                     if(GraphFracture?ClaimMap(e.Id):WorldTransaction($"world:{w!.CampaignId:N}:{e.Id}",s=>WorldRules.ClaimEncounter(s,w.CampaignId,WorldZone.Id,e.Id)))
                     {
-                        Audio.Play("reward","UI");WorldNotice(e.Boss==1?"Region restored. Routes and refuges change.":$"Defenders cleared · +{e.Reward.Xp} XP · +{e.Reward.Gold} gold");
+                        Audio.Play("reward","UI");WorldNotice(e.Boss==1&&!FrontierActive?"Region restored. Routes and refuges change.":$"Defenders cleared · +{CounterText.Short(Character.State.TotalXp-xpBefore)} XP · +{CounterText.Short(Character.State.Gold-goldBefore)} gold");
                         nextGuidanceTick=0;
+                        if(e.Boss>=0)laws.Clear();
+                        if(AdventureActive&&NearbyLoot.Any(d=>d.Receipt==e.Id))Effects.Record("Equipment dropped · press G nearby to collect · I to compare");
                         w=Character.State.World!;
                         if(GraphFracture&&Character.State.Fracture!.Completed)return;
-                        if(!GraphFracture&&e.Boss==1&&WorldZone.Region==Region.Crown&&w!.Ending is null){Paused=true;Audio.SetPaused(true);Hud.WorldEnding();}
+                        if(!GraphFracture&&!FrontierActive&&e.Boss==1&&WorldZone.Region==Region.Crown&&w!.Ending is null){Paused=true;Audio.SetPaused(true);Hud.WorldEnding();}
                     }
                 }
                 else if(Player.Position.DistanceTo(V(e.Position))>660)
@@ -133,14 +157,20 @@ public partial class Arena
                 }
                 continue;
             }
-            if(Player.Position.DistanceTo(V(e.Position))>340||Enemies.Count(a=>!a.Enemy!.Dead)>9)continue;
+            var count=e.Boss>=0?1:e.Enemies.Length*(AdventureActive?2:1);
+            if(Player.Position.DistanceTo(V(e.Position))>380||Enemies.Count(a=>!a.Enemy!.Dead)+count>(AdventureActive?16:12))continue;
             pack=[];
-            if(e.Boss>=0)pack.Add(Spawn(RegionalContent.Boss(WorldZone.Region,e.Boss),V(e.Position)));
-            else for(var i=0;i<e.Enemies.Length;i++)
+            if(e.Boss>=0)pack.Add(Spawn(AdventureEnemy(RegionalContent.Boss(WorldZone.Region,e.Boss)),V(e.Position)));
+            else for(var i=0;i<count;i++)
             {
-                var position=V(e.Position)+Vector2.FromAngle(i*Mathf.Tau/3)*42;
+                var position=V(e.Position)+Vector2.FromAngle(i*Mathf.Tau/count)*(i%2==0?44:72);
                 if(!world.Navigation.Clear(new(position.X,position.Y),new(position.X,position.Y),20))position=V(e.Position);
-                pack.Add(Spawn(RegionalContent.Enemy(WorldZone.Region,e.Enemies[i]),position));
+                var definition=AdventureEnemy(RegionalContent.Enemy(WorldZone.Region,e.Enemies[i%e.Enemies.Length]));
+                if(AdventureActive)definition=definition with {Life=Math.Max(1,definition.Life*65/100),Damage=Math.Max(1,definition.Damage*60/100)};
+                var elite=AdventureActive&&i==0&&AdventureRules.IsEliteEncounter(e);
+                var affix=e.Id.Sum(c=>c)%2==0?EliteKind.Volatile:EliteKind.Stormbound;
+                if(elite)definition=definition with {Life=definition.Life*3,Damage=definition.Damage*125/100,Name=affix+" "+(definition.Name??definition.Role.ToString())};
+                var actor=Spawn(definition,position);if(elite)actor.Elite=affix;pack.Add(actor);
             }
             worldPacks[e.Id]=pack;
             if(GraphFracture&&e.Boss>=0){laws.Position=V(e.Position)-new Vector2(320,180);laws.Configure(Character.State.Fracture!.WorldRules,null,ActivityFamily.Hunt);}
@@ -190,8 +220,20 @@ public partial class Arena
     public void RetryWorld()
     { if(GraphFracture){EnterFractureMap();return;}if(WorldTransaction($"resume:{Guid.NewGuid():N}",WorldRules.Resume))EnterWorldZone(true); }
     public void OpenRegionalMap()
-    {if(!WorldActive)return;LocalMapVisible=false;FlushWorldFog();Paused=true;Controls.ClearBuffer();Audio.SetPaused(true);if(GraphFracture)Hud.MapFractureStatus();else Hud.RegionalMap();}
-    public void CloseWorldMenu(){Paused=false;Audio.SetPaused(false);Controls.ClearBuffer();Hud.HideMenu();}
+    {if(!WorldActive)return;ResetPointerTravel();LocalMapVisible=false;FlushWorldFog();Paused=true;Controls.ClearBuffer();Audio.SetPaused(true);if(GraphFracture)Hud.MapFractureStatus();else Hud.RegionalMap(true);}
+    public void ToggleLocalMap()
+    {
+        if(!WorldActive||Paused||PlayerState.Dead)return;
+        ResetPointerTravel();FlushWorldFog();LocalMapVisible=!LocalMapVisible;
+        if(LocalMapVisible)Hud.ResetLocalMapView();Controls.ClearBuffer();Audio.SetPaused(LocalMapVisible);
+    }
+    private void ParkWorld()
+    {
+        if(!WorldActive||GraphFracture)return;
+        FlushWorldFog();var p=Player.Position;
+        WorldTransaction($"world.park:{Guid.NewGuid():N}",s=>PlayerState.Dead?WorldRules.Resume(s):WorldRules.Park(s,new(p.X,p.Y)));
+    }
+    public void CloseWorldMenu(){Paused=false;Audio.SetPaused(false);Controls.SuppressPrimaryUntilRelease();Hud.HideMenu();}
     public void TravelWaypoint(string id)
     {
         if(Enemies.Any(e=>!e.Enemy!.Dead&&e.Position.DistanceTo(Player.Position)<420)){WorldNotice("Travel requires a safe place away from hostiles.");CloseWorldMenu();return;}

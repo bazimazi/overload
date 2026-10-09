@@ -6,6 +6,7 @@ namespace Overload.Game;
 public partial class ArenaHud
 {
     private string selectedAtlasZone="hearth";
+    public bool WorldAtlasVisible { get; private set; }
     public void MapFractureStatus()
     {
         var run=arena.Character!.State.Fracture!;var map=run.Map!;
@@ -25,25 +26,38 @@ public partial class ArenaHud
     {
         var w=arena.Character!.State.World!;
         ClearMenu(arena.WorldZone.Name.ToUpperInvariant(),site.Name,site.Text);
+        if(site.Id=="mara"&&arena.AdventureObjective?.Id=="meet")
+        {
+            Text("FIRST QUEST · A road worth saving",20,gold);
+            Text("Take the west road to Cinderroad. Defeat the first patrol, collect its weapon, and prepare for the Ash enforcer.",18,ink);
+            Text("Reward: upgraded weapon, 800 bonus XP, 50 gold. Your first level unlocks a skill and talent point.",16,teal);
+            AddButton("Accept quest · clear the first patrol",arena.AcceptFirstQuest,true);
+        }
         if(w.Resolved.Contains(Region.Ash)&&site.Id=="mara")Text("The channels run cold. The workers are alive. I thought the Pattern kept us safe; you showed me whom it left out.",19,ink);
         if(w.Resolved.Contains(Region.Hollow)&&site.Id=="sen")Text("The register carries every restored name. Nobody needs permission to have existed.",19,ink);
         if(w.Ending is not null)Text(w.Ending=="preserve"?"Every road keeps more than one possibility. Hearth has room for them all.":"The new Pattern begins with a promise: no life is erased to make the world simpler.",19,gold);
-        AddButton("Return to the road",arena.CloseWorldMenu,true);goBack=arena.CloseWorldMenu;
+        if(site.Id=="mara"&&w.Adventure?.Milestones.Contains("trained")==true)AddButton("Trailkeeper contracts · explore, fight and earn legendary gear",()=>AdventureJournal());
+        AddButton("Return to the road",arena.CloseWorldMenu,site.Id!="mara"||arena.AdventureObjective?.Id!="meet");goBack=arena.CloseWorldMenu;
     }
-    public void RegionalMap()
+    public void RegionalMap(bool selectCurrent=false)
     {
         var w=arena.Character!.State.World!;
+        if(selectCurrent)selectedAtlasZone=arena.WorldZone.Id;
         ClearMenu("THE PALIMPSEST / REGIONAL WORLD","Roads that remain",$"{arena.WorldZone.Name} · {w.Resolved.Count}/4 regions restored. Activated safe waypoints permit travel.");
-        options.AddChild(new WorldAtlasCanvas {Progress=w,SelectedZone=selectedAtlasZone,TextPercent=arena.Audio.TextPercent,SelectZone=id=>{selectedAtlasZone=id;RegionalMap();},SizeFlagsHorizontal=SizeFlags.ExpandFill});
-        var selected=WorldContent.Zone(selectedAtlasZone);
+        WorldAtlasVisible=true;
+        options.AddChild(new WorldAtlasCanvas {Progress=w,SelectedZone=selectedAtlasZone,CurrentZone=arena.WorldZone.Id,AtlasHeight=Math.Clamp(Size.Y-290,240,350),TextPercent=arena.Audio.TextPercent,SelectZone=id=>{selectedAtlasZone=id;RegionalMap();},SizeFlagsHorizontal=SizeFlags.ExpandFill});
+        var selected=FrontierWorld.TryDepth(selectedAtlasZone,out var reach)?FrontierWorld.Generate(w.CampaignId,reach):WorldContent.Zone(selectedAtlasZone);
         var detail=Section(options,selected.Name);
-        BodyLabel(detail,selected.Objective,14,ink);
-        BodyLabel(detail,w.Visited.Contains(selected.Id)?"Visited • Select an activated waypoint below to travel safely.":"Select a discovered road on the atlas to inspect its destination.",12,muted);
+        BodyLabel(detail,(selected.Kind=="frontier"?"Endless Frontier":selected.Kind=="hearth"?"Starting zone":Arena.RegionName(selected.Region))+" · "+selected.Objective,14,ink);
+        BodyLabel(detail,selected.Id==arena.WorldZone.Id?"YOU ARE HERE · Open the local map to inspect terrain and plan a route.":w.Visited.Contains(selected.Id)?"Visited · Select an activated waypoint below to travel safely.":"Unexplored · Follow the connecting roads to discover this area.",12,muted);
+        BodyLabel(detail,$"{selected.Geometry.Bounds.Width/32} × {selected.Geometry.Bounds.Height/32} meters · {selected.Kind}",12,gold);
+        AddButton("Local terrain map",()=>{arena.CloseWorldMenu();arena.ToggleLocalMap();});
+        Text("Endless Frontier",18,gold);
+        Text($"Open from the southern trail in Hearth, from level 1. Vast connected reaches continue east with changing terrain and rising danger. Farthest reach: {w.Frontier.Farthest+1}.",14,ink);
         Text("Safe waypoints",18,gold);
-        foreach(var id in w.Waypoints.Order())
+        foreach(var (z,site) in WorldRules.AvailableWaypoints(w).OrderBy(p=>p.Zone.Id))
         {
-            var z=WorldContent.Zones.Values.Single(z=>z.Sites.Any(p=>p.Id==id));var site=z.Sites.Single(p=>p.Id==id);
-            AddButton($"Travel · {site.Name} / {z.Name}",()=>arena.TravelWaypoint(id));
+            var id=site.Id;AddButton($"Travel · {site.Name} / {z.Name}",()=>arena.TravelWaypoint(id));
         }
         AddButton("Return to exploration",arena.CloseWorldMenu,true);goBack=arena.CloseWorldMenu;
     }
@@ -56,47 +70,27 @@ public partial class ArenaHud
     }
     private void DrawLocalWorldMap()
     {
-        var z=arena.WorldZone;var bounds=z.Geometry.Bounds;
-        var rect=new Rect2(new Vector2(50,110),new Vector2(Size.X-100,Size.Y-250));
-        if(rect.Size.Y<100)return;
-        Surface(rect,opacity:.94f);
-        var scale=Math.Min((rect.Size.X-48)/bounds.Width,(rect.Size.Y-70)/bounds.Height);
-        var origin=rect.GetCenter()-new Vector2(bounds.Width,bounds.Height)*scale/2+new Vector2(0,12);
-        localMapOrigin=origin;localMapScale=scale;
-        Rect2 Project(RoomBlock b)=>new(origin+new Vector2(b.X,b.Y)*scale,new Vector2(b.Width,b.Height)*scale);
-        var cells=arena.WorldFog;var columns=(bounds.Width+WorldRules.FogStep-1)/WorldRules.FogStep;
-        bool Known(WorldPoint p)=>cells.Contains((int)p.Y/WorldRules.FogStep*columns+(int)p.X/WorldRules.FogStep);
-        foreach(var cell in cells)
+        var z=arena.WorldZone;var rect=LocalMapPanel;var field=LocalMapField;
+        Surface(rect,opacity:.98f);LayoutLocalMap();
+        DrawKnownTerrain(field,localMapOrigin,localMapScale);DrawMapEnemies(field,localMapOrigin,localMapScale);
+        var occupied=new List<Rect2>();
+        foreach(var target in arena.KnownWorldTargets().OrderByDescending(t=>t.Id==arena.WorldDestination?.Id))
         {
-            var x=cell%columns*WorldRules.FogStep;var y=cell/columns*WorldRules.FogStep;
-            DrawRect(Project(new(x,y,Math.Min(WorldRules.FogStep,bounds.Width-x),Math.Min(WorldRules.FogStep,bounds.Height-y))),new Color("394c4b"));
+            var p=MapPointToScreen(target.Position);if(!field.Grow(-8).HasPoint(p))continue;
+            var active=target.Id==arena.WorldDestination?.Id;
+            DrawMapMarker(p,target.Kind,active?gold:teal,4);
+            if(active)DrawArc(p,10,0,Mathf.Tau,24,gold,2);
+            var width=Math.Min(185,field.End.X-p.X-12);if(width<50)continue;
+            var label=new Rect2(p+new Vector2(9,-12),new(width,18));
+            if(occupied.Any(r=>r.Intersects(label)))continue;occupied.Add(label);
+            DrawRect(label,new Color("101315",.92f));Write(label.Position+new Vector2(3,13),Fit(target.Name,width-6,10),10,active?gold:ink);
         }
-        // Walls and icons are clipped to discovery, so this overlay never exposes hidden caches.
-        foreach(var block in z.Geometry.Blocks)
-            foreach(var cell in cells)
-            {
-                var x=cell%columns*96;var y=cell/columns*96;
-                var left=Math.Max(x,block.X);var top=Math.Max(y,block.Y);var right=Math.Min(x+96,block.X+block.Width);var bottom=Math.Min(y+96,block.Y+block.Height);
-                if(right>left&&bottom>top)DrawRect(new(origin+new Vector2(left,top)*scale,new Vector2(right-left,bottom-top)*scale),new Color("0d191e"));
-            }
-        foreach(var exit in z.Exits.Where(e=>Known(e.Position)))
-        {var p=origin+new Vector2(exit.Position.X,exit.Position.Y)*scale;DrawRect(new(p-new Vector2(4,4),new(8,8)),gold);Write(p+new Vector2(8,-4),exit.Name,11,ink);}
-        foreach(var site in z.Sites.Where(s=>Known(s.Position)&&s.Kind is "waypoint" or "refuge" or "device" or "cache"))
-        {var p=origin+new Vector2(site.Position.X,site.Position.Y)*scale;DrawCircle(p,4,new("8ee4bd"));Write(p+new Vector2(8,4),site.Name,11,ink);}
-        var player=origin+arena.Player.Position*scale;DrawCircle(player,5,Colors.White);DrawLine(player,player+arena.Player.Facing*13,Colors.White,2);
-        for(var i=1;i<arena.GuidancePath.Count;i++)
-        {
-            var a=arena.GuidancePath[i-1];var b=arena.GuidancePath[i];
-            var steps=Math.Max(1,(int)Math.Ceiling(System.Numerics.Vector2.Distance(a,b)/24));
-            for(var n=1;n<=steps;n++)
-            {
-                var from=System.Numerics.Vector2.Lerp(a,b,(n-1)/(float)steps);var to=System.Numerics.Vector2.Lerp(a,b,n/(float)steps);
-                if(Known(new(from.X,from.Y))&&Known(new(to.X,to.Y)))DrawLine(origin+new Vector2(from.X,from.Y)*scale,origin+new Vector2(to.X,to.Y)*scale,new Color("e4bf7d",.65f),2);
-            }
-        }
-        foreach(var target in arena.KnownWorldTargets())
-            if(target.Id==arena.WorldDestination?.Id)DrawArc(origin+target.Position*scale,10,0,Mathf.Tau,24,gold,2);
-        Write(rect.Position+new Vector2(20,28),z.Name.ToUpperInvariant()+" / KNOWN PATHS",16,gold);
-        Write(rect.Position+new Vector2(20,rect.Size.Y-14),Fit($"{arena.Controls.Glyph("local_map")} close · Click a discovered landmark to track · {arena.Controls.Glyph("track")} cycle · Time is stopped",rect.Size.X-40,12),12,muted);
+        var player=MapPointToScreen(arena.Player.Position);
+        if(field.Grow(-8).HasPoint(player))DrawPlayerArrow(player,arena.Player.Facing,6);
+        Write(rect.Position+new Vector2(18,29),Fit(z.Name.ToUpperInvariant()+" / LOCAL MAP",rect.Size.X-480,16),16,gold);
+        Write(new(rect.End.X-374,rect.Position.Y+29),$"N ↑   {localMapZoom:0.0}× ZOOM",11,muted);
+        var known=arena.WorldFog.Count;var total=(z.Geometry.Bounds.Width+95)/96*((z.Geometry.Bounds.Height+95)/96);
+        Write(rect.Position+new Vector2(18,rect.Size.Y-30),Fit($"{known*100/Math.Max(1,total)}% explored · ◆ Waypoint  ∩ Road  ● Landmark  · Wheel: zoom  · Middle drag: pan",rect.Size.X-36,11),11,teal);
+        Write(rect.Position+new Vector2(18,rect.Size.Y-12),Fit($"{arena.Controls.Glyph("local_map")} / Esc close · Left click: track / pin · Right click: walk · {arena.Controls.Glyph("track")} cycle landmarks · Time stopped",rect.Size.X-36,11),11,muted);
     }
 }

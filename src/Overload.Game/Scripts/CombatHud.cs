@@ -19,6 +19,7 @@ public partial class ArenaHud
         UpdateSlotHints();
         UpdateCheckpointButtons();
         UpdateGameDock();
+        UpdateMapButtons();
         closeMenu.Visible=MenuVisible&&!home&&goBack is not null;
         ObserveDispatch(delta);
         QueueRedraw();
@@ -42,10 +43,12 @@ public partial class ArenaHud
     public override void _Draw()
     {
         if (arena.PlayerState is null) return;
+        var began=arena.QualityTimestamp;
         DrawWorldVignette();
         if (home && MenuVisible) DrawHearth();
         else if(MenuVisible&&!arena.Playing&&!arena.CheckpointRest)DrawRect(new(Vector2.Zero,Size),new Color("050403",.68f));
         else { if (arena.CheckpointRest) DrawCheckpointHud(); else DrawFightHud(); if(arena.WorldActive&&!MenuVisible&&arena.LocalMapVisible)DrawLocalWorldMap(); if (MenuVisible) DrawRect(new(Vector2.Zero, Size), new Color("050403", .78f)); }
+        arena.RecordQualityStage("HUD draw",began);
     }
     private void DrawHearth()
     {

@@ -12,7 +12,7 @@ public partial class Arena
             if(!Playing||Paused||LocalMapVisible||Hud.MenuVisible)return null;
             return Controls.Controller
                 ? Enemies.Where(e=>!e.Enemy!.Dead&&Player.Position.DistanceTo(e.Position)<180&&Player.Facing.Dot(Player.Position.DirectionTo(e.Position))>.9f).OrderBy(e=>Player.Position.DistanceSquaredTo(e.Position)).FirstOrDefault()
-                : Enemies.Where(e=>!e.Enemy!.Dead&&e.Position.DistanceTo(CursorWorldPosition)<e.Radius+18).OrderBy(e=>e.Position.DistanceSquaredTo(CursorWorldPosition)).FirstOrDefault();
+                : Enemies.Where(e=>!e.Enemy!.Dead&&new Rect2(e.VisualPosition-new Vector2(e.Radius+12,e.Radius>10?70:48),new Vector2((e.Radius+12)*2,e.Radius>10?85:60)).HasPoint(CursorWorldPosition)).OrderBy(e=>e.Position.DistanceSquaredTo(CursorWorldPosition)).FirstOrDefault();
         }
     }
 }

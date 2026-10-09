@@ -16,6 +16,13 @@ public partial class Arena
         if(!IsSmoke || Playing) throw new InvalidOperationException("Reload fixture requires an isolated idle character");
         Character = new CharacterStore(characterPath); ApplyCharacterBuild();
     }
+    public void RestoreCombatSmokeFixture()
+    {
+        if(!IsSmoke||!OS.GetCmdlineUserArgs().Contains("--smoke-test")||Playing)throw new InvalidOperationException("Requires the isolated combat smoke fixture");
+        if(!UpdateCharacter(s=>s with {World=null}))throw new InvalidOperationException("Cannot restore isolated legacy fixture");
+        Balance=BaseBalance;PlayerState=new(Balance,new ArenaActionPreflight(this));
+        PlayerState.TryChangeBindings(Character!.State.Bindings);motion.Reset();
+    }
     public void OpenCharacter(bool separate = false,bool standard = false, FrameId frame = FrameId.Warden, int? trainingBuild = null)
     {
         try
@@ -34,11 +41,12 @@ public partial class Arena
     }
     public bool UpdateCharacter(Func<CharacterState, CharacterState> change)
     {
-        if (Playing || OathPractice || Character is null) return false;
+        if (Playing && (!WorldActive || GraphFracture || !Paused || PlayerState.Dead) || OathPractice || Character is null) return false;
         try
         {
-            Character.Transact(Character.State.Revision, Guid.NewGuid().ToString("N"), change);
-            ApplyCharacterBuild();
+            Character.Transact(Character.State.Revision, Guid.NewGuid().ToString("N"), s =>
+            { var result=change(s);return result.World?.Adventure is null ? result : AdventureRules.ObserveBuild(result); });
+            if(Playing)RefreshAdventureBuild();else ApplyCharacterBuild();
             SaveProblem = ""; return true;
         }
         catch (Exception e) when (e is IOException or InvalidOperationException or UnauthorizedAccessException)

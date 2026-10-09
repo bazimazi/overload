@@ -116,7 +116,8 @@ public sealed class EnemyDirector
                 }
                 direction = (direction + separation * .7f).Normalized();
             }
-            enemy.Move(direction * definition.Speed*(tick < enemy.SlowedUntil ? 0.6f : 1));
+            var speed = definition.Speed * (tick < enemy.SlowedUntil ? 0.6f : 1);
+            enemy.MoveResponsive(direction * speed, speed);
         }
     }
 }

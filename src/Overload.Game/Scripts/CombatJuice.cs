@@ -38,6 +38,8 @@ public partial class CombatEffects
         if (arena.Playing && arena.PlayerState.Action is { } action && action.RootActionId != lastJuiceAction)
         {
             lastJuiceAction=action.RootActionId;
+            if(action.DamagePercent>100)
+            {numbers.Add(new(arena.Player.Position+new Vector2(-26,-66),"SURGE +50%",new Color("ffe3a1"),12));RunePulse(arena.Player.Position,36,new Color("ffe3a1"));}
             if(action.Definition.Id==SkillId.Flask)Burst(arena.Player.Position+new Vector2(0,-22),new Color("b1dbad"),14,15);
             if(action.Implementation!=ActionImplementation.Base && action.Definition.Id!=SkillId.Flask)
                 numbers.Add(new(arena.Player.Position+new Vector2(-12,-54),action.Implementation.ToString().ToUpperInvariant(),new Color("b0e7d9")));
@@ -56,6 +58,7 @@ public partial class CombatEffects
     }
     private void DrawJuice()
     {
+        DrawHealthGlobes();
         var atlas = PixelAtlas.Load((arena.Character?.State.Frame ?? FrameId.Warden).ToString().ToLowerInvariant());
         foreach (var g in ghosts) atlas.Draw(this, g.Facing, atlas.Idle, g.Position, new Color(.4f, .9f, .85f, g.Remaining / g.Life * .24f));
         foreach (var s in sparks)

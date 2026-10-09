@@ -44,7 +44,7 @@ public partial class CombatEffects
             RunePulse(cast.Origin, cast.Radius, cast.Skill == SkillId.EmberWell ? new Color("edb073") : new Color("baa6ed"));
             var amount=cast.Damage*(cast.Pulse+1)/pulses-cast.Damage*cast.Pulse/pulses;
             foreach(var target in arena.Enemies.Where(e=>!e.Enemy!.Dead&&e.Position.DistanceTo(cast.Origin)<=cast.Radius+e.Radius&&WorldQueries.ClearRay(this,cast.Origin,e.Position)).OrderBy(e=>e.ActorId))
-                HitEnemy(target,amount,cast.Stagger,provenance,cast.Origin,cast.Aim);
+                HitEnemy(target,amount,cast.Stagger,provenance,cast.Origin,cast.Aim,cast.Skill);
             cast.Pulse++;cast.Due+=cast.Interval;
             if(cast.Pulse>=pulses)groundCasts.Remove(cast);
         }

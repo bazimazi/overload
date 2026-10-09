@@ -5,7 +5,7 @@ public enum GearSlot { Weapon, OffHand, Helm, Chest, Gloves, Boots }
 public enum AffixKind { Attack, Life, Armor, Resistance, FocusRegeneration, CriticalChance }
 public sealed record GearAffix(AffixKind Kind, int Value);
 public sealed record GearItem(Guid Id, string Name, GearSlot Slot, int Band, int Quality, AffixKind BaseKind, int BaseValue,
-    ImmutableArray<GearAffix> Affixes, bool Locked = false, int? ReplaceableSlot = null);
+    ImmutableArray<GearAffix> Affixes, bool Locked = false, int? ReplaceableSlot = null, string? Power = null);
 
 public static class EquipmentRules
 {
@@ -32,6 +32,12 @@ public static class EquipmentRules
         if (item.Locked || s.Equipment.ContainsValue(id)) throw new InvalidOperationException("Locked or equipped gear cannot be salvaged");
         return s with { Inventory = s.Inventory.Remove(item), Gold = s.Gold + 25, Alloy = s.Alloy + 5 };
     }
+    public static CharacterState SalvageLowRarity(CharacterState s)
+    {
+        if(s.World?.Adventure is not null&&s.World.ActiveZone.Id!="hearth")throw new InvalidOperationException("Salvage services require Hearth");
+        var spare=s.Inventory.Where(i=>i.Band<=2&&!i.Locked&&!s.Equipment.ContainsValue(i.Id)).ToArray();
+        return s with {Inventory=s.Inventory.RemoveRange(spare),Gold=s.Gold+spare.Length*25,Alloy=s.Alloy+spare.Length*5};
+    }
     public static CharacterState Upgrade(CharacterState s, Guid id)
     {
         var item = Find(s, id); if (item.Quality >= 3) throw new InvalidOperationException("Quality is already 3/3");
@@ -54,11 +60,15 @@ public static class EquipmentRules
     public static void Validate(CharacterState s)
     {
         if (s.Inventory.IsDefault || s.Inventory.Length > Capacity || s.Inventory.Any(i => i is null) || s.Inventory.Select(i => i.Id).Distinct().Count() != s.Inventory.Length || s.Equipment is null) throw new InvalidDataException("Invalid inventory");
-        foreach (var i in s.Inventory)
-            if (i.Id == Guid.Empty || !Enum.IsDefined(i.Slot) || i.Band is < 1 or > 5 || i.Quality is < 0 or > 3 || !Enum.IsDefined(i.BaseKind) || i.BaseValue is < 0 or > 1000
-                || i.Affixes.IsDefault || i.Affixes.Length != 2 || i.Affixes.Any(a => a is null || !LegalAffix(i.Slot, a.Kind) || a.Value is < 0 or > 20)
-                || i.Affixes.Select(a => a.Kind).Distinct().Count() != 2 || i.ReplaceableSlot is < 0 or > 1) throw new InvalidDataException("Invalid item definition");
+        foreach (var i in s.Inventory) ValidateItem(i);
         foreach (var pair in s.Equipment)
             if (!Enum.IsDefined(pair.Key) || !s.Inventory.Any(i => i.Id == pair.Value && i.Slot == pair.Key)) throw new InvalidDataException("Invalid equipped item reference");
+    }
+    public static void ValidateItem(GearItem i)
+    {
+        if (i.Id == Guid.Empty || string.IsNullOrWhiteSpace(i.Name) || i.Name.Length > 128 || !Enum.IsDefined(i.Slot) || i.Band is < 1 or > 5 || i.Quality is < 0 or > 3 || !Enum.IsDefined(i.BaseKind) || i.BaseValue is < 0 or > 1000
+            || i.Affixes.IsDefault || i.Affixes.Length != 2 || i.Affixes.Any(a => a is null || !LegalAffix(i.Slot, a.Kind) || a.Value is < 0 or > 20)
+            || i.Affixes.Select(a => a.Kind).Distinct().Count() != 2 || i.ReplaceableSlot is < 0 or > 1
+            || i.Power is not null && (!AdventureRules.PowerIds.Contains(i.Power)||i.Band != 5)) throw new InvalidDataException("Invalid item definition");
     }
 }

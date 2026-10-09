@@ -51,17 +51,20 @@ public sealed class IntegrationSmoke(Arena arena)
             case 372: Check(arena.Hud.MenuVisible && !arena.Playing, "return to title"); Joy(JoyButton.A, true); break;
             case 374: Joy(JoyButton.A, false); break;
             case 379: Check(arena.Playing, "controller confirms title selection"); arena.ReturnToTitle(); break;
-            case 380: Joy(JoyButton.DpadDown, true); break;
+            case 380: Check(arena.Hud.FocusPracticeForCheck(),"optional practice has a labeled native focus target"); break;
             case 381: Joy(JoyButton.DpadDown, false); break;
-            case 382: Joy(JoyButton.DpadDown, true); break;
+            case 382: break;
             case 383: Joy(JoyButton.DpadDown, false); break;
-            case 384: Joy(JoyButton.DpadDown, true); break;
-            case 385: Joy(JoyButton.DpadDown, false); Joy(JoyButton.DpadRight, true); break;
-            case 386: Joy(JoyButton.DpadRight, false); Joy(JoyButton.A, true); break;
-            case 387: Joy(JoyButton.A, false); break;
+            case 384: break;
+            case 385: Joy(JoyButton.DpadDown, false); break;
+            case 386: break;
+            case 387: break;
+            case 388: Joy(JoyButton.DpadRight, false); Joy(JoyButton.A, true); break;
+            case 389: Joy(JoyButton.A, false); break;
             case 390:
-                Check(arena.Playing && arena.RewriteLessonActive, "controller navigates to Overload and Override practice");
+                Check(arena.Playing && arena.RewriteLessonActive, "controller confirms the labeled optional combat practice");
                 arena.ReturnToTitle();
+                arena.RestoreCombatSmokeFixture();
                 arena.StartEncounter(0); ClearEnemies();
                 targets = [arena.Spawn(EnemyRole.Caster, new(195, 190)), arena.Spawn(EnemyRole.Caster, new(230, 190)), arena.Spawn(EnemyRole.Caster, new(265, 190)), arena.Spawn(EnemyRole.Caster, new(300, 190))];
                 foreach (var target in targets) target.Enemy!.ReceiveHit(0, 40, 0);
@@ -92,9 +95,34 @@ public sealed class IntegrationSmoke(Arena arena)
         if (!condition) { failed = true; GD.PushError($"SMOKE FAILED: {name}; position={arena.Player.Position}, origin={origin}, tick={arena.PlayerState.Tick}, move={Input.GetVector("move_left", "move_right", "move_up", "move_down")}, viewport={arena.Player.GetViewportRect()}"); arena.GetTree().Quit(1); return; }
         checks.Add(name); GD.Print($"SMOKE PASS: {name}");
     }
-    private void Finish()
+    private async void Finish()
     {
         if (failed) return;
+        // Isolated legendary fixtures validate secondary effects without altering the campaign playthrough.
+        arena.ReturnToTitle();
+        arena.UpdateCharacter(s=>FrameRules.Create(FrameId.Warden) with {CharacterId=s.CharacterId,Inventory=s.Inventory});
+        arena.RestoreCombatSmokeFixture();
+        arena.UpdateCharacter(s=>s with {Inventory=s.Inventory.SetItem(0,s.Inventory[0] with {Band=5,Power="nova"})});
+        arena.StartEncounter(0);ClearEnemies();arena.Player.Position=new(230,190);
+        targets=[arena.Spawn(EnemyRole.Caster,new(275,190)),arena.Spawn(EnemyRole.Caster,new(330,190)),arena.Spawn(EnemyRole.Caster,new(365,190))];
+        foreach(var target in targets)target.Enemy!.ReceiveHit(target.Enemy.Life-1,40,arena.PlayerState.Tick);
+        await arena.ToSignal(arena.GetTree(),SceneTree.SignalName.PhysicsFrame);
+        var circle=WorldQueries.SectorHits(arena.Player,new(330,190),Vector2.Right,64,360,4);
+        Check(circle.Contains(targets[0])&&circle.Contains(targets[2]),"circular queries include targets behind the aim and across the seam");
+        Check(arena.PlayerState.TryStart(SkillId.Cleave,System.Numerics.Vector2.UnitX),"legendary fixture starts an ordinary basic attack");
+        for(var i=0;i<18;i++)await arena.ToSignal(arena.GetTree(),SceneTree.SignalName.PhysicsFrame);
+        Check(targets[0].Enemy!.Dead&&targets[1].Enemy!.Dead&&!targets[2].Enemy!.Dead&&arena.Effects.Deathbursts==1,"one deathburst kills its neighbor without recursively exploding");
+        Check(arena.Effects.RecentEvents.Any(e=>e.EffectId==1001&&e.Source==SourceKind.SecondaryEffect&&e.Kind=="hit"),"deathburst damage retains secondary provenance");
+        arena.ReturnToTitle();arena.UpdateCharacter(s=>FrameRules.Create(FrameId.Threadseer) with {CharacterId=s.CharacterId});
+        arena.UpdateCharacter(s=>s with {Inventory=s.Inventory.SetItem(0,s.Inventory[0] with {Band=5,Power="split"})});
+        arena.StartEncounter(0);ClearEnemies();arena.Player.Position=new(230,190);
+        targets=[arena.Spawn(EnemyRole.Caster,new(280,190)),arena.Spawn(EnemyRole.Caster,new(325,190)),arena.Spawn(EnemyRole.Caster,new(365,190)),arena.Spawn(EnemyRole.Caster,new(405,190))];
+        foreach(var target in targets)target.Enemy!.ReceiveHit(0,40,arena.PlayerState.Tick);
+        await arena.ToSignal(arena.GetTree(),SceneTree.SignalName.PhysicsFrame);
+        Check(arena.PlayerState.TryStart(SkillId.ShardShot,System.Numerics.Vector2.UnitX),"split fixture starts an ordinary projectile attack");
+        for(var i=0;i<35;i++)await arena.ToSignal(arena.GetTree(),SceneTree.SignalName.PhysicsFrame);
+        Check(arena.Effects.SplitVolleys==1&&arena.Effects.HitsDealt==3&&targets.Take(3).All(t=>t.Enemy!.Life<t.Enemy.MaximumLife)&&targets[3].Enemy!.Life==targets[3].Enemy!.MaximumLife,"three fan projectiles hit three enemies once each and stop at their shared budget");
+        if(failed)return;
         var folder = "user://tests";
         DirAccess.MakeDirRecursiveAbsolute(folder);
         using var result = FileAccess.Open(folder + "/smoke.json", FileAccess.ModeFlags.Write);

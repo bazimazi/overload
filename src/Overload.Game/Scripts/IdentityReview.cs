@@ -53,13 +53,14 @@ public partial class Arena
                 Check(!PlayerState.ElsewhereActive&&!RewriteLessonActive,"leaving restores original contract "+frame);
             }
             StartWorld();await Frames(2);
-            Check(WorldDestination?.Name=="Ash Foundry","fresh Hearth guides to the unlocked road");
+            Check(WorldDestination?.Id=="mara","fresh Hearth guides to the first quest giver");
+            AcceptFirstQuest();await Frames(2);Check(WorldDestination?.Name=="Ash Foundry","accepting the quest guides to the unlocked road");
             var known=KnownWorldTargets().ToArray();Check(known.All(t=>WorldCellKnown(t.Position)),"tracking excludes unrevealed landmarks");
             TrackWorldTarget("exit:road.3");Check(WorldDestination?.Name=="Ash Foundry","unknown destination cannot be manually tracked");
             var ticks=PlayerState.Tick;KeyEvent(Key.Tab,true);await Frames(3);KeyEvent(Key.Tab,false);await Frames(10);
             Check(LocalMapVisible&&PlayerState.Tick==ticks,"tactical map freezes combat clocks");await Capture("hearth-tactical-map");
             TogglePause();Check(!LocalMapVisible&&!Paused,"back closes map without opening a pause menu");
-            WorldTransaction("identity.ash",s=>WorldRules.Enter(s,"ash.0",new(140,560)));EnterWorldZone(true);await Frames(3);
+            WorldTransaction("identity.ash",s=>WorldRules.Enter(s,"ash.0",new(890,1680)));EnterWorldZone(true);await Frames(3);
             Check(!PlayerState.Memories.InCombat&&Enemies.Any(e=>!e.Enemy!.Dead),"distant world defenders wait instead of pursuing immediately");
             var guard=Enemies.First(e=>!e.Enemy!.Dead);Player.Position=guard.Position-new Vector2(90,0);Player.TeleportVisual();await Frames(3);
             Check(PlayerState.Memories.InCombat,"visible nearby defenders engage as a pack");await Capture("ash-engaged-pack");
@@ -78,10 +79,10 @@ public partial class Arena
                 DisplayServer.WindowSetSize(new(1280,720));if(Audio.TextPercent!=100)Audio.ToggleText();await Frames(8);
                 foreach(var region in Enum.GetValues<Region>())
                 {
-                    WorldTransaction("identity.scenery:"+Guid.NewGuid(),s=>WorldRules.Enter(s,WorldContent.Id(region,0),new(1260,290)));EnterWorldZone(true);
+                    WorldTransaction("identity.scenery:"+Guid.NewGuid(),s=>WorldRules.Enter(s,WorldContent.Id(region,0),new(3780,870)));EnterWorldZone(true);
                     PlayerState.ChangeMaximumLife(System.Numerics.BigInteger.Pow(10,24));PlayerState.Reset();await Capture("world-"+region+"-gantry");
                     Check(world.PavedRoads.Any(p=>p.Length>1)&&world.PavedRoads.All(p=>Enumerable.Range(1,Math.Max(0,p.Length-1)).All(i=>WorldNavigation.Clear(new(p[i-1].X,p[i-1].Y),new(p[i].X,p[i].Y),36))),"painted roads have navigable width and real segments "+region);
-                    Player.Position=new(940,1020);Player.TeleportVisual();await Frames(4);
+                    Player.Position=V(WorldZone.Sites.Single(s=>s.Kind=="refuge").Position);Player.TeleportVisual();await Frames(4);
                     foreach(var defender in Enemies)defender.Enemy!.ReceiveHit(defender.Enemy.MaximumLife,0,PlayerState.Tick);
                     await Frames(3);InteractWorld();await Frames(2);
                     Check(WorldClaims.Contains(WorldContent.Id(region,0)+".refuge"),"refuge scenery follows an actual reclamation "+region);await Capture("world-"+region+"-refuge");

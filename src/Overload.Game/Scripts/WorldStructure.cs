@@ -3,74 +3,96 @@ using Overload.Domain;
 
 namespace Overload.Game;
 
-/// <summary>Raised architecture sorts at its feet, matching the world collision footprint.</summary>
+/// <summary>Retained solid scenery occupies the authoritative footprint and fades above the player.</summary>
 public partial class WorldStructure : Node2D
 {
-    public Rect2 Footprint { get; init; }
-    public Region Region { get; init; }
-    private Texture2D texture=null!;
-    private PixelAtlas props=null!;
-    private Color stone,light;
-    private float age;
+    public Rect2 Footprint {get;init;}
+    public Region Region {get;init;}
+    public bool Outdoors {get;init;}
+    public bool Settlement {get;init;}
+    private Color stone;
+    private WorldStructureLight lights=null!;
     public override void _Ready()
     {
-        texture=GD.Load<Texture2D>($"res://Assets/Pixel/{Region.ToString().ToLowerInvariant()}.png");props=PixelAtlas.Load("props");
-        stone=Region switch{Region.Ash=>new("67513b"),Region.Glass=>new("375f57"),Region.Hollow=>new("5b5269"),_=>new("6e5450")};
-        light=Region switch{Region.Ash=>new("e39350"),Region.Glass=>new("85caba"),Region.Hollow=>new("aa93d1"),_=>new("cfad78")};
+        TextureFilter=TextureFilterEnum.Linear;
+        TextureRepeat=TextureRepeatEnum.Mirror;
+        stone=Region switch {Region.Glass=>new(.71f,.86f,.79f),Region.Hollow=>new(.79f,.77f,.88f),Region.Crown=>new(.87f,.75f,.72f),_=>new(.85f,.81f,.73f)};
+        lights=new WorldStructureLight {Footprint=Footprint,Region=Region,Outdoors=Outdoors};
+        AddChild(lights);QueueRedraw();
     }
-    public override void _Process(double delta){age+=(float)Math.Min(delta,.05);QueueRedraw();}
+    public void Observe(Vector2 viewer,Vector2 player,double delta,bool paused)
+    {
+        Visible=Footprint.Grow(150).Intersects(new(viewer-new Vector2(450,300),new(900,600)));
+        var roof=new Rect2(Footprint.Position-new Vector2(16,100),Footprint.Size+new Vector2(32,100));
+        var hide=roof.HasPoint(player-new Vector2(0,24))&&player.Y<Footprint.End.Y;
+        SelfModulate=new Color(1,1,1,Mathf.Lerp(SelfModulate.A,hide?.38f:1,1-MathF.Exp(-(float)delta*12)));
+        lights.Advance(delta,paused);
+    }
     public override void _Draw()
     {
-        var rect=Footprint;
-        var source=new Rect2(texture.GetWidth()*.26f,texture.GetHeight()*.42f,texture.GetWidth()*.16f,texture.GetHeight()*.28f);
-        DrawRect(rect,new Color("111314"));
-        for(var y=rect.Position.Y;y<rect.End.Y-26;y+=48)
-            for(var x=rect.Position.X;x<rect.End.X;x+=48)
-                DrawTextureRectRegion(texture,new(x,y,Math.Min(48,rect.End.X-x),Math.Min(48,rect.End.Y-26-y)),source,new(.66f,.61f,.57f));
-        DrawRect(rect.Grow(-5),new Color(stone,.13f));
-        DrawRect(new(rect.Position.X,rect.End.Y-26,rect.Size.X,26),stone.Darkened(.46f));
-        DrawLine(rect.Position,new(rect.End.X,rect.Position.Y),stone.Lightened(.1f),3);
-        DrawLine(new(rect.Position.X,rect.End.Y-26),new(rect.End.X,rect.End.Y-26),stone.Lightened(.22f),3);
-        DrawLine(new(rect.Position.X,rect.End.Y-24),new(rect.End.X,rect.End.Y-24),new Color("151310"),1);
-        var column=Region switch{Region.Ash=>1,Region.Glass=>2,Region.Hollow=>3,_=>0};
-        for(var x=rect.Position.X+18;x<rect.End.X-8;x+=64)
+        var r=Footprint;var rise=Outdoors?0:34;
+        var top=new Rect2(r.Position-new Vector2(0,rise),r.Size);
+        DrawColoredPolygon([r.Position+new Vector2(6,6),r.Position+new Vector2(r.Size.X+32,13),r.End+new Vector2(32,16),new(r.Position.X+22,r.End.Y+16)],new Color(0,0,0,.34f));
+        if(Settlement)
         {
-            var foot=new Vector2(x,rect.End.Y+2);
-            props.Draw(this,column,1,foot,Colors.White,.65f);
-            var window=foot+new Vector2(27,-20);
-            DrawRect(new(window-new Vector2(7,5),new(14,13)),new Color("121111"));
-            DrawArc(window-new Vector2(0,5),7,Mathf.Pi,Mathf.Tau,16,stone,2);
-            DrawLine(window-new Vector2(0,11),window+new Vector2(0,6),stone.Darkened(.2f),2);
-            DrawRect(new(window+new Vector2(-4,-3),new(3,7)),new Color(light,.45f+.08f*MathF.Sin(age*2+x)));
-            if(Region==Region.Ash||Region==Region.Crown)
+            WorldMaterials.Sprite(this,"settlement",r.Position.X<600?0:1,new(r.GetCenter().X,r.End.Y),r.Size.X*1.15f,stone);
+            return;
+        }
+        DrawRect(r,new Color("171a19"));
+        Vector2[] roof=[top.Position,new(top.End.X,top.Position.Y),top.End,new(top.Position.X,top.End.Y)];
+        DrawPolygon(roof,new Color[]{stone.Darkened(Outdoors?.36f:.16f)},roof.Select(p=>p/(Outdoors?256:165)).ToArray(),Outdoors?WorldMaterials.Earth:WorldMaterials.Stone);
+        if(!Outdoors)
+        {
+            DrawTextureRectRegion(WorldMaterials.Stone,new(r.Position.X,top.End.Y,r.Size.X,rise),new(0,850,1254,350),new(.25f,.27f,.24f));
+            DrawLine(new(top.Position.X,top.End.Y),top.End,stone.Darkened(.5f),2);
+            DrawLine(top.Position,new(top.End.X,top.Position.Y),new Color(stone,.4f),1);
+        }
+        for(var x=r.Position.X+12;x<r.End.X;x+=Outdoors?52:40)
+        {
+            DrawLine(new(x,top.End.Y+2),new(x,r.End.Y),stone.Darkened(.75f),1);
+            var seed=(uint)((int)x*73856093);
+            WorldMaterials.Scenery(this,Outdoors?Region==Region.Glass?1:0:2,new(x+(Outdoors?seed%17-8f:0),r.End.Y),Outdoors?24+seed%16:45,stone);
+        }
+        for(var y=top.Position.Y+34;y<top.End.Y-12;y+=76)
+            for(var x=top.Position.X+34;x<top.End.X-12;x+=80)
             {
-                var torch=foot-new Vector2(0,36);DrawCircle(torch,14,new Color(light,.055f));
-                DrawRect(new(torch-new Vector2(1,2),new(2,4)),light);
-                DrawLine(torch+new Vector2(0,3),torch+new Vector2(0,8),stone,2);
+                var seed=(uint)((int)x*73856093)^(uint)((int)y*19349663);
+                var id=Outdoors?Region is Region.Glass or Region.Hollow?4:5:seed%3==0?11:3;
+                var height=Outdoors?Region is Region.Glass or Region.Hollow?76+seed%27:58+seed%24:40+seed%12;
+                WorldMaterials.Scenery(this,id,new(x+(seed%25)-12,y+((seed>>8)%19)-9),height,stone);
+            }
+        if(Outdoors)
+            for(var x=r.Position.X+32;x<r.End.X-20;x+=72)
+            {
+                var seed=(uint)((int)x*19349663);var lush=Region is Region.Glass or Region.Hollow;
+                WorldMaterials.Scenery(this,lush?4:5,new(x,r.End.Y-12-seed%12),lush?76+seed%25:58+seed%22,stone);
+                WorldMaterials.Scenery(this,Region==Region.Glass?1:0,new(x+18,r.End.Y),26+seed%12,stone);
+            }
+        if(!Outdoors)
+        {
+            for(var x=r.Position.X+38;x<r.End.X-12;x+=100)
+            {
+                var foot=new Vector2(x,r.End.Y-5);
+                WorldMaterials.Scenery(this,8,foot,37);
+                WorldMaterials.Scenery(this,9,foot-new Vector2(28,0),24,stone);
             }
         }
-        if(rect.Size.Y>90)
-        {
-            var center=rect.GetCenter();
-            if(Region==Region.Glass)
-            {
-                for(var i=0;i<4;i++){var p=center+new Vector2((i-1.5f)*22,0);DrawColoredPolygon([p+new Vector2(-8,10),p+new Vector2(0,-34-i%2*12),p+new Vector2(9,9)],stone.Lightened(.1f));DrawLine(p+new Vector2(0,-30),p+new Vector2(1,7),light.Darkened(.2f),1);}
-            }
-            else
-            {
-                props.Draw(this,column,2,center+new Vector2(0,12),new Color(.9f,.85f,.8f),1.5f);
-                for(var i=0;i<3;i++){var p=center+new Vector2(46+i*22,-26);DrawRect(new(p,new(12,20)),stone.Darkened(.35f));DrawLine(p+new Vector2(3,3),p+new Vector2(9,3),light.Darkened(.4f));}
-            }
-        }
-        if(rect.Size.Y>rect.Size.X*2.2f)
-        {
-            for(var y=rect.Position.Y+26;y<rect.End.Y;y+=110)
-                WorldArt.Draw(this,Region,true,new(rect.GetCenter().X-rect.Size.X/2,y-74,rect.Size.X,96),new(.82f,.82f,.82f));
-        }
-        else
-        {
-            var rise=Math.Min(64,rect.Size.Y*.25f);
-            WorldArt.Draw(this,Region,false,new(rect.Position-new Vector2(8,rise),rect.Size+new Vector2(16,rise+6)),new(.92f,.9f,.87f));
-        }
+    }
+}
+
+public partial class WorldStructureLight : Node2D
+{
+    public Rect2 Footprint {get;init;}
+    public Region Region {get;init;}
+    public bool Outdoors {get;init;}
+    private float age;
+    public override void _Ready()=>Material=new CanvasItemMaterial {BlendMode=CanvasItemMaterial.BlendModeEnum.Add};
+    public void Advance(double delta,bool paused){if(!paused)age+=(float)Math.Min(delta,.05);if(!Outdoors&&IsVisibleInTree())QueueRedraw();}
+    public override void _Draw()
+    {
+        if(Outdoors)return;
+        var color=Region switch {Region.Glass=>new Color(.32f,.6f,.54f),Region.Hollow=>new(.42f,.32f,.6f),_=>new(.9f,.49f,.17f)};
+        for(var x=Footprint.Position.X+38;x<Footprint.End.X-12;x+=100)
+            WorldMaterials.Light(this,new(x,Footprint.End.Y-24),56,color*(.34f+.025f*MathF.Sin(age*4+x)));
     }
 }

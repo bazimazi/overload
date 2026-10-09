@@ -22,6 +22,8 @@ public partial class ArenaHud
         ArtButton(build, 1, "Talent paths", $"{FoundationRules.TalentBudget(s) - s.Talents.Count} talent points available", TalentsMenu);
         ArtButton(build, 15, "Codex inscriptions", $"{s.Inscriptions.Count}/2 inscriptions equipped", CodexMenu);
         ArtButton(build, 10, "Active loadout", "Choose your three active skills", LoadoutMenu);
+        if(s.ValidatedLevel>=60)
+        {
         Text($"Unspent Resonance: {CounterText.Short(FoundationRules.UnspentResonance(s))}", 15, gold);
         if(arena.PlayerState.RedCovenantActive)Text("Focus regeneration from gear and talents is INACTIVE while Red Covenant is equipped.",15,gold);
         AddButton(s.AutoResonance ? $"Resonance: automatic {s.ResonancePolicy} → manual" : "Resonance: manual → automatic", () =>
@@ -30,9 +32,10 @@ public partial class ArenaHud
             AddButton($"Auto rule: {policy}{(policy==ResonancePolicy.Balanced ? " 1:1" : policy==ResonancePolicy.Offense ? " 3:1" : " 1:3")}",()=>
             { arena.UpdateCharacter(c=>FoundationRules.AddXp(c with { AutoResonance=true,ResonancePolicy=policy },0));CharacterMenu(); });
         AddButton("Allocate an exact Resonance amount", ResonanceMenu);
+        }
         AddButton("Exact counters and combat values", ExactCounters);
         AddButton("Free respec — return skill, talent and Resonance points", () => { arena.UpdateCharacter(FoundationRules.Respec); CharacterMenu(); });
-        Issue(); AddButton("Back to Hearth", Title);
+        Issue(); AddButton(arena.Playing?"Return to adventure":"Back to Hearth", ReturnFromBuild);goBack=ReturnFromBuild;
     }
     private void ResonanceMenu()
     {
@@ -54,7 +57,11 @@ public partial class ArenaHud
         var s = arena.Character!.State;
         ClearMenu("SKILLS / PERSISTENT CHOICES", "Train the Frame", $"{FoundationRules.SkillBudget(s) - FoundationRules.SkillSpent(s)} skill points available; techniques require rank 3");
         PanelTabs("Skills");
+        var available=FoundationRules.SkillBudget(s)-FoundationRules.SkillSpent(s);
+        AddButton("Change equipped skills · Q / E / R",LoadoutMenu,available==0);
+        if(s.World?.Adventure is not null)Text("Basic hits: +8 Focus. Three basic hits: next damaging skill +50% (Surge).",14,gold);
         var grid=CardGrid();
+        var focused=false;
         foreach (var skill in arena.Balance.Skills.Where(k => k.Family == ActionFamily.Assault))
         {
             var box=Section(grid,SkillName(skill.Id));
@@ -64,11 +71,12 @@ public partial class ArenaHud
             BodyLabel(detail,string.Join(" ",Enumerable.Range(0,5).Select(i=>i<rank?"◆":"◇")),18,gold);
             BodyLabel(detail,$"{skill.FocusCost} Focus • {skill.Cooldown/60f:0.#}s cooldown",12,muted);
             BodyLabel(box,DescribeSkill(skill.Id),13,ink);
-            PanelButton(box,$"Train • Rank {rank}/5",()=>{arena.UpdateCharacter(c=>FoundationRules.Rank(c,skill.Id));SkillsMenu();},rank>=5||FoundationRules.SkillSpent(s)>=FoundationRules.SkillBudget(s));
+            var train=PanelButton(box,$"Train • Rank {rank}/5",()=>{arena.UpdateCharacter(c=>FoundationRules.Rank(c,skill.Id));SkillsMenu();},rank>=5||available==0);
+            if(!focused&&!train.Disabled){FocusAfterLayout(train);focused=true;}
             var techniques=new HBoxContainer();box.AddChild(techniques);
             foreach(var technique in Enum.GetValues<Technique>())PanelButton(techniques,technique+(s.Techniques.TryGetValue(skill.Id,out var known)&&known==technique?" ◆":""),()=>{arena.UpdateCharacter(c=>FoundationRules.ChooseTechnique(c,skill.Id,technique));SkillsMenu();},rank<3||!s.Techniques.ContainsKey(skill.Id)&&FoundationRules.SkillSpent(s)>=FoundationRules.SkillBudget(s));
         }
-        Issue(); AddButton("Back", CharacterMenu, true); goBack = CharacterMenu;
+        Issue(); AddButton("Back", CharacterMenu); goBack = CharacterMenu;
     }
     private void LoadoutMenu()
     {

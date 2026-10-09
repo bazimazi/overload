@@ -22,7 +22,7 @@ public sealed record LevelGeometry(RoomBlock Bounds, ImmutableArray<RoomBlock> B
     public TacticalNavigation Navigation() => new(Blocks, Bounds);
     public void Validate()
     {
-        if (Bounds.Width is < 256 or > 4096 || Bounds.Height is < 256 or > 4096 || Blocks.IsDefault || Blocks.Length > 256
+        if (Bounds.Width is < 256 or > 8192 || Bounds.Height is < 256 or > 8192 || Blocks.IsDefault || Blocks.Length > 256
             || Blocks.Any(b => b.Width <= 0 || b.Height <= 0 || b.X < Bounds.X || b.Y < Bounds.Y
                 || b.X + b.Width > Bounds.X + Bounds.Width || b.Y + b.Height > Bounds.Y + Bounds.Height))
             throw new InvalidDataException("Invalid level geometry");

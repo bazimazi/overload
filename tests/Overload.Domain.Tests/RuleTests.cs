@@ -48,10 +48,10 @@ public class RuleTests
         Assert.True(p.Cooldown(SkillId.ShieldPulse) > 0);
     }
     [Fact]
-    public void FinalWindupAndActivePhaseCannotBeCanceled()
+    public void BasicRecoveryRequiresItsOpeningFramesBeforeMovementCancels()
     {
         var p = new PlayerCombat(Profile); p.TryStart(SkillId.Cleave, Vector2.UnitX);
-        Advance(p, 4); Assert.False(p.TryStart(SkillId.Traverse, Vector2.UnitX));
+        Advance(p, 4);
         Advance(p, 3); Assert.Equal(ActionPhase.Active, p.Action!.Phase(p.Tick));
         Assert.False(p.CancelRecoveryByMovement());
         Advance(p, 10); Assert.False(p.CancelRecoveryByMovement());

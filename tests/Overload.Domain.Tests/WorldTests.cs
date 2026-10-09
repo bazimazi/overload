@@ -14,14 +14,18 @@ public sealed class WorldTests
         foreach(var zone in WorldContent.Zones.Values)
         {
             WorldContent.Validate(zone);
-            foreach(var exit in zone.Exits){Assert.True(WorldContent.Zones.ContainsKey(exit.Destination));Assert.True(WorldContent.Zone(exit.Destination).Geometry.Navigation().Clear(exit.Arrival.Vector,exit.Arrival.Vector,20));}
+            foreach(var exit in zone.Exits)
+            {
+                var destination=FrontierWorld.TryDepth(exit.Destination,out var depth)?FrontierWorld.Generate(Guid.Empty,depth):WorldContent.Zone(exit.Destination);
+                Assert.True(destination.Geometry.Navigation().Clear(exit.Arrival.Vector,exit.Arrival.Vector,20));
+            }
         }
     }
     [Fact] public void BothFoundryForksReconnectForEveryFrameWithoutAnOath()
     {
         var nav=WorldContent.Zone("ash.0").Geometry.Navigation();
         foreach(var route in new[]{new Vector2[]{new(140,560),new(610,290),new(1260,290),new(1710,560)},[new(140,560),new(620,850),new(1210,920),new(1710,560)]})
-            foreach(var radius in new[]{8f,12f,20f})for(var i=1;i<route.Length;i++)Assert.NotEmpty(nav.FindPath(route[i-1],route[i],radius));
+            foreach(var radius in new[]{8f,12f,20f})for(var i=1;i<route.Length;i++)Assert.NotEmpty(nav.FindPath(route[i-1]*3,route[i]*3,radius));
     }
     [Fact] public void RealTravelHonorsGatesAndWorksInBothDirections()
     {
@@ -65,7 +69,7 @@ public sealed class WorldTests
     }
     [Fact] public void FogAndSafeResumeSurviveSerializationWithoutInferringLegacyDiscovery()
     {
-        var old=FrameRules.Create(FrameId.Warden) with {SchemaVersion=5};var migrated=CharacterStore.Decode(CharacterStore.Encode(old));Assert.Null(migrated.World);Assert.Equal(6,migrated.SchemaVersion);
+        var old=FrameRules.Create(FrameId.Warden) with {SchemaVersion=5};var migrated=CharacterStore.Decode(CharacterStore.Encode(old));Assert.Null(migrated.World);Assert.Equal(8,migrated.SchemaVersion);
         var s=WorldRules.Reveal(WorldRules.Travel(Fresh(),"road.0"),new(400,560));s=CharacterStore.Decode(CharacterStore.Encode(s));
         Assert.NotEmpty(s.World!.Fog["ash.0"]);Assert.Equal("hearth",WorldRules.Resume(s).World!.ActiveZone.Id);
         Assert.Throws<FutureSaveException>(()=>CharacterStore.Decode(CharacterStore.Encode(s with {World=s.World with {Version="world.future"}})));

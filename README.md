@@ -1,5 +1,17 @@
 # Overload
 
+**9 October graphics overhaul:** **Play Overload.cmd** launches `graphics.2026-10-09`. The world renders at 1280×720 with sharper characters, blended earth/moss/stone materials, feathered navigable paths, forests and ruins on solid terrain, projected actor shadows, and local lights. Hearth has a forge and depot; Mara, Iven and Sen have distinct civilian sprites. Roofs and canopies fade when they cover the player. [Changes, artwork prompts and verification](docs/GRAPHICS_OVERHAUL.md). Current runtime evidence: `artifacts/LATEST-GRAPHICS.json`.
+
+**Previous combat rhythm and clarity pass:** Basic hits restore Focus; three hits empower the next damaging skill. Held mouse attacks continue through nearby enemies, held skill keys repeat, and red Life globes reward moving through cleared packs. A simpler opening menu and class selection lead directly into Hearth. [Gameplay and verification](docs/COMBAT_RHYTHM.md).
+
+**Previous ARPG combat and playability pass:** Left click ground to move, enemies to approach and attack, and landmarks to interact; **Alt + LMB** attacks while standing your ground. Denser patrols, marked elite hazards, immediate defensive cancellation of basic attacks, faster exploration, and Reaving / Split Volley / Deathburst legendaries deepen combat. Equipment comparisons show damage, Life and armor changes immediately. [Controls, gameplay and full-campaign verification](docs/ARPG_GAMEPLAY.md).
+
+**9 October adventure gameplay overhaul:** launch **Play Overload.cmd**. Start in Hearth, take Mara's first patrol quest, collect visible loot, compare and equip it with **I**, train with **K**, and follow the quest journal with **J**. **P** channels a town portal and returns to the same place. Repeatable Trailkeeper contracts open fresh frontier reaches and pay legendary gear with named powers. Story / Adventurer / Veteran difficulty is available in Hearth. [Gameplay and verification](docs/ADVENTURE_GAMEPLAY.md).
+
+**9 October movement and animation upgrade:** short acceleration/turning ramps, prompt braking, precise click arrivals, **held right-mouse steering**, distance-driven walk cycles, eased combat poses, and a camera synchronized with interpolated sprites. Launch **Play Overload.cmd**. See [movement changes and verification](docs/MOVEMENT_ANIMATION.md).
+
+**9 October open-world overhaul:** launch `artifacts/windows/Overload.exe`. World characters start inside safe Hearth Junction with an always-visible minimap and clickable map controls. **M** opens the world atlas; **Tab** opens a zoomable local map with pins and right-click path movement. Campaign landscapes are nine times larger; Hearth's southern trail enters connected **6144 × 3840** frontier reaches that continue east from level 1. Older world saves upgrade their geography automatically. See [open-world behavior and validation](docs/OPEN_WORLD_OVERHAUL.md).
+
 The 9 October ARPG presentation overhaul adds painted skill/item art, an ornate orb HUD, equipment and progression panels, an interactive world atlas, regional architecture, and right-click path movement. **C / I** inspect your character/equipment during play. See [changes and validation](docs/RPG_PRESENTATION.md). Launch the updated Windows build at `artifacts/windows/Overload.exe`; keep the complete folder together.
 
 Overload is a Godot C# action RPG prototype about learning new ways to act and earning the right to rewrite one character rule. New characters explore seventeen connected zones across Hearth and four regions, reclaim refuges, restore infrastructure, and face eight bosses before the First Pattern finale. Fractures add seeded physical branches and Hunt/Breach/Vault objectives. Three Frames, 24 skills, nine signatures and two earned oaths retain their combat rules. Earlier room-based saves remain resumable. Human playtest and release-quality gates remain open.
@@ -10,7 +22,7 @@ On this workspace, launch **`artifacts/windows/Overload.exe`**. Keep the entire 
 
 The current build uses Compatibility/OpenGL rendering. Additional hardware validation remains open.
 
-The current gameplay and UI build is identified by **`artifacts/LATEST-IDENTITY.json`**. See [gameplay and identity](docs/GAMEPLAY_IDENTITY.md) for the Memory Chamber, memory preservation, combat deck, minimap and world improvements. **`artifacts/LATEST-WORLD.json`** identifies the earlier connected-world build; **`artifacts/LATEST-EXPERIENCE.json`** identifies the earlier presentation upgrade. **`artifacts/LATEST-CANDIDATE.json`** records the older R01 archive. Follow the [release review sheet](docs/RELEASE_REVIEW.md) and [S06 feedback sheet](docs/playtests/S06_FIRST_PLAYTEST.md); human release acceptance remains open.
+The current build is identified by **`artifacts/LATEST-GRAPHICS.json`**. `LATEST-COMBAT.json` and `LATEST-ARPG.json` record the preceding combat passes. `LATEST-ADVENTURE.json` and `LATEST-MOVEMENT.json` record the previous passes. Double-click **`Play Overload.cmd`** in the repository root to launch it. [Open-world changes and evidence](docs/OPEN_WORLD_OVERHAUL.md) describe the starting zone, large campaign landscapes, continuing frontier and map navigation. `LATEST-OPEN-WORLD.json`, `LATEST-RPG.json`, `LATEST-IDENTITY.json`, `LATEST-WORLD.json`, `LATEST-EXPERIENCE.json` and `LATEST-CANDIDATE.json` record earlier passes. Human release acceptance remains open.
 
 To build from source on Windows, install .NET SDK **10.0.401**, then run from the repository root:
 
@@ -24,18 +36,25 @@ Setup downloads and checksum-verifies Godot **4.7.2 .NET** and matching template
 | Action | Keyboard / mouse | Controller |
 | --- | --- | --- |
 | Move / aim | WASD / mouse | Left / right stick |
-| Frame basic attack | Hold left mouse | Hold RB |
+| Navigate / steer | Left click ground / hold mouse; right mouse also works | Left stick |
+| Approach and attack | Click an enemy; hold to repeat | Left stick / RB |
+| Attack while standing ground | Alt + left mouse | Hold RB |
 | Three equipped active skills | Q / E / R | X / Y / B |
 | Evade / flask | Space / F | A / LB |
 | Preserve memories while acting | Hold Shift | Hold left trigger |
 | Track a discovered landmark | T | D-pad Left |
 | Pause | Escape | Start |
 | Menu navigation / confirm / back | Arrows / Enter / Escape | D-pad / A / B |
+| Interact / nearby loot | Click a landmark or loot label; G nearby | D-pad Up |
+| Inventory / character | I / C | Pause menu |
+| Skills / quest journal | K / J | Pause menu |
+| Town portal / return | P | Pause menu |
+| Local / world map | Tab / M | Back / D-pad Right |
 | Diagnostics | F3 | Keyboard only |
 
-Fresh installs start a level-1 Standard Warden in the connected campaign. Select **Explore the world**, walk to a road, and press **G** to interact. **Tab** opens the discovered local map; **M** opens regional travel. Controller: **D-pad Up** interacts, **Back/View** opens the local map, **D-pad Right** opens regional travel, **B** returns. Safe waypoints restore supplies and permit fast travel. Ash opens Glass and Hollow in either order; their resolutions open Crown. Older eight-room and sixteen-checkpoint journeys resume through their original adapters. See [World implementation](docs/WORLD_IMPLEMENTATION.md).
+Fresh installs start a level-1 Standard Warden in the connected campaign. Follow the gold marker to Mara, press **G** to accept the first quest, then take the west road. **Tab** opens the discovered local map; **M** opens regional travel. Controller: **D-pad Up** interacts, **Back/View** opens the local map, **D-pad Right** opens regional travel, **B** returns. Safe waypoints restore supplies and permit fast travel. Ash opens Glass and Hollow in either order; their resolutions open Crown. Older eight-room and sixteen-checkpoint journeys resume through their original adapters. See [World implementation](docs/WORLD_IMPLEMENTATION.md).
 
-Each Frame has a free basic and three equipped active skills from its eight-skill collection. Rank skills, choose techniques, learn twelve connected talent nodes, equip two inscriptions, compare/forge six gear slots, or respec at Hearth. Threadseer places delayed wells and looms; Revenant commands one echo and uses ranged pressure. Control/utility casts keep their authored behavior and cannot dispatch direct-damage patterns. Character XP and post-60 Resonance have no designed level cap.
+Each Frame has a free basic and three equipped active skills from its eight-skill collection. Rank skills, choose techniques, learn twelve connected talent nodes, equip two inscriptions, compare/forge six gear slots, or respec at Hearth. Threadseer places delayed wells and looms; Revenant commands one echo and uses ranged pressure. Control/utility casts keep their authored behavior and cannot dispatch direct-damage patterns. Character XP and post-60 Resonance have no designed level cap. Inventory, skills, talents and loadouts are editable in paused field menus; forging and salvage require Hearth.
 
 Completing the campaign opens **Fracture Atlas and attunement**. New expeditions have real branching routes, required Hunt/Breach/Vault objectives and optional guarded caches at any unlocked tier. Required objectives allocate 80% of fixed XP; caches allocate 20%, forfeited if left behind. Completion retains exact gold, Alloy, targeted equipment and frontier/chapter rules. Older seven-group saves keep their original checkpoints.
 

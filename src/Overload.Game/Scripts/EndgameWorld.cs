@@ -16,6 +16,19 @@ public partial class EndgameWorld : Node2D
     private CourtProp coverSprite=null!;
     public bool Assisted { get; private set; }
     public bool ObjectiveReady=>activity!=ActivityFamily.Vault || keystone;
+    public IEnumerable<Rect2> WarningAreas
+    {
+        get
+        {
+            var tick=arena.PlayerState.Tick-entry;
+            foreach(var id in rules)
+            {
+                var rule=WorldLaws.Rules.Single(r=>r.Id==id);
+                if(rule.DamagePercent<=0||tick%rule.Period>rule.WarningTicks+15)continue;
+                foreach(var area in WorldLaws.Areas(id,tick))yield return new(Position+new Vector2(area.X,area.Y),new(area.Width,area.Height));
+            }
+        }
+    }
     public string Hint=>activity==ActivityFamily.Vault&&!keystone?"Vault: defeat guardians, then touch the golden keystone at the exit.":activity==ActivityFamily.Breach?"Breach: break the wardens. Hazard pulses leave the central lane safe.":"Hunt: bring down the marked elite and boss.";
     public void Initialize(Arena owner)
     {
@@ -44,6 +57,8 @@ public partial class EndgameWorld : Node2D
     public void Advance()
     {
         if(!arena.Playing||arena.Paused)return;
+        if(arena.AdventureActive&&rules.Length>0&&arena.WorldZone.Encounters.Any(e=>e.Boss>=0)&&!arena.Enemies.Any(e=>!e.Enemy!.Dead&&e.Enemy.Definition.Role==EnemyRole.Bellkeeper))
+        {Clear();return;}
         var tick=arena.PlayerState.Tick-entry;
         if(activity==ActivityFamily.Vault&&arena.Enemies.All(e=>e.Enemy!.Dead)&&arena.Player.Position.DistanceTo(new(560,192))<=28)keystone=true;
         foreach(var id in rules)
@@ -51,7 +66,11 @@ public partial class EndgameWorld : Node2D
             var rule=WorldLaws.Rules.Single(r=>r.Id==id);
             if(rule.DamagePercent==0 || tick%rule.Period!=rule.WarningTicks)continue;
             foreach(var area in WorldLaws.Areas(id,tick))if(new Rect2(Position+new Vector2(area.X,area.Y),new(area.Width,area.Height)).Grow(arena.Player.Radius).HasPoint(arena.Player.Position))
-                arena.PlayerState.ReceiveHit(Progression.TierScaled(CombatMath.Points(250)*rule.DamagePercent/100,arena.EncounterTier)*(Assisted?50:100)/100,false);
+            {
+                var difficulty=arena.AdventureActive?arena.Character!.State.World!.Adventure!.Difficulty:AdventureDifficulty.Adventurer;
+                var multiplier=difficulty==AdventureDifficulty.Story?65:difficulty==AdventureDifficulty.Veteran?125:100;
+                arena.Effects.HazardHit(Progression.TierScaled(CombatMath.Points(250)*rule.DamagePercent/100,arena.EncounterTier)*(Assisted?50:100)/100*multiplier/100);
+            }
         }
         QueueRedraw();
     }

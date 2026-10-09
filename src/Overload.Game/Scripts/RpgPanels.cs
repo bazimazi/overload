@@ -29,7 +29,7 @@ public partial class ArenaHud
         var row = new HBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill }; row.AddThemeConstantOverride("separation", 6); options.AddChild(row);
         foreach (var entry in new (string Name, Action Open)[] { ("Character", CharacterMenu), ("Arsenal", Inventory), ("Skills", SkillsMenu), ("Talents", TalentsMenu), ("Memories", Bindings), ("Atlas", Fractures) })
         {
-            var b = PanelButton(row, entry.Name, entry.Open, arena.Playing);
+            var b = PanelButton(row, entry.Name, entry.Open, arena.Playing&&(!arena.WorldActive||arena.GraphFracture||entry.Name is "Memories" or "Atlas"));
             if (entry.Name == active) b.AddThemeColorOverride("font_color", gold);
         }
     }

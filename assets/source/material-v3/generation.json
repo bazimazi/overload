@@ -1,0 +1,102 @@
+﻿{
+    "version":  "graphics.2026-10-09",
+    "assets":  [
+                   {
+                       "name":  "earth",
+                       "prompt":  "Use case: stylized-concept. Asset type: seamless square terrain albedo texture for an original dark fantasy top-down action RPG. Primary request: create a production-quality 1024x1024 seamless tiling surface of weathered compact earth, charcoal gravel, slate fragments and sparse dead straw. Orthographic straight down, fills the entire square edge to edge. Small irregular stones embedded into dirt, convincing worn granular material with subtle natural variations, layered hand-painted realism rather than pixel blocks. Muted ash brown / slate gray / olive earth colors, medium-dark values, low contrast, soft neutral diffuse illumination, no cast shadows, no central composition, no vignette, no bright highlights. Flat walkable ground only; tiny debris remains ground texture. All four edges must tile seamlessly. No large rocks, no buildings, no trees, no characters, no distinct road, no UI, no text, no logos. This is an in-game repeating material, not a concept scene.",
+                       "tool":  "built-in image_gen",
+                       "source":  "assets/source/material-v3/earth.png",
+                       "runtime":  "src/Overload.Game/Assets/Materials/earth.png",
+                       "generated":  "C:\\Users\\msynk\\.codex\\generated_images\\01a11f9a-6a50-7450-b0d1-90990b108c22\\exec-af6ef22b-a502-494a-956b-0c4b5efc8937.png",
+                       "pixels":  [
+                                      1254,
+                                      1254
+                                  ],
+                       "mode":  "RGB",
+                       "sha256":  "3c77bdf54b2f2568172ab7efaf2fb98a749e4178b22158a956ab04da23193499"
+                   },
+                   {
+                       "name":  "moss",
+                       "prompt":  "Use case: stylized-concept. Asset type: seamless square terrain albedo texture for an original dark fantasy top-down action RPG. Primary request: create a production-quality 1024x1024 seamless tiling surface of damp forest earth, velvety dark moss, tiny wet pebbles and sparse broken leaves. Orthographic straight down, fills the entire square edge to edge. Rich believable fine material detail with organic moss transitioning into earth, layered hand-painted realism rather than pixel blocks. Muted gray-green / deep olive / slate colors, medium-dark values, low contrast, soft neutral diffuse illumination, no cast shadows, no central composition, no vignette, no bright highlights. Flat walkable ground only. All four edges must tile seamlessly. No large rocks, no buildings, no trees, no water pools, no characters, no distinct road, no UI, no text, no logos. This is an in-game repeating material, not a concept scene.",
+                       "tool":  "built-in image_gen",
+                       "source":  "assets/source/material-v3/moss.png",
+                       "runtime":  "src/Overload.Game/Assets/Materials/moss.png",
+                       "generated":  "C:\\Users\\msynk\\.codex\\generated_images\\01a11f9a-6a50-7450-b0d1-90990b108c22\\exec-1ca4b317-bde7-4ed7-a2d2-e8bd9933e4bf.png",
+                       "pixels":  [
+                                      1254,
+                                      1254
+                                  ],
+                       "mode":  "RGB",
+                       "sha256":  "5252bbfb73690b3f152a2e2d0c0ed3f2a9155a144d249dde12be0faa382e13bb"
+                   },
+                   {
+                       "name":  "stone",
+                       "prompt":  "Use case: stylized-concept. Asset type: seamless square floor albedo texture for an original dark fantasy top-down action RPG. Primary request: create a production-quality 1024x1024 seamless tiling surface of ancient medieval stone flagstones, varied irregular rectangular dark slate slabs, softened chipped edges, worn joints, tiny cracks and restrained traces of dust and moss. Orthographic straight down, fills the entire square edge to edge. Layered hand-painted realistic material detail rather than pixel blocks. Muted neutral gray / warm charcoal / subtle desaturated brown, medium-dark values, low contrast, soft neutral diffuse illumination, no cast shadows, no central composition, no vignette, no bright highlights. Flat walkable paving only. All four edges must tile seamlessly with no outer border. No relief walls, no symbols, no decorations, no furniture, no characters, no UI, no text, no logos. This is an in-game repeating material, not a concept scene.",
+                       "tool":  "built-in image_gen",
+                       "source":  "assets/source/material-v3/stone.png",
+                       "runtime":  "src/Overload.Game/Assets/Materials/stone.png",
+                       "generated":  "C:\\Users\\msynk\\.codex\\generated_images\\01a11f9a-6a50-7450-b0d1-90990b108c22\\exec-9f51cc36-d213-495e-b370-2a7d35c5ceb6.png",
+                       "pixels":  [
+                                      1254,
+                                      1254
+                                  ],
+                       "mode":  "RGB",
+                       "sha256":  "dc5f27b81a794b2614e99cd8a2fdb5e5aa78dfa249ed67df365fd7e0ed8dff10"
+                   },
+                   {
+                       "name":  "scenery",
+                       "prompt":  "Use case: stylized-concept. Asset type: one production sprite atlas for an original dark fantasy top-down action RPG. Primary request: a 4 column by 3 row sprite sheet, exactly equal cells on a 1024x768 transparent canvas, one isolated object centered in each cell with generous 24-pixel empty padding. Camera: consistent orthographic oblique top-down view at 50 degrees above ground, see front and top, no perspective vanishing point. Detailed hand-painted realistic game sprites with crisp clean silhouettes, subdued natural materials, neutral soft light from upper left. Row 1 left to right: rugged slate boulder, low mossy boulder, shattered medieval stone pillar, clustered broken masonry rubble. Row 2 left to right: wind-shaped dark conifer tree, bare charred gnarled tree, small cluster of marsh reeds, sparse dry grass clump. Row 3 left to right: iron brazier with small amber flame, weathered wooden supply crates, leaning broken wooden cart wheel, battered medieval stone shrine. Each whole object entirely fits inside its cell; no overlapping cells, no grid lines, no labels, no lettering, no ground plane, no baked ground shadow. Tree trunk foot at bottom center of the cell, foliage contained inside its own cell. Actual transparent alpha around every sprite, no fake checkerboard. Original artwork, no characters or recognizable franchise assets.",
+                       "tool":  "built-in image_gen",
+                       "source":  "assets/source/material-v3/scenery.png",
+                       "runtime":  "src/Overload.Game/Assets/Materials/scenery.png",
+                       "generated":  "C:\\Users\\msynk\\.codex\\generated_images\\01a11f9a-6a50-7450-b0d1-90990b108c22\\exec-50668b2b-1ae0-4fcf-b5eb-f60dfd560fef.png",
+                       "pixels":  [
+                                      1448,
+                                      1086
+                                  ],
+                       "mode":  "RGBA",
+                       "transparentPixels":  944117,
+                       "columns":  4,
+                       "rows":  3,
+                       "sha256":  "291649207e6c0e05aa2d329ae90ecf9656ff991cc76d856aa8b9cac0b56161ac"
+                   },
+                   {
+                       "name":  "villagers",
+                       "prompt":  "Use case: stylized-concept. Asset type: transparent NPC sprite atlas for an original dark fantasy top-down action RPG. Create a 1536x512 image divided into exactly three equal square 512x512 cells in one horizontal row. One isolated full-body NPC per cell, centered, feet at the same lower baseline, generous transparent padding. Three-quarter overhead game camera view, facing southeast, camera elevated about 45 degrees. Detailed hand-painted realistic sprite art, muted medieval materials, soft light from upper left, strong distinct silhouette, legible when scaled to 80 pixels high. Left cell: Mara, a female middle-aged blacksmith and engineer wearing rugged brown leather apron over charcoal clothes, rust-orange scarf, rolled sleeves, tool belt, holding a small hammer, no weapon or armor. Middle: Iven, a lean male courier in an ivory hood and dusty moss-green traveling cloak, leather satchel across chest, standing relaxed, no weapon or armor. Right: Sen, an elderly female archivist with gray hair in a bun, long burgundy and cream robes, holding a closed book and a lantern, no weapon or armor. Exactly three figures; no companion, no scenery, no floor, no ground shadow, no backdrop, no text, no grid lines, no symbols, no labels, no UI. True transparent background including all spaces between limbs. Original designs, no existing franchise characters. Do not crop any part of a person.",
+                       "tool":  "built-in image_gen",
+                       "source":  "assets/source/material-v3/villagers.png",
+                       "runtime":  "src/Overload.Game/Assets/Materials/villagers.png",
+                       "generated":  "C:\\Users\\msynk\\.codex\\generated_images\\01a11f9a-6a50-7450-b0d1-90990b108c22\\exec-6cbfe112-2504-453c-90be-d4979f6d5856.png",
+                       "pixels":  [
+                                      2172,
+                                      724
+                                  ],
+                       "mode":  "RGBA",
+                       "grid":  [
+                                    3,
+                                    1
+                                ],
+                       "frames":  "src/Overload.Game/Assets/Materials/villagers.frames.json",
+                       "sha256":  "a6054af42563d918e11b1dd459897f1220811b06adef215dc0afa5d856656460"
+                   },
+                   {
+                       "name":  "settlement",
+                       "prompt":  "Use case: stylized-concept. Asset type: transparent scenery sprite atlas for an original dark fantasy overhead action RPG. Create a 1024x1024 sheet arranged as an exact two by two grid of equal square cells. Four distinct isolated complete buildings, one centered in each square with generous fully transparent space between them. Consistent three-quarter elevated overhead game camera at 45 degrees, fronts face southeast, soft diffuse upper-left light, hand-painted material realism, weathered stone and timber, dark muted earth colors with small warm amber light accents. Top left: modest surviving village blacksmith shop, squat stone cottage, dark slate roof, open forge entrance glowing amber, a chimney, timber supports, anvil beside entrance. Top right: courier supply depot, squat timber and stone caravan shelter with a faded moss-green cloth awning, crates neatly beside entrance, roof and front visible. Bottom left: small ruined archive chapel, weathered stone, narrow arched entry, torn burgundy banner, broken slate roof, a lamp. Bottom right: survivor camp shelter, low timber frame and beige canvas roof, stacked supplies, small amber lantern. Each is a compact believable built structure suitable to draw at 280 pixels wide in a game, its entire roof and base visible. No people, no animals, no ground plane, no landscape, no broad cast shadow, no surrounding walls beyond the building, no text or signs with lettering, no labels, no grid, no UI, no logos. True transparent background around every structure. Original art, no recognizable franchise building.",
+                       "tool":  "built-in image_gen",
+                       "source":  "assets/source/material-v3/settlement.png",
+                       "runtime":  "src/Overload.Game/Assets/Materials/settlement.png",
+                       "generated":  "C:\\Users\\msynk\\.codex\\generated_images\\01a11f9a-6a50-7450-b0d1-90990b108c22\\exec-c57f6291-20fc-4c57-9389-d00280f36f07.png",
+                       "pixels":  [
+                                      1254,
+                                      1254
+                                  ],
+                       "mode":  "RGBA",
+                       "grid":  [
+                                    2,
+                                    2
+                                ],
+                       "frames":  "src/Overload.Game/Assets/Materials/settlement.frames.json",
+                       "sha256":  "587076f79bf6a1f4319e9520da049728f86dc1fe8c7dd070a84f19d3c0cd01f2"
+                   }
+               ]
+}

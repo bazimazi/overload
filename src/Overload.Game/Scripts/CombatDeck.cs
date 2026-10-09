@@ -25,12 +25,12 @@ public partial class ArenaHud
     {
         var w=Size.X;var h=Size.Y;var s=arena.PlayerState;
         var title=arena.WorldActive?arena.WorldZone.Name:arena.RewriteLessonActive?"The Memory Chamber":arena.JourneyActive?arena.JourneyName:arena.PracticeTier is not null?"Fracture practice":"The Broken Court";
-        var objective=arena.RewriteLessonActive?arena.RewriteLessonTitle:arena.Objective;
+        var objective=arena.AdventureObjective?.Instruction??(arena.RewriteLessonActive?arena.RewriteLessonTitle:arena.Objective);
         var cardWidth=Math.Min(370,w*.43f);
         Surface(new(18,18,cardWidth,86),new Color("645947"),.88f);
         DrawLine(new(19,20),new(19,102),gold,2);
         Write(new(32,40),Fit(title.ToUpperInvariant(),cardWidth-28,17),17,gold);
-        Write(new(32,62),Fit(arena.RewriteLessonActive?"PRACTICE / "+(arena.RewriteLessonStep+1)+" OF 6":arena.WorldActive?Arena.RegionName(arena.WorldZone.Region).ToUpperInvariant():"THE PALIMPSEST",cardWidth-28,10),10,muted);
+        Write(new(32,62),Fit(arena.RewriteLessonActive?"PRACTICE / "+(arena.RewriteLessonStep+1)+" OF 6":arena.FrontierActive?"ENDLESS FRONTIER / DANGER "+CounterText.Short(arena.EncounterTier):arena.WorldActive&&arena.WorldZone.Kind=="hearth"?"SAFE STARTING ZONE":arena.WorldActive?Arena.RegionName(arena.WorldZone.Region).ToUpperInvariant():"THE PALIMPSEST",cardWidth-28,10),10,muted);
         Write(new(32,86),Fit(objective.Contains(" / ")?objective[(objective.IndexOf(" / ",StringComparison.Ordinal)+3)..]:objective,cardWidth-28,12),12,ink);
         if(arena.WorldActive)DrawWorldCompass();
         else
@@ -40,11 +40,12 @@ public partial class ArenaHud
             Write(new(w-164,62),$"{arena.Enemies.Count(e=>!e.Enemy!.Dead)} HOSTILES",12,gold);
         }
         DrawTargetPlate();
+        DrawAdventureGuidance();
         if(s.ElsewhereActive||s.RedCovenantActive)
         {
             var text=s.ElsewhereActive?s.Anchor is {} anchor?$"RETURN ANCHOR · {(anchor.ExpiresAt-s.Tick)/60f:0.0}s":"ELSEWHERE · EVADE → PLACE / RETURN":$"RED COVENANT · FOCUS → LIFE · {s.ReservedPermille/10f:0.#}% RESERVED";
-            Write(new(32,124),"OVERRIDE",10,violet);
-            Write(new(32,144),Fit(text,Math.Min(430,w*.55f),12),12,ink);
+            Write(new(32,159),"OVERRIDE",10,violet);
+            Write(new(32,179),Fit(text,Math.Min(370,w*.43f)-28,12),12,ink);
         }
         var bossBody=arena.Enemies.FirstOrDefault(e=>!e.Enemy!.Dead&&e.Enemy.Definition.Role==EnemyRole.Bellkeeper);
         if(bossBody is not null)
@@ -62,7 +63,7 @@ public partial class ArenaHud
             var alpha=Math.Clamp(arena.ArrivalTime/.7f,0,1)*Math.Clamp((2.6f-arena.ArrivalTime)/.3f,0,1);
             CenterWrite(new(w/2,h*.34f),arena.ArrivalTitle.ToUpperInvariant(),24,new Color(gold,alpha));
         }
-        if(dispatchTime>0&&!MenuVisible)
+        if(dispatchTime>0&&!MenuVisible&&!arena.AdventureToastVisible&&!arena.PortalChanneling&&!arena.HazardUnderfoot)
         {
             var alpha=Math.Min(1,dispatchTime*3);
             var y=arena.RewriteLessonActive?h-188:h-211;
@@ -79,7 +80,7 @@ public partial class ArenaHud
             CenterWrite(new(w/2,h-187),Fit(arena.CombatLesson,w-60,11),11,gold);
         if(arena.CombatNoticeTime>0&&!MenuVisible)
             CenterWrite(new(w/2,h-176),Fit(arena.CombatNotice,w-60,12),12,ember);
-        if(arena.WorldActive&&!MenuVisible)
+        if(arena.WorldActive&&!MenuVisible&&arena.CombatNoticeTime<=0)
             CenterWrite(new(w/2,h-176),Fit(arena.WorldPrompt,w-60,12),12,gold);
         DrawCombatDeck();
         if(s.Life*4<s.MaximumLife&&!s.Dead)
@@ -119,7 +120,8 @@ public partial class ArenaHud
             var id=ids[i];var rect=ActionSlotRect(i);var cd=s.Cooldown(id);
             var prediction=arena.Predictions.GetValueOrDefault(id)?.Selection;
             var overloaded=prediction?.Accepted==true&&prediction.Implementation!=ActionImplementation.Base;
-            var active=s.Action?.Definition.Id==id;var color=overloaded?teal:active?gold:new Color("67604f");
+            var surged=s.CombatRhythmEnabled&&s.SurgeCharges==3&&i is >0 and <4&&arena.Balance.Skills.Single(k=>k.Id==id).Damage>0;
+            var active=s.Action?.Definition.Id==id;var color=surged?gold:overloaded?teal:active?gold:new Color("67604f");
             Surface(rect,color,.93f);
             if(overloaded)DrawRect(rect.Grow(-2),new Color(teal,.07f));
             var center=rect.GetCenter();
@@ -140,9 +142,16 @@ public partial class ArenaHud
             var label=overloaded?prediction!.Implementation.ToString():id==SkillId.Traverse&&s.ElsewhereActive?s.Anchor is null?"Place anchor":"Return":SkillName(id);
             CenterWrite(new(center.X,rect.Position.Y+79),Fit(label,rect.Size.X-8,10),10,overloaded?teal:ink);
             var skill=arena.Balance.Skills.Single(k=>k.Id==id);
-            var cost=cd>0?$"{cd/60f:0.0}s":id==SkillId.Flask?$"{s.FlaskCharges} flasks":overloaded?$"+{prediction!.StrainCost/1000} strain":s.RedCovenantActive&&skill.FocusCost>0?$"{skill.FocusCost*.4f:0.#}% Life":skill.FocusCost==0?"Ready":$"{skill.FocusCost} Focus";
+            var cost=cd>0?$"{cd/60f:0.0}s":id==SkillId.Flask?$"{s.FlaskCharges} flasks":surged?"SURGE +50%":i==0&&s.CombatRhythmEnabled&&!s.RedCovenantActive?"+8 Focus / hit":overloaded?$"+{prediction!.StrainCost/1000} strain":s.RedCovenantActive&&skill.FocusCost>0?$"{skill.FocusCost*.4f:0.#}% Life":skill.FocusCost==0?"Ready":$"{skill.FocusCost} Focus";
             CenterWrite(new(center.X,rect.Position.Y+93),Fit(cost,rect.Size.X-8,9),9,muted);
             if(cd>0&&skill.Cooldown>0)Bar(new(rect.Position.X+5,rect.End.Y-4,rect.Size.X-10,2),1-Math.Min(1,cd/(float)skill.Cooldown),gold);
+        }
+        if(s.CombatRhythmEnabled)
+        {
+            var x=left+8;var y=h-164;
+            for(var i=0;i<3;i++)DrawCircle(new(x+i*12,y),3,i<s.SurgeCharges?gold:new Color("39342a"));
+            Write(new(x+38,y+4),s.SurgeCharges==3?"SURGE READY":$"SURGE {s.SurgeCharges}/3",9,s.SurgeCharges==3?gold:muted);
+            if(s.SurgeCharges>0)Bar(new(x,y+7,105,2),s.SurgeRemainingTicks/360f,gold);
         }
         DrawReservoir(new(left-73,h-68),shownLife,new("b52332"),"LIFE",CombatMath.BarBasisPoints(s.Life,s.MaximumLife)/100+"%");
         DrawReservoir(new(right+72,h-68),s.RedCovenantActive?1-s.ReservedPermille/1000f:shownFocus,s.RedCovenantActive?violet:new("286ab5"),s.RedCovenantActive?"CAPACITY":"FOCUS",s.RedCovenantActive?$"{s.ReservedPermille/10f:0}%":$"{s.Focus/1000}");

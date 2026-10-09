@@ -7,6 +7,7 @@ namespace Overload.Game;
 public static class RpgTheme
 {
     public static readonly Color Gold = new("c5a46a"), Ink = new("e8dfcd"), Muted = new("a49d90");
+    public static Color GearColor(GearItem item)=>item.Band switch {1=>Ink,2=>new("80bfff"),3=>new("f0d58a"),4=>new("bd9af2"),_=>new("ffb752")};
     public static Font Heading => heading ??= GD.Load<Font>("res://Assets/Fonts/Cinzel.ttf");
     private static Font? heading;
     private static Texture2D? icons;

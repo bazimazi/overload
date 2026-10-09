@@ -11,6 +11,7 @@ public partial class Arena
     private string? trackedWorldId;
     private System.Numerics.Vector2[] guidancePath=[];
     private long nextGuidanceTick;
+    private WorldTarget? worldPin;
     public WorldTarget? WorldDestination { get; private set; }
     public IReadOnlyList<System.Numerics.Vector2> GuidancePath=>guidancePath;
     public bool WorldCellKnown(Vector2 p)
@@ -23,16 +24,23 @@ public partial class Arena
     public IEnumerable<WorldTarget> KnownWorldTargets()
     {
         if(!WorldActive)yield break;
-        foreach(var exit in WorldZone.Exits.Where(e=>WorldCellKnown(V(e.Position))))
+        foreach(var exit in WorldZone.Exits.Where(e=>WorldCellKnown(V(e.Position))&&(GraphFracture||WorldRules.ExitOpen(Character!.State.World!,e))))
             yield return new("exit:"+exit.Id,exit.Name,V(exit.Position),"exit");
-        foreach(var site in WorldZone.Sites.Where(s=>WorldCellKnown(V(s.Position))&&s.Kind is "refuge" or "waypoint" or "device" or "cache" or "lore"))
-            if((GraphFracture||WorldRules.Satisfied(Character!.State.World!,site.Requires)||site.Kind=="refuge")&&!WorldClaims.Contains(site.Id))
+        foreach(var site in WorldZone.Sites.Where(s=>WorldCellKnown(V(s.Position))&&s.Kind is "refuge" or "waypoint" or "device" or "cache" or "lore" or "npc"))
+            if((GraphFracture||WorldRules.Satisfied(Character!.State.World!,site.Requires)||site.Kind=="refuge")&&(!WorldClaims.Contains(site.Id)||site.Kind is "waypoint" or "refuge"))
                 yield return new(site.Id,site.Name,V(site.Position),site.Kind);
+        if(worldPin is not null)yield return worldPin;
+        foreach(var loot in NearbyLoot.Where(d=>WorldCellKnown(V(d.Position))))yield return new("loot:"+loot.Item.Id,loot.Item.Name,V(loot.Position),"cache");
     }
     public void TrackWorldTarget(string id)
     {
         if(!KnownWorldTargets().Any(t=>t.Id==id))return;
         trackedWorldId=id;nextGuidanceTick=0;AdvanceWorldNavigation();
+    }
+    public bool PinWorldLocation(Vector2 point)
+    {
+        if(!WorldActive||!WorldCellKnown(point)||!WorldNavigation.Clear(new(point.X,point.Y),new(point.X,point.Y),Player.Radius))return false;
+        worldPin=new("map.pin","Your map pin",point,"pin");TrackWorldTarget(worldPin.Id);return true;
     }
     public void CycleWorldTarget()
     {
@@ -45,6 +53,13 @@ public partial class Arena
     private WorldTarget? MainWorldTarget()
     {
         var z=WorldZone;
+        var quest=GuidedAdventureTarget();if(quest is not null)return quest;
+        if(FrontierActive)
+        {
+            var camp=z.Sites.Single(s=>s.Kind=="waypoint");
+            return !WorldClaims.Contains(camp.Id)?new(camp.Id,camp.Name,V(camp.Position),"waypoint")
+                :new("exit:onward","Uncharted wilderness",V(z.Exits.Single(e=>e.Id=="onward").Position),"exit");
+        }
         if(GraphFracture)
         {
             var map=Character!.State.Fracture!.Map!;
@@ -67,7 +82,7 @@ public partial class Arena
         }
         var exit=z.Kind switch
         {
-            "hearth"=>z.Exits.FirstOrDefault(e=>WorldRules.ExitOpen(w,e)&&!w.Resolved.Contains(WorldContent.Zone(e.Destination).Region)),
+            "hearth"=>z.Exits.FirstOrDefault(e=>!FrontierWorld.TryDepth(e.Destination,out _)&&WorldRules.ExitOpen(w,e)&&!w.Resolved.Contains(WorldContent.Zone(e.Destination).Region))??z.Exits.FirstOrDefault(e=>e.Id=="frontier"),
             "wild"=>z.Exits.FirstOrDefault(e=>e.Id==(!w.Claims.Contains(WorldContent.Id(z.Region,1)+".boss")?"enforcer":w.Resolved.Contains(z.Region)?"home":"dungeon")),
             "dungeon"=>z.Exits.FirstOrDefault(e=>e.Id==(WorldRules.Satisfied(w,WorldContent.Id(z.Region,2)+".ready")?"ruler":"return")),
             _=>z.Exits.FirstOrDefault()
@@ -85,7 +100,7 @@ public partial class Arena
         guidancePath=waypoints.Length==0?[]:[from,..waypoints];
     }
     private void ResetWorldNavigation()
-    {trackedWorldId=null;WorldDestination=null;guidancePath=[];nextGuidanceTick=0;engagedWorldActors.Clear();}
+    {trackedWorldId=null;worldPin=null;WorldDestination=null;guidancePath=[];nextGuidanceTick=0;engagedWorldActors.Clear();}
     private bool EngagedEnemy(ActorBody actor)=>!WorldActive||actor.Enemy!.Dead||engagedWorldActors.Contains(actor.ActorId);
     private bool HasEngagedEnemies=>Enemies.Any(e=>!e.Enemy!.Dead&&EngagedEnemy(e));
     private void AdvanceWorldEngagement()

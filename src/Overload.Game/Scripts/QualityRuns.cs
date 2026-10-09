@@ -24,7 +24,7 @@ public partial class Arena
     private readonly List<double> qualityFrames = [];
     private readonly List<object> qualityMemory = [];
     private readonly Dictionary<string,List<double>> qualityStages=[];
-    public long QualityTimestamp => qualityMode is "perf" or "ordinary" ? Stopwatch.GetTimestamp() : 0;
+    public long QualityTimestamp => qualityMode is "perf" or "ordinary" || worldQualityClock.IsRunning&&!worldSoak ? Stopwatch.GetTimestamp() : 0;
     public void RecordQualityStage(string name,long began)
     {
         if(began==0)return;
@@ -87,7 +87,7 @@ public partial class Arena
         var p95 = Percentile(.95); var p99 = Percentile(.99);
         WriteQuality(mode=="perf"?"performance.json":"ordinary-performance.json", new { seconds = qualitySeconds, warmupSeconds = 30, samples = qualityFrames.Count, p50Ms = Percentile(.5), p95Ms = p95, p99Ms = p99,
             targetPassed = p95 <= 16.7 && p99 < 25, renderer = RenderingServer.GetVideoAdapterName(), backend = RenderingServer.GetCurrentRenderingMethod(),
-            output = DisplayServer.WindowGetSize().ToString(), world = "640x360", vsync = "Disabled",fpsCap=Engine.MaxFps, enemies = Enemies.Count, projectileCapacity = 200, seed = 42,
+            output = DisplayServer.WindowGetSize().ToString(), world = "1280x720 raster / 640x360 world units", vsync = "Disabled",fpsCap=Engine.MaxFps, enemies = Enemies.Count, projectileCapacity = 200, seed = 42,
             overloadActions=qualitySignatures,peakStrainSubunits=qualityPeakStrain,
             stages=QualityStageSummary(),
             peakWorkingSetBytes = Process.GetCurrentProcess().PeakWorkingSet64, note = "Rendered frame intervals measured with Stopwatch. Stress supplies/effects/memory evidence are isolated fixture grants with normal authority caps. Ground effects and echo are combined to stress both implementations. Loot is awarded at checkpoints; there are no live floor pickups. This is not a player encounter." });

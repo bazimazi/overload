@@ -7,7 +7,7 @@ public sealed record ReturnAnchor(Vector2 Position, string RoomId, long ExpiresA
 
 public sealed class ActionExecution(SkillDefinition definition, long id, long startedAt, Vector2 aim, SourceKind source = SourceKind.BasePlayerAction,
     ActionImplementation implementation = ActionImplementation.Base, string? selectedDefinitionId = null, Vector2 origin = default,
-    ImmutableArray<MemoryToken> consumedMemories = default, Vector2? destination = null, TraversePhase traversal = TraversePhase.Standard)
+    ImmutableArray<MemoryToken> consumedMemories = default, Vector2? destination = null, TraversePhase traversal = TraversePhase.Standard, int damagePercent = 100)
 {
     public SkillDefinition Definition { get; } = definition;
     public long RootActionId { get; } = id;
@@ -19,6 +19,7 @@ public sealed class ActionExecution(SkillDefinition definition, long id, long st
     public Vector2 Origin { get; } = origin;
     public Vector2? Destination { get; } = destination;
     public TraversePhase Traversal { get; } = traversal;
+    public int DamagePercent { get; } = damagePercent;
     public ImmutableArray<MemoryToken> ConsumedMemories { get; } = consumedMemories.IsDefault ? [] : consumedMemories;
     public bool Emitted { get; set; }
     public HashSet<int> Victims { get; } = [];
@@ -28,19 +29,19 @@ public sealed class ActionExecution(SkillDefinition definition, long id, long st
 }
 
 /// <summary>Only this authority spends resources and advances the player's action clock.</summary>
-public sealed class PlayerCombat
+public sealed partial class PlayerCombat
 {
-    private readonly BalanceProfile balance;
+    private BalanceProfile balance;
     private readonly IActionPreflight preflight;
     private readonly object planOwner = new();
     private long revision;
     private long? lastOverloadTick;
     private long? outsideCombatSince;
     private int strainRemainder;
-    private readonly BigInteger damageScale;
-    private readonly BigInteger grade;
+    private BigInteger damageScale;
+    private BigInteger grade;
     private readonly BigInteger encounterTier;
-    private readonly bool quietRest;
+    private bool quietRest;
     private readonly Dictionary<SkillId, long> readyAt = [];
     private long nextActionId;
     private int focusRemainder;
@@ -83,6 +84,7 @@ public sealed class PlayerCombat
         Memories = new(profile.Memories);
         damageScale = 50 + (character?.Might ?? 0); quietRest = character?.Inscriptions.Contains("quiet-rest") == true;
         grade = character?.AttunementGrade ?? 1; encounterTier = tier ?? 1;
+        CombatRhythmEnabled = character?.World?.Adventure is not null;
         if (encounterTier < 1) throw new ArgumentOutOfRangeException(nameof(tier));
         UnreservedMaximumLife = EndlessRules.PlayerAmount(CombatMath.Points(profile.Hero.Life), character?.Resolve ?? 0, grade);
         Reset();
@@ -93,8 +95,20 @@ public sealed class PlayerCombat
         Reset();
         if(!rest){Life=BigInteger.Min(life,MaximumLife);Focus=Math.Min(focus,MaximumFocus);FlaskCharges=flasks;}
     }
+    /// <summary>Rebuild gear and progression without resetting the combat clock, resources or action identity.</summary>
+    public void Reconfigure(BalanceProfile profile, CharacterState character)
+    {
+        balance = profile with { Skills = [..profile.Skills], Enemies = [..profile.Enemies] };
+        damageScale = 50 + character.Might; grade = character.AttunementGrade;
+        quietRest = character.Inscriptions.Contains("quiet-rest");
+        UnreservedMaximumLife = EndlessRules.PlayerAmount(CombatMath.Points(profile.Hero.Life), character.Resolve, grade);
+        Life = BigInteger.Min(Life, MaximumLife); Focus = Math.Min(Focus, MaximumFocus);
+        // Executing actions retain the definition committed at their start. Future actions use the new build.
+        revision++;
+    }
     public void Reset()
     {
+        ResetCombatRhythm();
         reservations.Clear(); PeakReservation=0; HealedUnderReservation=false;
         Life = MaximumLife; Barrier = 0; BarrierExpiresAt = 0; Focus = MaximumFocus; FlaskCharges = balance.Hero.FlaskCharges;
         Tick = 0; Action = null; readyAt.Clear(); healTotal = 0; healAge = 0; focusRemainder = 0;
@@ -108,6 +122,7 @@ public sealed class PlayerCombat
     {
         if (Dead) return;
         Tick++;
+        if (Tick >= surgeExpiresAt) SurgeCharges = 0;
         reservations.RemoveAll(r=>r.ExpiresAt<=Tick);
         if (Tick >= BarrierExpiresAt) Barrier = 0;
         revision++;
@@ -156,7 +171,7 @@ public sealed class PlayerCombat
             definition = definition with { ContentId = Anchor is null ? "action.elsewhere.place" : "action.elsewhere.swap",
                 Windup = 0, Active = Anchor is null ? 9 : 7, Recovery = 0, Cooldown = Anchor is null ? 24 : 150, Capabilities = ActionCapabilities.None };
         failure ??= Dead ? "You have fallen" : Cooldown(intent.Skill) > 0 ? "Cooling down"
-            : Action is { } old && !CanCancel(old, intent.Skill == SkillId.Traverse) ? "Action committed"
+            : Action is { } old && !CanCancel(old, intent.Skill is SkillId.Traverse or SkillId.Flask) ? "Action committed"
             : RedCovenantActive && !CanReserve(definition.FocusCost) ? "Life reservation would exceed 40% or leave less than 1 Life"
             : !RedCovenantActive && Focus < definition.FocusCost * 1000 ? "Not enough Focus"
             : intent.Skill == SkillId.Flask && (FlaskCharges == 0 || healAge < balance.Hero.FlaskTicks && healTotal > 0) ? "Flask unavailable" : null;
@@ -184,7 +199,8 @@ public sealed class PlayerCombat
             : selected.Implementation==ActionImplementation.Cascade ? fresh.Skill with { Windup=21,Active=1 } : fresh.Skill;
         var execution = new ActionExecution(executedSkill, nextActionId + 1, Tick, plan.Intent.Aim, selected.Source,
             selected.Implementation, selected.DefinitionId, fresh.World.Origin, selected.Tokens, fresh.World.For(selected.Implementation).Destination,
-            ElsewhereActive && plan.Intent.Skill == SkillId.Traverse ? Anchor is null ? TraversePhase.AnchorPlace : TraversePhase.AnchorSwap : TraversePhase.Standard);
+            ElsewhereActive && plan.Intent.Skill == SkillId.Traverse ? Anchor is null ? TraversePhase.AnchorPlace : TraversePhase.AnchorSwap : TraversePhase.Standard,
+            CombatRhythmEnabled && SurgeCharges == 3 && fresh.Skill.FocusCost > 0 && fresh.Skill.Damage > 0 ? 150 : 100);
         if (!Memories.TryConsume(selected.Tokens)) return Reject("Memory changed; choose again");
         if(RedCovenantActive && fresh.Skill.FocusCost>0)
         {
@@ -197,6 +213,7 @@ public sealed class PlayerCombat
         if (selected.Implementation != ActionImplementation.Base) { lastOverloadTick = Tick; strainRemainder = 0; }
         readyAt[plan.Intent.Skill] = Tick + selected.CooldownTicks;
         nextActionId++; Action = execution; revision++; LastSelection = selected;
+        CommitCombatRhythm(execution);
         if (execution.Traversal == TraversePhase.AnchorPlace) pendingAnchor = (fresh.World.Origin, fresh.World.RoomId, Tick + 9);
         if (execution.Traversal == TraversePhase.AnchorSwap) Anchor = null;
         if (plan.Intent.Skill == SkillId.Flask)
@@ -242,6 +259,7 @@ public sealed class PlayerCombat
     private bool CanCancel(ActionExecution action, bool evade)
     {
         if (action.Definition.Id is SkillId.Traverse or SkillId.Flask) return false;
+        if(evade&&action.Definition.Id is SkillId.Cleave or SkillId.Needle or SkillId.ShardShot)return true;
         var age = action.Age(Tick);
         return age >= action.Definition.Windup + action.Definition.Active + 6
             || evade && age < action.Definition.Windup - 3;
@@ -273,7 +291,7 @@ public sealed class PlayerCombat
         var absorbed = BigInteger.Min(Barrier, damage); Barrier -= absorbed; damage -= absorbed;
         Life = BigInteger.Max(0, Life - damage);
         revision++;
-        if (Dead) { reservations.Clear(); Action = null; Barrier = 0; Anchor = null; pendingAnchor = null; healTotal = 0; Strain = 0; strainRemainder = 0; lastOverloadTick = null; LastReason = "Fallen"; SetCombatActive(false); Memories.Clear(MemoryClearReason.Death); }
+        if (Dead) { ResetCombatRhythm(); reservations.Clear(); Action = null; Barrier = 0; Anchor = null; pendingAnchor = null; healTotal = 0; Strain = 0; strainRemainder = 0; lastOverloadTick = null; LastReason = "Fallen"; SetCombatActive(false); Memories.Clear(MemoryClearReason.Death); }
         return true;
     }
     private bool Reject(string reason) { LastReason = reason; return false; }

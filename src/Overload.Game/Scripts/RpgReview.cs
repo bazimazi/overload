@@ -21,10 +21,11 @@ public partial class Arena
         }
         try
         {
+            GetWindow().Size=new(1280,720);await Frames(4);
             ReturnToTitle();
             Check(UpdateCharacter(s=>WorldRules.Enroll(FoundationRules.AddXp(FrameRules.Create(FrameId.Warden),Progression.TotalXp(30))) with {CharacterId=s.CharacterId,Gold=5000,Alloy=500}),"isolated level-30 Standard profile");
             ReturnToTitle();await Shot("hearth");
-            foreach(var view in new[]{"arsenal","item","character","skills","talents","memories","loadout","oaths","settings","atlas","frames"})
+            foreach(var view in new[]{"quickstart","services","arsenal","item","character","skills","talents","memories","loadout","oaths","settings","atlas","frames"})
             {Hud.ShowRpgPanel(view);await Shot(view);}
             Hud.ShowRpgPanel("arsenal");
             Check(Hud.RpgInventoryItemButtons()==6,"six real inventory items have selectable artwork");
@@ -39,8 +40,8 @@ public partial class Arena
                 foreach(var text in new[]{100,125})
                 {
                     if(Audio.TextPercent!=text)Audio.ToggleText();
-                    foreach(var view in new[]{"arsenal","item","talents","skills","character","frames"})
-                    {Hud.ShowRpgPanel(view);await Shot($"{view}-{size.X}-{text}");}
+                    foreach(var view in new[]{"quickstart","services","arsenal","item","talents","skills","character","frames"})
+                    {Hud.ShowRpgPanel(view);await Shot($"{view}-{size.X}-{text}");if(view is "skills" or "frames")Check(Hud.RpgFocusedActionVisible(),$"{view} primary action is visible and usable at {size.X} / {text}% text");}
                 }
             }
             if(rendered)DisplayServer.WindowSetSize(new(1280,720));if(Audio.TextPercent!=100)Audio.ToggleText();await Frames(8);
@@ -49,7 +50,7 @@ public partial class Arena
             if(rendered){await Frames(4);await ToSignal(RenderingServer.Singleton,RenderingServer.SignalName.FramePostDraw);using var image=GetViewport().GetTexture().GetImage();image.SavePng(System.IO.Path.Combine(directory,"local-map.png"));}
             LocalMapVisible=false;ReturnToTitle();StartEncounter(2);
             PlayerState.ChangeMaximumLife(BigInteger.Pow(10,20));PlayerState.Reset();Player.Position=new(300,220);Player.TeleportVisual();
-            var original=Player.Position;Controls.Observe(new InputEventMouseMotion {Position=worldContainer.Position+(new Godot.Vector2(185,265)-CameraOrigin)*worldContainer.Scale});BeginPointerTravel();
+            var original=Player.Position;Controls.Observe(new InputEventMouseMotion {Position=worldContainer.Position+(new Godot.Vector2(185,265)-CameraOrigin)*WorldScale});BeginPointerTravel();
             Check(PointerDestination is not null,"mouse destination routes through the actual navigation");
             await Frames(75);Check(Player.Position.DistanceTo(original)>40,"pointer travel moves the real collision body");
             Input.ActionPress("move_right");await Frames(3);Input.ActionRelease("move_right");Check(PointerDestination is null,"keyboard movement cancels mouse travel");
@@ -66,7 +67,7 @@ public partial class Arena
                 StartWorld();
                 foreach(var region in Enum.GetValues<Region>())
                 {
-                    WorldTransaction("rpg.scenery:"+Guid.NewGuid(),s=>WorldRules.Enter(s,WorldContent.Id(region,0),new(1260,290)));EnterWorldZone(true);
+                    WorldTransaction("rpg.scenery:"+Guid.NewGuid(),s=>WorldRules.Enter(s,WorldContent.Id(region,0),new(3780,870)));EnterWorldZone(true);
                     PlayerState.ChangeMaximumLife(BigInteger.Pow(10,20));PlayerState.Reset();await Frames(15);Paused=true;ArrivalTime=0;Hud.HideMenu();
                     await ToSignal(RenderingServer.Singleton,RenderingServer.SignalName.FramePostDraw);using var image=GetViewport().GetTexture().GetImage();image.SavePng(System.IO.Path.Combine(directory,"world-"+region+".png"));
                     Paused=false;
@@ -89,11 +90,19 @@ public partial class ArenaHud
             case "character":CharacterMenu();break;case "skills":SkillsMenu();break;case "talents":TalentsMenu();break;
             case "memories":Bindings();break;case "loadout":LoadoutMenu();break;case "oaths":Oaths();break;
             case "settings":Settings();break;case "atlas":Fractures();break;case "frames":NewFrameMenu();break;
+            case "quickstart":QuickStart();break;case "services":TownServices();break;
         }
     }
     private IEnumerable<Node> PanelDescendants(Node node)
     {foreach(var child in node.GetChildren()){yield return child;foreach(var descendant in PanelDescendants(child))yield return descendant;}}
     public int RpgInventoryItemButtons()=>PanelDescendants(options).OfType<Button>().Count(b=>b.TooltipText.Contains("Quality",StringComparison.Ordinal));
+    public bool RpgFocusedActionVisible()
+    {
+        var focus=GetViewport().GuiGetFocusOwner();
+        var valid=focus is Button {Disabled:false}&&GetGlobalRect().Encloses(focus.GetGlobalRect())&&scroll.GetGlobalRect().Encloses(focus.GetGlobalRect());
+        if(!valid)GD.Print($"RPG FOCUS: control={focus?.Name} rect={focus?.GetGlobalRect()} viewport={GetGlobalRect()} scroll={scroll.GetGlobalRect()} offset={scroll.ScrollVertical}");
+        return valid;
+    }
     public void LearnRpgTalent()=>PanelDescendants(options).OfType<Button>().First(b=>!b.Disabled&&b.TooltipText.Contains("+5% damage",StringComparison.Ordinal)).EmitSignal(Button.SignalName.Pressed);
     public void TrainRpgSkill()=>PanelDescendants(options).OfType<Button>().First(b=>!b.Disabled&&b.Text.StartsWith("Train",StringComparison.Ordinal)).EmitSignal(Button.SignalName.Pressed);
 }

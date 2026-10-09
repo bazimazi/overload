@@ -25,6 +25,7 @@ public partial class ArenaHud : Control
         InitializeSlotHints();
         InitializeCheckpointButtons();
         InitializeGameDock();
+        InitializeMapButtons();
         menu = new Control { MouseFilter = MouseFilterEnum.Stop };
         AddChild(menu); menu.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         panel = new RelicPanel();
@@ -52,16 +53,25 @@ public partial class ArenaHud : Control
         closeMenu.Position=panel.Position+new Vector2(panel.Size.X-38,10);
     }
     private int FontSize(int size) => (int)Math.Round(size * arena.Audio.TextPercent / 100f);
+    private async void FocusAfterLayout(Control control)
+    {
+        await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
+        await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
+        if(!GodotObject.IsInstanceValid(control)||control.IsQueuedForDeletion()||!control.IsVisibleInTree())return;
+        control.GrabFocus();scroll.EnsureControlVisible(control);
+    }
     private void ClearMenu(string eyebrow, string title, string subtitle)
     {
+        WorldAtlasVisible=false;
         home = false;
         foreach (var child in options.GetChildren()) { options.RemoveChild(child); child.QueueFree(); }
         menu.Show(); capture = null;
         LayoutMenu(); menu.Theme = MakeTheme();
         Theme=menu.Theme;
         goBack = () => { if (arena.Playing) Pause(); else Title(); };
-        Text(eyebrow, 11, gold); Text(title, 30, ink); Text(subtitle, 14, muted);
-        options.AddChild(new Control { CustomMinimumSize = new Vector2(0, 8) }); QueueRedraw();
+        var compact=arena.Playing&&arena.AdventureActive;
+        Text(eyebrow, 10, gold); Text(title, compact?22:30, ink); Text(subtitle, compact?12:14, muted);
+        options.AddChild(new Control { CustomMinimumSize = new Vector2(0, compact?0:8) }); QueueRedraw();
         panelEntrance?.Kill();panel.Modulate=arena.Audio.ReducedFlash?Colors.White:new Color(1,1,1,.35f);
         if(!arena.Audio.ReducedFlash){panelEntrance=CreateTween();panelEntrance.TweenProperty(panel,"modulate",Colors.White,.16);}
     }
@@ -91,36 +101,70 @@ public partial class ArenaHud : Control
     {
         if (arena.Character is null) { SaveRecovery(); return; }
         arena.PresentHearth();
-        ClearMenu("THE PALIMPSEST / HEARTH", "OVERLOAD", "Fight to remember. Change how you fight.");
+        ClearMenu("ACTION RPG / SAVED ADVENTURE", "OVERLOAD", "Explore. Fight. Find stronger gear.");
         home = true; LayoutMenu();
         var s = arena.Character.State;
-        if(s.World is not null)AddButton($"Explore the world · {s.World.ActiveZone.Name}",arena.StartWorld,true);
-        else if(s.RunId==Guid.Empty||s.CheckpointRoom==JourneyRules.Length(s))AddButton("Enter the connected world campaign",arena.StartWorld);
+        if(s.World is not null)AddButton($"Continue adventure · {s.World.ActiveZone.Name}",arena.StartWorld,true);
+        else if(s.RunId==Guid.Empty||s.CheckpointRoom==JourneyRules.Length(s))AddButton("Start exploring at Hearth Junction",arena.StartWorld,true);
+        else AddButton("Start open world · separate level-1 character",()=>{arena.OpenCharacter(true,true,s.Frame);arena.StartWorld();},true);
         Text($"{s.Frame}  /  Level {CounterText.Short(s.ValidatedLevel)}  /  {(s.Mode==ProfileMode.Standard?"Standard journey":"Training character")}", 14, gold);
-        if(s.World is null) AddButton(arena.Character.State.RunId != Guid.Empty && arena.Character.State.CheckpointRoom < JourneyRules.Length(arena.Character.State) ? $"Resume court — room {arena.Character.State.CheckpointRoom + 1}/{JourneyRules.Length(arena.Character.State)}" : arena.Character.State.RegionalCampaign?"Begin the four-region campaign":"Begin the eight-room court", () => { if (arena.IsSmoke) arena.StartEncounter(0); else arena.StartJourney(); }, true);
-        var grid = new GridContainer { Columns = 2, SizeFlagsHorizontal = SizeFlags.ExpandFill }; grid.AddThemeConstantOverride("h_separation", 10); grid.AddThemeConstantOverride("v_separation", 10); options.AddChild(grid);
-        HomeCard(grid, "Memories", "Overload bindings", Bindings);
-        HomeCard(grid, "Arsenal", "Equipment & forge", Inventory);
-        HomeCard(grid, "Character", "Skills, talents & Codex", CharacterMenu);
-        HomeCard(grid, "Fracture Atlas", "Endless expeditions", Fractures);
-        HomeCard(grid, "Forbidden oaths", "Override & mastery", Oaths);
-        HomeCard(grid, "Learn to rewrite", "Play Overload & Override", arena.StartRewriteLesson);
+        AddButton("New character · choose your class",NewFrameMenu);
+        AddButton("Your saved characters",SavedFrames);
+        AddButton("How to play · movement and combat",QuickStart);
+        AddButton("Learn to rewrite · optional combat practice",arena.StartRewriteLesson);
+        if(s.World is null&&s.RunId!=Guid.Empty&&s.CheckpointRoom<JourneyRules.Length(s))AddButton($"Resume saved legacy court · room {s.CheckpointRoom+1}/{JourneyRules.Length(s)}",arena.StartJourney);
+        AddButton("Character, equipment and town services",TownServices);
         var links = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; options.AddChild(links);
         HomeLink(links, "Field guide", Tutorial); HomeLink(links, "Settings", Settings); HomeLink(links, "Controls", Controls); HomeLink(links, "Quit", () => arena.QuitGame());
-        HomeLink(links,"Characters",NewFrameMenu);
         goBack = null;
-        Text($"Move → remember → change your next action. Hold {arena.Controls.Glyph("preserve")} to save a memory.", 13, muted);
+        Text("Begin in safe Hearth. Follow Mara's gold quest marker.\nTab: local map · M: world map · Esc: pause", 13, muted);
         if (!string.IsNullOrEmpty(arena.Character.Notice)) Text(arena.Character.Notice, 12, gold);
     }
-    public void HideMenu() { menu.Hide(); capture = null; QueueRedraw(); }
+    private void QuickStart()
+    {
+        ClearMenu("HOW TO PLAY", "Your first adventure", "Start in safe Hearth, then follow Mara's gold quest marker.");
+        var move=Section(options,"1 · Move and explore");
+        BodyLabel(move,"Left click ground to walk. Click Mara or a landmark to approach and interact. WASD also moves. Tab opens your local map; M opens the world map. Follow the gold route around obstacles.");
+        var fight=Section(options,"2 · Fight and survive");
+        BodyLabel(fight,"Click an enemy to approach and attack. Hold LMB to keep fighting nearby enemies. Alt + LMB attacks without walking. Hold Q, E or R to repeat your equipped skills when ready. Space evades amber attack warnings; F drinks a healing flask.");
+        BodyLabel(fight,"Basic hits restore 8 Focus. Land three basic attacks to charge Surge: your next damaging skill deals 50% more damage. Use it within 6 seconds, or land another basic hit to refresh the timer.",14,gold);
+        BodyLabel(fight,"Walk near red Life globes while hurt to heal automatically. Save your flasks for dangerous fights.");
+        var grow=Section(options,"3 · Collect and grow");
+        BodyLabel(grow,"Click a glowing item or press G nearby to collect it. I compares and equips gear. K spends earned skill points. J explains your next quest. P opens a town portal after 3 seconds standing still; P in Hearth returns you to the same place.");
+        AddButton("Back",()=>{if(arena.Playing)Pause();else Title();},true);goBack=()=>{if(arena.Playing)Pause();else Title();};
+    }
+    private void TownServices()
+    {
+        ClearMenu("CHARACTER / TOWN SERVICES","Prepare your adventure","Equipment, skill training and advanced build choices.");
+        AddButton("Equipment · compare, equip, forge and salvage",Inventory,true);
+        AddButton("Skills and talents",CharacterMenu);
+        AddButton("Memories · advanced attack bindings",Bindings);
+        AddButton("Forbidden oaths · advanced combat rules",Oaths);
+        AddButton("Fracture Atlas · endgame expeditions",Fractures);
+        AddButton("Back",Title);goBack=Title;
+    }
+    public bool FocusPracticeForCheck()
+    {
+        if(!arena.IsSmoke)return false;
+        var button=options.GetChildren().OfType<Button>().FirstOrDefault(b=>b.TooltipText.StartsWith("Learn to rewrite",StringComparison.Ordinal));
+        button?.GrabFocus();return button is not null;
+    }
+    public void HideMenu() { menu.Hide(); WorldAtlasVisible=false;capture = null; QueueRedraw(); }
     public void Pause()
     {
         ClearMenu("TAKE A BREATH", "Paused", "The encounter clock is stopped.");
         AddButton("Continue", arena.TogglePause, true); AddButton("Controls", Controls);
+        if(arena.AdventureActive)
+        {
+            AddButton("Quest journal",AdventureJournal);AddButton("Inventory · compare and equip",Inventory);
+            AddButton("Skills and talents",SkillsMenu);
+            AddButton("Town portal",()=>{arena.TogglePause();arena.BeginTownPortal();});
+        }
+        if(arena.WorldActive)AddButton("World map and safe travel",arena.OpenRegionalMap);
         AddButton("Field guide", Tutorial); AddButton("Settings", Settings);
         if (arena.CheckpointRest) AddButton("Review checkpoint rewards",arena.InspectCheckpoint);
         else AddButton("Retry this encounter", arena.RetryCurrentRoom);
-        AddButton("Return to Hearth", arena.ReturnToTitle);
+        AddButton("Save and return to title", arena.ReturnToTitle);
         goBack = arena.TogglePause;
     }
     public void Death()
@@ -144,8 +188,9 @@ public partial class ArenaHud : Control
         var grid = new GridContainer { Columns = 2 }; options.AddChild(grid);
         foreach (var name in InputRouter.Names.Where(n => n != "pause"))
         {
-            var button = new Button { Text = $"{name.Replace('_', ' ')}  [{arena.Controls.Glyph(name)}]", CustomMinimumSize = new Vector2(210, 32) };
-            button.Pressed += () => { capture = name; captureLabel.Text = $"Press a key for {name}…"; }; grid.AddChild(button);
+            var label = name switch {"cleave"=>"Basic · "+SkillName(arena.EquippedAction(SkillId.Cleave)),"pulse"=>"Skill 1 · "+SkillName(arena.EquippedAction(SkillId.ShieldPulse)),"lance"=>"Skill 2 · "+SkillName(arena.EquippedAction(SkillId.ChainLance)),"special"=>"Skill 3 · "+SkillName(arena.EquippedAction(SkillId.Faultline)),"preserve"=>"Preserve memories","stand_ground"=>"Attack without walking",_=>name.Replace('_', ' ')};
+            var button = new Button { Text = $"{label}  [{arena.Controls.Glyph(name)}]", CustomMinimumSize = new Vector2(210, 38), AutowrapMode=TextServer.AutowrapMode.WordSmart };
+            button.Pressed += () => { capture = name; captureLabel.Text = $"Press a key for {label}…"; }; grid.AddChild(button);
         }
         Text("Controller: LS move · RS aim · RB basic attack\nX / Y / B active skills · A Traverse · LB Flask · Start pause\nD-pad / A navigate menus · B back · Keyboard arrows / Enter", 15, muted);
         AddButton("Back", () => { if (arena.Playing) Pause(); else Title(); }, true);

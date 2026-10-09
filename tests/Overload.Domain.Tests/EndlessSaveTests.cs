@@ -50,7 +50,7 @@ public sealed class EndlessSaveTests : IDisposable
     {
         var old=new CharacterState { SchemaVersion=2, TotalXp=Progression.TotalXp(1000),ValidatedLevel=1000 };
         var migrated=CharacterStore.Decode(CharacterStore.Encode(old));
-        Assert.Equal(6,migrated.SchemaVersion); Assert.Equal(old.Gold,migrated.Gold); Assert.Equal(old.TotalXp,migrated.TotalXp);
+        Assert.Equal(8,migrated.SchemaVersion); Assert.Equal(old.Gold,migrated.Gold); Assert.Equal(old.TotalXp,migrated.TotalXp);
         Assert.Equal(old.Inventory.Length,migrated.Inventory.Length); Assert.Null(migrated.Fracture);
         var store=new CharacterStore(directory); store.Transact(0,"backup",s=>s with { Gold=s.Gold+1 });
         File.WriteAllText(Path.Combine(directory,"character.json"),new string('x',CharacterStore.MaximumSaveBytes+1));

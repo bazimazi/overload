@@ -14,7 +14,7 @@ public sealed class PatternMotion(Arena arena)
         {
             Reset(); arena.Player.Velocity = Vector2.Zero;
             if (action.Traversal == TraversePhase.AnchorSwap && action.Age(arena.PlayerState.Tick) == 0 && action.Destination is { } returnPoint)
-                arena.Player.Position = new(returnPoint.X, returnPoint.Y);
+            { arena.Player.Position = new(returnPoint.X, returnPoint.Y); arena.Player.SnapMotion(); }
             return;
         }
         if (action?.Destination is not { } target || action.Implementation is not (ActionImplementation.Pursuit or ActionImplementation.Crossing))

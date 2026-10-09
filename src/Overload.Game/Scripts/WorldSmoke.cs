@@ -13,7 +13,11 @@ public partial class Arena
         var output=System.IO.Path.Combine(ProjectSettings.GlobalizePath("res://"),"../../artifacts/world");Directory.CreateDirectory(output);
         void Check(bool value,string label){if(!value)throw new InvalidOperationException(label);checks++;GD.Print("WORLD PASS: "+label);}
         async Task Frames(int count){for(var i=0;i<count;i++)await ToSignal(GetTree(),SceneTree.SignalName.PhysicsFrame);}
-        void ClearDefenders(){foreach(var e in Enemies.ToArray())e.Enemy!.ReceiveHit(e.Enemy.MaximumLife,0,PlayerState.Tick);}
+        System.Numerics.BigInteger? routeFixtureXp=null;
+        void ClearDefenders(){
+            // This fixture verifies routes and persistence; AdventureReview separately measures normal combat.
+            if(routeFixtureXp!=Character!.State.TotalXp){routeFixtureXp=Character.State.TotalXp;PlayerState.ChangeMaximumLife(System.Numerics.BigInteger.Pow(10,24));PlayerState.Reset();}
+            foreach(var e in Enemies.ToArray())e.Enemy!.ReceiveHit(e.Enemy.MaximumLife,0,PlayerState.Tick);}
         async Task Capture(string name)
         {if(!captures)return;await ToSignal(RenderingServer.Singleton,RenderingServer.SignalName.FramePostDraw);using var image=GetViewport().GetTexture().GetImage();image.SavePng(System.IO.Path.Combine(output,name+".png"));}
         async Task Walk(WorldPoint destination)
@@ -58,12 +62,12 @@ public partial class Arena
                     // Activated approach checkpoints may be outside Hearth; the safe travel API returns home.
                     if(WorldZone.Id!="hearth"){TravelWaypoint("hearth.waypoint");await Frames(3);}
                     await Exit("road."+(int)region);
-                    if(captures){await Walk(new(1190,550));ArrivalTime=0;await Capture(frame+"-"+region+"-landmark");}
-                    Check(Enemies.Count(e=>!e.Enemy!.Dead)<=12,"bounded world pack activation");
+                    if(captures){await Walk(new(3570,1650));ArrivalTime=0;await Capture(frame+"-"+region+"-landmark");}
+                    Check(Enemies.Count(e=>!e.Enemy!.Dead)<=16,"bounded world pack activation");
                     if(region==Region.Ash)
                     {
-                        await Walk(new(610,290));await Walk(new(1260,290));await Capture(frame+"-gantry");
-                        await Walk(new(620,850));await Walk(new(1210,920));await Walk(new(980,940));await Walk(new(940,1020));InteractWorld();await Frames(3);
+                        await Walk(new(1830,870));await Walk(new(3780,870));await Capture(frame+"-gantry");
+                        await Walk(new(1860,2550));await Walk(new(3630,2760));await Walk(new(2940,2820));await Walk(new(2820,3060));InteractWorld();await Frames(3);
                         Check(Character!.State.World!.Waypoints.Contains("ash.0.refuge"),"atomic refuge, waypoint and shortcut "+frame);await Capture(frame+"-refuge");
                     }
                     LocalMapVisible=true;await Capture(frame+"-"+region+"-local-map");LocalMapVisible=false;

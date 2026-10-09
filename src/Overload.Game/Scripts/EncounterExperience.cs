@@ -89,9 +89,9 @@ public partial class Arena
     {
         if (Paused) return;
         PlayerState.AdvanceClock(); Player.BeginTick();
-        var mouse=(Controls.PointerPosition-worldContainer.Position)/worldContainer.Scale;
+        var mouse=CursorWorldPosition;
         var intent=Controls.Read(PlayerState.Tick,Player.Position,mouse);
-        Player.Facing=intent.Aim;Player.Move(intent.Move*Balance.Hero.Speed);Player.PublishPose(PlayerState);
+        FacePlayer(intent.Move,intent.Aim);Player.Move(ResolvePlayerMovement(intent.Move,1d/60));FinishPlayerMovement();Player.EndTick();Player.PublishPose(PlayerState);
         if (Input.IsActionJustPressed("pulse") && Spoils?.Item is not null) EquipSpoilsAndContinue();
         else if (Input.IsActionJustPressed("interact") || Player.Position.DistanceTo(CheckpointExit)<18) ContinueJourney();
     }
